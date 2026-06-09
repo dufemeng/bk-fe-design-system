@@ -126,6 +126,8 @@ node scripts/validate-artifacts.mjs --forward-tests
 
 ## Validation
 
+安装和冒烟自测见 [BFDS Install Self-Test](docs/install-self-test.md)。
+
 推荐验证顺序：
 
 1. skill frontmatter 校验：`python3 /Users/loomisli/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/bfds-design` 和 `skills/bfds-implement`。
