@@ -8,8 +8,8 @@ BFDS 是一个面向前端需求生命周期的设计补全层（Design Completi
 - 目标界面与变更边界确认：明确当前目标界面、现状来源、本次新增/修改/删除/替换/局部设计范围。
 - 设计方向探索：只脑暴设计稿，不脑暴产品能力。
 - 三方案设计评审工作台：生成 `docs/design/<slug>/workbench.html`，用 Kami 风格外壳承载三个 iframe 交互模拟器。
-- 设计契约：用户选择方案后，生成 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`、`status.json`。
-- 实现与还原检查：由 `bfds-implement` 消费设计产物，实现代码并运行设计还原检查。
+- 设计交付包：用户选择方案后，生成 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`、`status.json`。
+- 实现与设计还原验收：由 `bfds-implement` 消费设计产物，实现代码并运行设计还原验收。
 - 局部实时微调：复用 Impeccable `live` 做选区、注释、对话微调。
 
 MVP 采用静态 HTML 工作台，用户在 Codex / Claude Code 对话里确认选择；事件记录 server 放到后续版本。

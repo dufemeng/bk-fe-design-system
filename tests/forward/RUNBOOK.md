@@ -1,19 +1,19 @@
-# BFDS Forward Test Runbook
+# BFDS Forward Test 运行手册
 
-Forward tests are agent-behavior tests, not unit tests. Use this runbook when validating the two BFDS skills after edits.
+Forward tests 是 agent 行为测试，不是单元测试。修改两个 BFDS skill 后，用这份手册做行为验证。
 
-## Rules
+## 规则
 
-- Run each scenario in a fresh thread or subagent.
-- Pass the skill path and user-like request.
-- Do not paste the expected behavior section into the agent prompt.
-- Do not tell the agent what bug you suspect.
-- Record the transcript, files read, stop point, and produced artifacts.
+- 每个场景使用新的 thread 或 subagent。
+- 传入 skill 路径和接近真实用户的请求。
+- 不要把“期望行为”段落贴进 agent prompt。
+- 不要告诉 agent 你怀疑的问题。
+- 记录 transcript、读取文件、停止点和生成的设计产物。
 - 每个场景之间清理生成的 `docs/design/<slug>/` 设计产物，除非该场景明确需要保留。
 
-## Prompt Shape
+## 提示词形态
 
-Use prompts like:
+使用这类提示词：
 
 ```text
 Use $bfds-design at /path/to/skills/bfds-design. Here is the user request:
@@ -22,30 +22,30 @@ Use $bfds-design at /path/to/skills/bfds-design. Here is the user request:
 Use the repository at /path/to/project.
 ```
 
-Not:
+不要这样写：
 
 ```text
 Review this skill and confirm it reads intent-router.md.
 ```
 
-## Minimum Fresh-Agent Scenarios
+## 最小新会话场景
 
-1. `bfds-design-start.md`: should trigger `bfds-design` and stop at 目标界面与变更边界确认。
-2. `bfds-design-selection.md`: should generate 设计交付包 only after an existing 评审工作台/status.json is available.
-3. `bfds-implement-no-artifacts.md`: should refuse to write code without 设计交付包.
-4. `bfds-implement-resume-many-slugs.md`: should list candidates and wait for user choice.
-5. `bfds-negative-api-database-bug.md`: should not route ordinary API/database/debug work into BFDS.
+1. `bfds-design-start.md`：应触发 `bfds-design`，并停在目标界面与变更边界确认。
+2. `bfds-design-selection.md`：只有已有评审工作台/status.json 时，才生成设计交付包。
+3. `bfds-implement-no-artifacts.md`：缺设计交付包时，应拒绝写代码。
+4. `bfds-implement-resume-many-slugs.md`：应列出候选设计任务，并等待用户选择。
+5. `bfds-negative-api-database-bug.md`：普通 API、数据库、debug 工作不应进入 BFDS。
 
-## Evidence Template
+## 证据模板
 
 ```text
-Scenario:
-Agent/thread:
-Prompt:
-Files read:
-Decision:
-Stop/continue point:
-Artifacts produced:
-Unexpected behavior:
-Pass/fail:
+场景：
+Agent/thread：
+Prompt：
+读取文件：
+决策：
+停止/继续点：
+生成产物：
+异常行为：
+通过/失败：
 ```
