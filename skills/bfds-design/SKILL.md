@@ -17,6 +17,8 @@ BFDS 是 Design Completion Layer。它只在需求大致明确后补齐前端设
 
 如果当前仓库也有 repo-root `templates/`、`scripts/`、`vendor/impeccable/`，可以作为开发态 fallback。不要要求必须存在 repo-root BFDS 仓库才继续。
 
+Impeccable 不嵌在 BFDS skill 内部。需要 context 或 live 时，优先使用目标项目已安装的宿主同级 bundle：Codex / agents 为 `.agents/skills/impeccable/`，Claude Code 为 `.claude/skills/impeccable/`。
+
 ## 使用前先读
 
 - 开始或继续设计：读 [intent-router.md](references/intent-router.md)。

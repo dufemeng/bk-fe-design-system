@@ -16,7 +16,7 @@ Live Region Iteration 是用户介入阶段，用于局部微调。它发生在 
 1. 恢复当前 BFDS slug。
 2. 读取 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
 3. 确认用户选择的区域、页面 URL 或组件位置。
-4. 读取 `vendor/impeccable/skill/reference/live.md`。
+4. 按 [impeccable-integration.md](impeccable-integration.md) 的安装模型读取 `.agents/skills/impeccable/reference/live.md` 或 `.claude/skills/impeccable/reference/live.md`；开发态才 fallback 到 `vendor/impeccable/skill/reference/live.md`。
 5. 启动或恢复 Impeccable live 流程，前提是入口、dev server 或静态 HTML 可验证。
 6. 生成局部 variant，不扩大产品范围。
 7. 用户接受后，把结果关联回当前 slug：

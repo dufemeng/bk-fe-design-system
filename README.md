@@ -27,22 +27,46 @@ BFDS MVP 由两个 skill 组成：
 
 ## Install Skills
 
-安装到 Codex 时，把两个 skill 目录复制到 `${CODEX_HOME:-$HOME/.codex}/skills/`：
+BFDS 仓库已经内置 Impeccable。安装时不要把 `vendor/impeccable/.agents` 嵌到 BFDS skill 内部，而是把 Impeccable 安装成目标项目的同级宿主 skill。原因是 Impeccable 自己的 reference 和脚本命令依赖宿主路径：
+
+- Codex / agents：`<target-project>/.agents/skills/impeccable/`
+- Claude Code：`<target-project>/.claude/skills/impeccable/`
+
+推荐用安装脚本：
 
 ```bash
-cp -R skills/bfds-design "${CODEX_HOME:-$HOME/.codex}/skills/"
-cp -R skills/bfds-implement "${CODEX_HOME:-$HOME/.codex}/skills/"
+node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs codex --target /path/to/target-project
+node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs claude --target /path/to/target-project
 ```
 
-安装到 Claude Code 项目时，把两个 skill 目录复制到目标项目的 `.claude/skills/`：
+Codex 模式会把 BFDS 两个 skill 复制到 `${CODEX_HOME:-$HOME/.codex}/skills/`，并把内置 Impeccable 复制到目标项目的 `.agents/skills/impeccable/`。
+
+Claude Code 模式会把 BFDS 两个 skill 和内置 Impeccable 都复制到目标项目的 `.claude/skills/`，并复制 Impeccable 的 `.claude/agents/` 辅助 agent。
+
+手动安装 Codex 时，执行：
 
 ```bash
-mkdir -p .claude/skills
-cp -R /path/to/bk-fe-design-system/skills/bfds-design .claude/skills/
-cp -R /path/to/bk-fe-design-system/skills/bfds-implement .claude/skills/
+TARGET=/path/to/target-project
+BFDS=/path/to/bk-fe-design-system
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills" "$TARGET/.agents/skills"
+cp -R "$BFDS/skills/bfds-design" "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R "$BFDS/skills/bfds-implement" "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R "$BFDS/vendor/impeccable/.agents/skills/impeccable" "$TARGET/.agents/skills/"
 ```
 
-两个 skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 是外部设计能力：如果目标环境已安装 Impeccable skill、已 vendor Impeccable，或可验证 Impeccable CLI，则 BFDS 会复用；否则 BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装/链接，不会伪造结果。
+手动安装 Claude Code 时，执行：
+
+```bash
+TARGET=/path/to/target-project
+BFDS=/path/to/bk-fe-design-system
+mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/agents"
+cp -R "$BFDS/skills/bfds-design" "$TARGET/.claude/skills/"
+cp -R "$BFDS/skills/bfds-implement" "$TARGET/.claude/skills/"
+cp -R "$BFDS/vendor/impeccable/.claude/skills/impeccable" "$TARGET/.claude/skills/"
+cp -R "$BFDS/vendor/impeccable/.claude/agents/"* "$TARGET/.claude/agents/"
+```
+
+两个 BFDS skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
 
 ## Artifact Layout
 
@@ -87,6 +111,8 @@ fixtures/docs-design-sample/settings-prompt/
 ## Scripts
 
 ```bash
+node scripts/install-bfds-skills.mjs codex --target /path/to/target-project --dry-run
+node scripts/install-bfds-skills.mjs claude --target /path/to/target-project --dry-run
 node scripts/bfds-status.mjs
 node scripts/bfds-status.mjs --json --root fixtures/docs-design-sample
 node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt

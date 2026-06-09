@@ -5,6 +5,7 @@ BFDS 只在 adapter 和 skill references 层复用 Impeccable，不修改 `vendo
 ## 边界
 
 - `vendor/impeccable/` 保持 upstream-compatible 源码拷贝。
+- 安装时把 `vendor/impeccable/.agents/skills/impeccable/` 或 `vendor/impeccable/.claude/skills/impeccable/` 复制成目标项目宿主同级 skill，不复制进 BFDS skill 内部。
 - BFDS 的需求级设计产物统一写入 `docs/design/<slug>/`。
 - `.impeccable/` 可以作为 Impeccable live/config 的兼容目录保留，但不是 BFDS 主状态目录。
 - Product Design 不 vendor；BFDS 只借鉴其先确认 brief、再做视觉探索、最后固定交接物的纪律。
@@ -18,6 +19,8 @@ BFDS 只在 adapter 和 skill references 层复用 Impeccable，不修改 `vendo
 
 ## 已验证的本地入口
 
+- `vendor/impeccable/.agents/skills/impeccable/` 是 Codex / agents 宿主 bundle，脚本路径以 `.agents/skills/impeccable/` 为项目根相对路径。
+- `vendor/impeccable/.claude/skills/impeccable/` 是 Claude Code 宿主 bundle，脚本路径以 `.claude/skills/impeccable/` 为项目根相对路径。
 - `vendor/impeccable/package.json` 暴露 `bin.impeccable = cli/bin/cli.js`。
 - `vendor/impeccable/cli/bin/cli.js` 支持 `detect` 和 `skills` 子命令。
 - `vendor/impeccable/skill/SKILL.src.md` 的命令表包含 `init`、`document`、`critique`、`audit`、`polish`、`live` 等 skill sub-command。
