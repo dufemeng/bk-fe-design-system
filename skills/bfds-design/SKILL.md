@@ -1,11 +1,21 @@
 ---
 name: bfds-design
-description: 当用户明确要求从 PRD、产品方案、原型、截图、Figma、URL、现有页面或组件开始前端设计时使用。用于确认当前页面/组件现状和增删改范围，生成三个可交互设计工作台方案，并在用户确认选择后写入 docs/design/<slug> 设计产物。不要用于后端、数据库、普通 bug 修复、纯代码重构、算法实现、接口实现或没有设计意图的请求。
+description: 当用户明确要求从 PRD、产品方案、原型、截图、Figma、URL、现有页面或组件开始 BFDS 前端设计时使用；也用于继续已有 BFDS 设计、在已有 workbench/status 上选择 A/B/C 或合并方案、固化 docs/design/<slug> contract pack、以及对当前 BFDS 设计做局部 live 微调。不要用于后端、数据库、普通 bug 修复、纯代码重构、算法实现、接口实现、没有设计意图的请求，或未关联 BFDS workbench/status 的泛泛前端工作。
 ---
 
 # BFDS Design
 
 BFDS 是 Design Completion Layer。它只在需求大致明确后补齐前端设计产物，不重新做产品规划、后端架构、API、数据库、权限或通用工程实现。
+
+## 安装后路径约定
+
+先定位本 skill 目录（包含当前 `SKILL.md` 的目录）。BFDS 自带资源优先从这里读取：
+
+- 模板：`assets/templates/`
+- 脚本：`scripts/`
+- 协议：`references/`
+
+如果当前仓库也有 repo-root `templates/`、`scripts/`、`vendor/impeccable/`，可以作为开发态 fallback。不要要求必须存在 repo-root BFDS 仓库才继续。
 
 ## 使用前先读
 

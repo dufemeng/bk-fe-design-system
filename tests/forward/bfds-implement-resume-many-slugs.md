@@ -14,6 +14,13 @@
 
 `bfds-implement`
 
+## 预期读取文件
+
+- `skills/bfds-implement/SKILL.md`
+- `skills/bfds-implement/references/resume-design-artifacts.md`
+- `skills/bfds-implement/scripts/bfds-status.mjs`
+- `docs/design/*/status.json`
+
 ## 期望行为
 
 - 扫描 status。

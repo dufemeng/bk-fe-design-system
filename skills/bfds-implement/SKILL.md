@@ -1,11 +1,21 @@
 ---
 name: bfds-implement
-description: 当用户要求实现已经确认的 BFDS 设计方案时使用。该技能会从 docs/design/<slug>/status.json 恢复需求，读取 design-contract.json、implementation-handoff.md 和 qa-plan.json，然后按设计交接物实现代码并运行设计还原检查。如果缺少已确认 BFDS 设计产物，不要凭记忆实现，应先引导用户选择已有设计产物或回到 bfds-design。
+description: 当用户要求实现已经确认的 BFDS 设计方案时使用；也用于按 docs/design/<slug> handoff 继续实现、从 status.json 恢复 BFDS slug、运行 BFDS 设计还原检查或 QA、以及实现后进入局部 live 微调。该技能必须读取 design-contract.json、implementation-handoff.md 和 qa-plan.json；缺少已确认 BFDS 设计产物时不要凭记忆实现，应先引导用户选择已有设计产物或回到 bfds-design。不要用于 API、数据库、后端权限、算法、普通 bug 修复或纯重构。
 ---
 
 # BFDS Implement
 
 BFDS Implement 只实现已经确认并固化为 contract pack 的 BFDS 设计方案。实现依据来自 `docs/design/<slug>/`，不是聊天记忆。
+
+## 安装后路径约定
+
+先定位本 skill 目录（包含当前 `SKILL.md` 的目录）。BFDS 自带资源优先从这里读取：
+
+- 模板：`assets/templates/`
+- 脚本：`scripts/`
+- 协议：`references/`
+
+如果当前仓库也有 repo-root `templates/`、`scripts/`、`vendor/impeccable/`，可以作为开发态 fallback。不要要求必须存在 repo-root BFDS 仓库才继续。
 
 ## 使用前先读
 

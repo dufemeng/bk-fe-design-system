@@ -14,6 +14,14 @@
 
 `bfds-design`
 
+## 预期读取文件
+
+- `skills/bfds-design/SKILL.md`
+- `skills/bfds-design/references/intent-router.md`
+- `skills/bfds-design/references/contract-pack.md`
+- `skills/bfds-design/assets/templates/artifacts/`
+- `docs/design/settings-prompt/status.json` 或当前线程 slug 的 `status.json`
+
 ## 期望行为
 
 - 读取 `intent-router.md` 和 `contract-pack.md`。

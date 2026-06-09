@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bfds.local/schemas/design-contract.schema.json",
+  "title": "BFDS Design Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "title",
+    "selectedOption",
+    "sourceArtifacts",
+    "surface",
+    "changeType",
+    "keep",
+    "change",
+    "avoid",
+    "screens",
+    "states",
+    "interactions",
+    "tokens",
+    "responsive",
+    "motion",
+    "assets",
+    "acceptanceRules"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selectedOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[ABC](?:\\+[ABC])*$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mergedFrom": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["A", "B", "C"]
+          },
+          "uniqueItems": true
+        },
+        "decisionNotes": {
+          "type": "string"
+        }
+      }
+    },
+    "sourceArtifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workbench", "options", "productContext", "designContext"],
+      "properties": {
+        "workbench": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["A", "B", "C"],
+          "properties": {
+            "A": { "type": "string", "minLength": 1 },
+            "B": { "type": "string", "minLength": 1 },
+            "C": { "type": "string", "minLength": 1 }
+          }
+        },
+        "productContext": {
+          "type": "string",
+          "minLength": 1
+        },
+        "designContext": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surfaceEvidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "currentSource", "confidence"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["page", "route", "component", "region", "modal", "flow", "empty-state", "other"]
+        },
+        "route": { "type": "string" },
+        "currentSource": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["screenshot", "figma", "prototype", "url", "browser-capture", "storybook", "code-inference", "user-description"]
+          }
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["verified", "user-confirmed", "code-inferred-unverified", "low"]
+        }
+      }
+    },
+    "changeType": {
+      "type": "string",
+      "enum": ["create", "extend", "modify", "remove", "replace", "merge", "restyle"]
+    },
+    "keep": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "change": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "avoid": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "composition", "hierarchy"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "composition": { "type": "string", "minLength": 1 },
+          "hierarchy": { "type": "string", "minLength": 1 },
+          "density": { "type": "string" }
+        }
+      }
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "expectation"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "expectation": { "type": "string", "minLength": 1 },
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] }
+        }
+      }
+    },
+    "interactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trigger", "result"],
+        "properties": {
+          "trigger": { "type": "string", "minLength": 1 },
+          "result": { "type": "string", "minLength": 1 },
+          "accessibility": { "type": "string" }
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "required": ["source", "rules"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "rules": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "responsive": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["viewport", "rule"],
+        "properties": {
+          "viewport": { "type": "string", "minLength": 1 },
+          "rule": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "motion": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "rule"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "rule": { "type": "string", "minLength": 1 },
+          "reducedMotion": { "type": "string" }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "source", "rule"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "rule": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "acceptanceRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "rule", "severity"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "rule": { "type": "string", "minLength": 1 },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] }
+        }
+      }
+    }
+  }
+}

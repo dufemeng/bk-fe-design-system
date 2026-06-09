@@ -8,11 +8,11 @@ Intent Router 是 BFDS skill 的开场步骤，不是独立 skill。它先判断
 
 1. 用户当前输入。
 2. 当前线程是否刚创建 workbench、刚选择 option、或已明确 slug。
-3. `docs/design/*/status.json`，可用 `node scripts/bfds-status.mjs --json` 辅助扫描。
+3. `docs/design/*/status.json`，可用 `node <bfds-design-skill-dir>/scripts/bfds-status.mjs --json` 辅助扫描。
 4. 用户是否指定 `docs/design/<slug>`。
 5. 当前仓库是否有 `PRODUCT.md`、`DESIGN.md`。
 
-脚本失败时，人工 fallback：用文件工具列出 `docs/design/*/status.json`，读取最近更新的 2-5 个。
+如果当前仓库有 repo-root 脚本，也可以运行 `node scripts/bfds-status.mjs --json`。脚本失败时，人工 fallback：用文件工具列出 `docs/design/*/status.json`，读取最近更新的 2-5 个。
 
 ## 决策矩阵
 

@@ -13,9 +13,10 @@ Workbench 是静态 HTML 审阅台，不是事件 server。用户在对话中回
 
 模板来源：
 
-- `templates/kami-workbench/workbench.html`
-- `templates/kami-workbench/option.html`
-- `templates/kami-workbench/workbench.css`
+- 优先使用本 skill 自带模板：`assets/templates/kami-workbench/workbench.html`
+- 优先使用本 skill 自带模板：`assets/templates/kami-workbench/option.html`
+- 优先使用本 skill 自带模板：`assets/templates/kami-workbench/workbench.css`
+- 开发态 repo-root fallback：`templates/kami-workbench/*`
 
 ## 样式边界
 

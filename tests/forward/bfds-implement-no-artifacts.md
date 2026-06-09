@@ -14,6 +14,12 @@
 
 `bfds-implement`
 
+## 预期读取文件
+
+- `skills/bfds-implement/SKILL.md`
+- `skills/bfds-implement/references/resume-design-artifacts.md`
+- `skills/bfds-implement/scripts/bfds-status.mjs`
+
 ## 期望行为
 
 - 读取 `resume-design-artifacts.md`。

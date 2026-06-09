@@ -15,6 +15,16 @@
 
 `bfds-implement`
 
+## 预期读取文件
+
+- `skills/bfds-implement/SKILL.md`
+- `skills/bfds-implement/references/resume-design-artifacts.md`
+- `skills/bfds-implement/references/implementation-protocol.md`
+- `docs/design/settings-prompt/status.json`
+- `docs/design/settings-prompt/design-contract.json`
+- `docs/design/settings-prompt/implementation-handoff.md`
+- `docs/design/settings-prompt/qa-plan.json`
+
 ## 期望行为
 
 - 运行或人工执行 `bfds-status` 恢复。

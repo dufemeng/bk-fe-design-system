@@ -13,6 +13,11 @@
 
 不应触发 `bfds-design` 或 `bfds-implement`。如果误触发，skill 必须在硬停止条件中拒绝继续。
 
+## 预期读取文件
+
+- 正常情况不应读取 BFDS skill。
+- 如果误触发，只允许读取对应 `SKILL.md` 的硬停止条件，不读取 workbench、contract pack 或 implementation protocol。
+
 ## 期望行为
 
 - 说明 API、数据库、普通 bug/debug 不属于 BFDS Design Completion Layer 范围。

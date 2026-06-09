@@ -13,6 +13,14 @@
 
 `bfds-design`
 
+## 预期读取文件
+
+- `skills/bfds-design/SKILL.md`
+- `skills/bfds-design/references/intent-router.md`
+- `skills/bfds-design/references/surface-change-framing.md`
+- `fixtures/current-surface-description.md`
+- `fixtures/existing-component-change.md`
+
 ## 期望行为
 
 - 读取 `surface-change-framing.md`。

@@ -14,6 +14,14 @@
 
 `bfds-design`
 
+## 预期读取文件
+
+- `skills/bfds-design/SKILL.md`
+- `skills/bfds-design/references/intent-router.md`
+- `skills/bfds-design/references/impeccable-integration.md`
+- `skills/bfds-design/references/surface-change-framing.md`
+- `fixtures/prd-simple.md`
+
 ## 期望行为
 
 - 读取 `intent-router.md`。

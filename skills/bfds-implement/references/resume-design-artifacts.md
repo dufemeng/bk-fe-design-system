@@ -6,8 +6,9 @@
 
 1. 如果用户显式给出 `docs/design/<slug>` 或 `<slug>`，先读取该目录。
 2. 如果当前线程刚生成 `contract-ready`，使用当前 slug，但仍必须读文件确认。
-3. 否则运行 `node scripts/bfds-status.mjs --json` 扫描 `docs/design/*/status.json`。
-4. 脚本不可用时，人工列出并读取 `docs/design/*/status.json`。
+3. 否则运行 `node <bfds-implement-skill-dir>/scripts/bfds-status.mjs --json` 扫描 `docs/design/*/status.json`。
+4. 如果当前仓库有 repo-root 脚本，也可以运行 `node scripts/bfds-status.mjs --json`。
+5. 脚本不可用时，人工列出并读取 `docs/design/*/status.json`。
 
 ## Artifact Gate
 

@@ -25,6 +25,25 @@ BFDS MVP 由两个 skill 组成：
 
 不触发 BFDS 的请求包括：API 实现、数据库 migration、后端权限、普通 bug 修复、纯代码重构、算法实现，以及没有 BFDS contract pack 的“凭记忆实现”。
 
+## Install Skills
+
+安装到 Codex 时，把两个 skill 目录复制到 `${CODEX_HOME:-$HOME/.codex}/skills/`：
+
+```bash
+cp -R skills/bfds-design "${CODEX_HOME:-$HOME/.codex}/skills/"
+cp -R skills/bfds-implement "${CODEX_HOME:-$HOME/.codex}/skills/"
+```
+
+安装到 Claude Code 项目时，把两个 skill 目录复制到目标项目的 `.claude/skills/`：
+
+```bash
+mkdir -p .claude/skills
+cp -R /path/to/bk-fe-design-system/skills/bfds-design .claude/skills/
+cp -R /path/to/bk-fe-design-system/skills/bfds-implement .claude/skills/
+```
+
+两个 skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 是外部设计能力：如果目标环境已安装 Impeccable skill、已 vendor Impeccable，或可验证 Impeccable CLI，则 BFDS 会复用；否则 BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装/链接，不会伪造结果。
+
 ## Artifact Layout
 
 设计需求级产物写入：
