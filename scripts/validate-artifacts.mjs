@@ -40,9 +40,13 @@ const forwardFiles = [
 
 const pressureFiles = [
   'tests/pressure/bfds-design-context-trap.md',
+  'tests/pressure/bfds-design-init-request-quarantine.md',
   'tests/pressure/bfds-design-skip-question-not-brainstorm.md',
   'tests/pressure/bfds-design-workbench-gate.md',
-  'tests/pressure/bfds-design-contract-gate.md'
+  'tests/pressure/bfds-design-contract-gate.md',
+  'tests/pressure/bfds-implement-detect-target-gate.md',
+  'tests/pressure/bfds-implement-critique-contract-lock.md',
+  'tests/pressure/bfds-implement-live-contract-patch.md'
 ];
 
 function readJson(file) {
@@ -163,6 +167,20 @@ function validateArtifactDir(dir) {
   if (contract.slug !== dirSlug) errors.push(`design-contract.json.slug must equal directory slug ${dirSlug}`);
   if (qaPlan.slug !== dirSlug) errors.push(`qa-plan.json.slug must equal directory slug ${dirSlug}`);
   if (status.slug !== dirSlug) errors.push(`status.json.slug must equal directory slug ${dirSlug}`);
+
+  if (qaPlan.impeccable?.detect?.enabled && (qaPlan.impeccable.detect.targets ?? []).length === 0) {
+    errors.push('qa-plan.json.impeccable.detect.targets must include at least one concrete target when detect is enabled');
+  }
+
+  for (const target of qaPlan.impeccable?.detect?.targets ?? []) {
+    if (/[<>]/.test(target)) {
+      errors.push(`qa-plan.json.impeccable.detect.targets must be concrete, got placeholder-like value ${JSON.stringify(target)}`);
+    }
+  }
+
+  if (qaPlan.impeccable?.critique?.target && /[<>]/.test(qaPlan.impeccable.critique.target)) {
+    errors.push(`qa-plan.json.impeccable.critique.target must be concrete when present, got placeholder-like value ${JSON.stringify(qaPlan.impeccable.critique.target)}`);
+  }
 
   for (const file of [
     contract.sourceArtifacts?.workbench,

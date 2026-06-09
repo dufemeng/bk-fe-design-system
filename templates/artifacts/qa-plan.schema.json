@@ -132,7 +132,11 @@
             "enabled": { "type": "boolean" },
             "targets": {
               "type": "array",
-              "items": { "type": "string", "minLength": 1 }
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[^<>]+$"
+              }
             },
             "notes": { "type": "string" }
           }
@@ -143,7 +147,11 @@
           "required": ["enabled"],
           "properties": {
             "enabled": { "type": "boolean" },
-            "target": { "type": "string" },
+            "target": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^<>]+$"
+            },
             "notes": { "type": "string" }
           }
         }

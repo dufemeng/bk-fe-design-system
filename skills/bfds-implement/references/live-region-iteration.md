@@ -18,10 +18,11 @@
 3. 确认用户选择的区域、页面 URL 或组件位置。
 4. 按 [impeccable-integration.md](impeccable-integration.md) 的安装模型读取 `.agents/skills/impeccable/reference/live.md` 或 `.claude/skills/impeccable/reference/live.md`；开发态才 fallback 到 `vendor/impeccable/skill/reference/live.md`。
 5. 启动或恢复 Impeccable live 流程，前提是入口、dev server 或静态 HTML 可验证。
-6. 生成局部方案，不扩大产品范围。
+6. 生成局部方案，不扩大产品范围，不改写未选中的全局设计方向。
 7. 用户接受后，把结果关联回当前设计任务：
    - 更新 `status.state = live-iterating` 或 `qa-passed/done`
-   - 在 `qa-report.md` 记录局部区域、用户意图、结果和剩余风险
+   - 在 `qa-report.md` 记录局部区域、用户意图、结果、影响的契约规则和剩余风险
+   - 记录局部契约补丁，说明本次微调覆盖或补充了哪些 `acceptanceRules`、`states`、`interactions`、`responsive` 或 `motion` 约束
 
 ## 停止条件
 
@@ -30,6 +31,23 @@
 - 目标页面不能运行或不能打开。
 - Impeccable live 入口、配置或脚本路径无法验证。
 - 用户要求的是产品范围、API、数据库或后端变更。
+- 用户要求的微调会改变 `surface`、`changeType`、已选方案核心构图、`keep` / `change` / `avoid` 或 P0/P1 级验收规则；此时停止并回到 `bfds-design` 重新固化设计。
+
+## 局部契约补丁
+
+局部实时微调接受后，必须在 `qa-report.md` 或状态记录里写清：
+
+```text
+局部契约补丁:
+区域: <目标界面中的局部区域>
+用户意图: <用户原话或等价摘要>
+变更范围: <只影响哪些局部结构/状态/密度/动效/文案>
+影响规则: <acceptanceRules/checks/states/interactions/responsive/motion 的 id 或名称>
+保持不变: <仍然遵守的 keep/avoid/全局设计方向>
+复跑要求: <需要复跑的 P0/P1/P2 检查，或说明仅 P3 polish>
+```
+
+不要只写“用户接受了 live 结果”。没有局部契约补丁，后续 `bfds-implement` 新会话无法判断 live 结果是设计契约的一部分，还是一次未固化的临时修改。
 
 ## 与自动化设计还原检查的关系
 

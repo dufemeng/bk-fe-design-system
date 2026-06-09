@@ -10,6 +10,8 @@
 4. 如果当前仓库有 repo-root 脚本，也可以运行 `node scripts/bfds-status.mjs --json`。
 5. 脚本不可用时，人工列出并读取 `docs/design/*/status.json`。
 
+扫描结果只把以下状态列为可实现候选：`contract-ready`、`implementing`、`implemented`、`qa-failed`、`qa-passed`、`live-iterating`、`done`。`draft`、`workbench-ready`、`selected`、`invalid` 或未知状态不得进入实现候选；如果用户指定这些状态的设计任务，停止并引导回 `bfds-design` 固化完整设计交付包。
+
 ## 设计产物完整性校验
 
 目标目录必须同时存在：

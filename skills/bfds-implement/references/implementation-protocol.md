@@ -9,13 +9,32 @@
    - `docs/design/<slug>/design-contract.json`
    - `docs/design/<slug>/implementation-handoff.md`
    - `docs/design/<slug>/qa-plan.json`
-   - `PRODUCT.md`
-   - `DESIGN.md`
-3. 扫描目标项目代码、路由、组件、tokens、icon set、测试和构建命令。
-4. 对照设计契约的 `surface` 和 `changeType`，确认目标代码与已确认目标界面一致。
-5. 按实现交接说明实现代码。
-6. 运行项目已有检查。
-7. 进入自动化设计还原检查。
+   - `design-contract.json.sourceArtifacts.productContext` 指向的可信 `PRODUCT.md`
+   - `design-contract.json.sourceArtifacts.designContext` 指向的可信 `DESIGN.md`
+3. 如果设计契约记录的上下文路径缺失或不可信，停止并要求回到 `bfds-design` 刷新设计上下文；实现阶段不重新执行 Impeccable init，也不凭聊天或文件名猜上下文。
+4. 扫描目标项目代码、路由、组件、tokens、icon set、测试和构建命令。
+5. 对照设计契约的 `surface` 和 `changeType`，确认目标代码与已确认目标界面一致。
+6. 按实现交接说明实现代码。
+7. 运行项目已有检查。
+8. 进入自动化设计还原检查。
+
+## 契约锁
+
+实现阶段的权威输入按优先级排序：
+
+1. `design-contract.json`
+2. `implementation-handoff.md`
+3. `qa-plan.json`
+4. 设计契约引用的 `PRODUCT.md` / `DESIGN.md`
+5. 当前目标项目代码和运行证据
+
+用户在实现阶段追加的聊天描述、Impeccable `critique` 输出、Impeccable `live` 输出、浏览器观察和检测器结果，都不能直接改写已确认设计契约。它们只能用于：
+
+- 选择实现入口和验证证据。
+- 发现实现偏差或可用性/可访问性问题。
+- 生成局部契约补丁或要求回到 `bfds-design` 重新固化设计。
+
+如果任何子流程输出与 `keep`、`change`、`avoid`、`surface`、`changeType`、`acceptanceRules` 冲突，先停止并说明冲突，不直接实现冲突内容。
 
 ## 实现原则
 

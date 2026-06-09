@@ -12,10 +12,10 @@ BFDS 只在 adapter 和 skill references 层复用 Impeccable，不修改 `vendo
 
 ## 复用能力
 
-- 设计上下文梳理：优先执行 Impeccable `init` skill 流程，建立或刷新 `PRODUCT.md`、`DESIGN.md` 和 live config。
-- 自动化设计还原检查：使用 Impeccable CLI 的 `detect` 子命令扫描实现文件或页面证据。
-- 设计评审增强：需要额外设计评审时，读取 Impeccable `critique` reference，并标注为审查增强，不替代 BFDS 设计契约验收。
-- 局部实时微调：局部微调时读取 Impeccable `live` reference，并把 live 结果关联回当前 BFDS 设计任务。
+- 设计上下文梳理：优先执行 Impeccable `init` skill 流程，建立或刷新 `PRODUCT.md`、`DESIGN.md` 和 live config。进入 init 前必须挂起当前 BFDS 任务级设计请求，init 只问项目级上下文，完成后再恢复任务。
+- 自动化设计还原检查：使用 Impeccable CLI 的 `detect` 子命令扫描实现文件或页面证据。扫描目标必须来自 `qa-plan.json` 或本轮实现改动文件，不能从聊天描述或占位符临时猜测。
+- 设计评审增强：需要额外设计评审时，读取 Impeccable `critique` reference，并标注为审查增强，不替代 BFDS 设计契约验收。critique 必须消费 BFDS 契约上下文包，输出只能作为验收证据或阻塞风险。
+- 局部实时微调：局部微调时读取 Impeccable `live` reference，并把 live 结果关联回当前 BFDS 设计任务。接受 live 结果后必须记录局部契约补丁，不能改写全局设计契约或扩大产品范围。
 
 ## 已验证的本地入口
 

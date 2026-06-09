@@ -129,12 +129,11 @@
   "impeccable": {
     "detect": {
       "enabled": true,
-      "targets": ["<implemented route or source files>"],
-      "notes": "Use node vendor/impeccable/cli/bin/cli.js detect when dependencies and Node version are available."
+      "targets": ["/settings"],
+      "notes": "Use the implemented route or actual implementation source files for this contract; do not scan workbench or option HTML."
     },
     "critique": {
       "enabled": false,
-      "target": "<optional screenshot or route>",
       "notes": "需要额外设计评审时启用；critique 不能替代设计契约验收。"
     }
   },

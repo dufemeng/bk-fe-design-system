@@ -35,6 +35,26 @@ node vendor/impeccable/cli/bin/cli.js detect <target>
 
 如果依赖、Node 版本、CLI 子命令或已安装 skill 入口不可验证，记录为未运行。不要把未运行写成通过。
 
+反模式扫描目标只能来自：
+
+- `qa-plan.impeccable.detect.targets` 中明确存在的实现文件、目录或可验证 route。
+- `qa-plan.targetRoutes` 中的 route。
+- 本轮为实现该 BFDS 设计契约而实际修改的源码文件。
+
+不得把聊天里的临时描述、评审工作台文件、选中方案 HTML、`<...>` 占位字符串或无法验证的路径当作 detect target。`qa-plan.impeccable.detect.enabled = true` 但没有可验证目标时，记录“未运行：detect target 未固化或不可验证”，不要临时猜一个目标。
+
+## 设计评审增强
+
+如果 `qa-plan.impeccable.critique.enabled = true`，按 [impeccable-integration.md](impeccable-integration.md) 执行设计评审增强。传给 critique 的上下文必须先锁定：
+
+- 设计任务标识、目标界面、`changeType`。
+- `selectedOption.summary`。
+- `keep`、`change`、`avoid`。
+- P0/P1/P2 `acceptanceRules` 和关键 `qa-plan.checks`。
+- 实现截图、目标 route 或组件预览。
+
+Critique 输出只能作为验收证据。它不能替代 `design-contract.json`，也不能把“更好看的新方向”变成实现目标。若 critique 发现 P0/P1 可用性或可访问性问题，记录为阻塞并要求修复或回到 `bfds-design` 重新固化设计；不要直接改写契约。
+
 ## 验收不等于截图
 
 截图只是证据。报告必须把源视觉目标和实现结果放到同一判断里：
