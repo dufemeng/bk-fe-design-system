@@ -1,6 +1,6 @@
-# BFDS Forward Test 运行手册
+# BFDS 前向测试运行手册
 
-Forward tests 是 agent 行为测试，不是单元测试。修改两个 BFDS skill 后，用这份手册做行为验证。
+前向测试是 agent 行为测试，不是单元测试。修改两个 BFDS skill 后，用这份手册做行为验证。
 
 ## 规则
 
@@ -35,6 +35,12 @@ Review this skill and confirm it reads intent-router.md.
 3. `bfds-implement-no-artifacts.md`：缺设计交付包时，应拒绝写代码。
 4. `bfds-implement-resume-many-slugs.md`：应列出候选设计任务，并等待用户选择。
 5. `bfds-negative-api-database-bug.md`：普通 API、数据库、debug 工作不应进入 BFDS。
+
+## 压力测试
+
+前向测试描述期望行为。压力测试验证新会话 agent 在真实诱导下不会走捷径。
+
+修改设计上下文、门禁、设计方向探索、评审工作台或设计交付包流程后，必须按 `tests/pressure/RUNBOOK.md` 跑压力测试，再判断 `bfds-design` 是否稳定。
 
 ## 证据模板
 

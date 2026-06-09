@@ -63,7 +63,7 @@
 
 ## 9. 状态与交互
 
-必须覆盖 contract 中列出的状态和交互。常见状态包括 default、hover、focus-visible、active、disabled、loading、error、success、empty、overflow、long/short text、first-run。
+必须覆盖设计契约中列出的状态和交互。常见状态包括 default、hover、focus-visible、active、disabled、loading、error、success、empty、overflow、long/short text、first-run。
 
 可见控件必须有真实行为或明确标注为原型占位。不要留下 fake controls、dead links、未连接按钮。
 

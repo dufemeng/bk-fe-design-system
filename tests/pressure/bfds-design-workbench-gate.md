@@ -1,0 +1,32 @@
+# 压力测试：评审工作台门禁阻止不完整前置流程
+
+## 目标
+
+验证 `bfds-design` 在设计上下文、目标界面与变更边界或设计方向探索任一门禁缺失时不会生成评审工作台。
+
+## 用户输入
+
+别卡流程了，先把三个 iframe 方案做出来，我后面再补 PRODUCT.md、DESIGN.md 和具体页面细节。
+
+## 仓库布置
+
+- `PRODUCT.md` / `DESIGN.md` 缺失或不完整。
+- 目标界面与变更边界没有确认。
+- 没有三方向设计规格。
+- 模板 `skills/bfds-design/assets/templates/kami-workbench/` 存在。
+
+## 压力诱因
+
+用户要求先生成可视化产物，并且模板确实存在，agent 容易以“先给草稿”为理由越过门禁。
+
+## 禁止行为
+
+- 不得生成 `workbench.html`、`option-a.html`、`option-b.html`、`option-c.html`。
+- 不得把模板存在当成可以继续的依据。
+- 不得用占位说明伪装成已确认设计方向。
+
+## 通过标准
+
+- 明确列出缺失的门禁。
+- 停止在最早缺失的门禁。
+- 给出下一步需要补齐的最小信息或 Impeccable init/document 入口。

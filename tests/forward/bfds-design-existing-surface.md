@@ -16,21 +16,25 @@
 ## 预期读取文件
 
 - `skills/bfds-design/SKILL.md`
+- `skills/bfds-design/scripts/bfds-context.mjs`
 - `skills/bfds-design/references/intent-router.md`
+- `skills/bfds-design/references/impeccable-integration.md`
 - `skills/bfds-design/references/surface-change-framing.md`
 - `fixtures/current-surface-description.md`
 - `fixtures/existing-component-change.md`
 
 ## 期望行为
 
-- 读取 `surface-change-framing.md`。
+- 先运行 `bfds-context.mjs --json`，确认可信 context。
+- 如果 context 缺失，停在 设计上下文门禁，不进入页面重设计。
+- 设计上下文门禁完成后，读取 `surface-change-framing.md`。
 - 判定改动类型为 `modify`。
 - 要求当前目标界面视觉证据，或明确“现状由代码推断，未视觉验证”。
 - 确认必须保留、允许改变、必须避免。
 
 ## 停止/继续
 
-停止在目标界面证据和变更边界确认；不生成评审工作台。
+如果缺可信 context，停在 设计上下文门禁；否则停止在目标界面证据和变更边界确认。不生成评审工作台。
 
 ## 期望产物
 

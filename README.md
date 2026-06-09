@@ -116,13 +116,15 @@ fixtures/docs-design-sample/settings-prompt/
 ```bash
 node scripts/install-bfds-skills.mjs codex --dry-run
 node scripts/install-bfds-skills.mjs claude --dry-run
+node skills/bfds-design/scripts/bfds-context.mjs --json
 node scripts/bfds-status.mjs
 node scripts/bfds-status.mjs --json --root fixtures/docs-design-sample
 node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node scripts/validate-artifacts.mjs --forward-tests
+node scripts/validate-artifacts.mjs --pressure-tests
 ```
 
-脚本只做确定性辅助：扫描状态、校验设计产物结构、校验 forward test 文件结构。核心设计判断仍由 BFDS skill 协议和用户确认完成。
+脚本只做确定性辅助：扫描状态、校验设计产物结构、校验前向测试和压力测试文件结构。核心设计判断仍由 BFDS skill 协议和用户确认完成。
 
 ## Validation
 
@@ -132,5 +134,6 @@ node scripts/validate-artifacts.mjs --forward-tests
 
 1. skill frontmatter 校验：`python3 /Users/loomisli/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/bfds-design` 和 `skills/bfds-implement`。
 2. 示例设计产物校验：`node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt`。
-3. forward tests 结构校验：`node scripts/validate-artifacts.mjs --forward-tests`。
-4. 人工走读 `tests/forward/`，确认开始设计、现有目标界面改造、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合 spec。
+3. 前向测试结构校验：`node scripts/validate-artifacts.mjs --forward-tests`。
+4. 压力测试结构校验：`node scripts/validate-artifacts.mjs --pressure-tests`。
+5. 人工走读 `tests/forward/`，并按 `tests/pressure/RUNBOOK.md` 做新会话 agent 压力测试，确认开始设计、上下文陷阱、跳过提问、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合规格。

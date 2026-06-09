@@ -94,22 +94,27 @@ test -f .claude/agents/impeccable-manual-edit-applier.md
 在 BFDS 仓库根目录运行：
 
 ```bash
+node skills/bfds-design/scripts/bfds-context.mjs --json
 node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node scripts/validate-artifacts.mjs --forward-tests
+node scripts/validate-artifacts.mjs --pressure-tests
 node skills/bfds-design/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
+node skills/bfds-design/scripts/validate-artifacts.mjs --pressure-tests
 node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 ```
 
 预期行为：
 
 - 示例设计产物校验通过。
-- forward tests 结构校验通过。
+- BFDS 设计上下文脚本只报告可信上下文位置，不误用 `vendor/`、`open-sources/`、`fixtures/`。
+- 前向测试结构校验通过。
+- 压力测试结构校验通过。
 - skill-local 脚本能在不依赖 repo-root `templates/` 的情况下校验 fixture。
 
 验收标准：
 
 - 所有命令退出码为 0。
-- 输出包含 `Artifacts valid` 和 `Forward test files are structurally valid.`。
+- 输出包含 `Artifacts valid`、`Forward test files are structurally valid.` 和 `Pressure test files are structurally valid.`。
 
 ## 5. Skill 触发冒烟
 
@@ -184,7 +189,8 @@ cp -R /path/to/bk-fe-design-system/fixtures/docs-design-sample/settings-prompt d
 
 - 安装脚本默认目标是当前目录。
 - Codex 和 Claude Code 的 Impeccable 都安装到各自宿主路径，不嵌进 BFDS skill 内部。
-- BFDS 设计产物和 forward tests 校验通过。
+- BFDS 设计产物和前向测试校验通过。
 - `bfds-design` 只补齐设计，不做产品规划或工程实现。
 - `bfds-implement` 缺设计交付包时硬停止。
 - 有完整设计交付包时，能从 `status.json` 恢复并按实现交接说明进入实现和验收。
+- `bfds-design` 压力测试场景下不会误用第三方设计上下文、不会跳过三方向设计规格、不会越过评审工作台/设计交付包门禁。

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const args = process.argv.slice(2);
 const forwardMode = args.includes('--forward-tests');
+const pressureMode = args.includes('--pressure-tests');
 const targetDir = args.find(arg => !arg.startsWith('--')) ?? 'fixtures/docs-design-sample/settings-prompt';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,6 +36,13 @@ const forwardFiles = [
   'tests/forward/bfds-implement-resume-one-slug.md',
   'tests/forward/bfds-implement-resume-many-slugs.md',
   'tests/forward/bfds-negative-api-database-bug.md'
+];
+
+const pressureFiles = [
+  'tests/pressure/bfds-design-context-trap.md',
+  'tests/pressure/bfds-design-skip-question-not-brainstorm.md',
+  'tests/pressure/bfds-design-workbench-gate.md',
+  'tests/pressure/bfds-design-contract-gate.md'
 ];
 
 function readJson(file) {
@@ -175,19 +183,10 @@ function validateArtifactDir(dir) {
   return errors;
 }
 
-function validateForwardTests() {
+function validateMarkdownScenarios(files, headings) {
   const errors = [];
-  const headings = [
-    '## 用户输入',
-    '## 仓库初始状态',
-    '## 期望 Skill',
-    '## 预期读取文件',
-    '## 期望行为',
-    '## 停止/继续',
-    '## 期望产物'
-  ];
 
-  for (const file of forwardFiles) {
+  for (const file of files) {
     assertFile(file, errors);
     if (!fs.existsSync(file)) continue;
     const content = fs.readFileSync(file, 'utf8');
@@ -199,7 +198,34 @@ function validateForwardTests() {
   return errors;
 }
 
-const errors = forwardMode ? validateForwardTests() : validateArtifactDir(targetDir);
+function validateForwardTests() {
+  return validateMarkdownScenarios(forwardFiles, [
+    '## 用户输入',
+    '## 仓库初始状态',
+    '## 期望 Skill',
+    '## 预期读取文件',
+    '## 期望行为',
+    '## 停止/继续',
+    '## 期望产物'
+  ]);
+}
+
+function validatePressureTests() {
+  return validateMarkdownScenarios(pressureFiles, [
+    '## 目标',
+    '## 用户输入',
+    '## 仓库布置',
+    '## 压力诱因',
+    '## 禁止行为',
+    '## 通过标准'
+  ]);
+}
+
+const errors = pressureMode
+  ? validatePressureTests()
+  : forwardMode
+    ? validateForwardTests()
+    : validateArtifactDir(targetDir);
 
 if (errors.length > 0) {
   process.stderr.write(errors.map(error => `- ${error}`).join('\n'));
@@ -207,4 +233,10 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-process.stdout.write(forwardMode ? 'Forward test files are structurally valid.\n' : `Artifacts valid: ${targetDir}\n`);
+process.stdout.write(
+  pressureMode
+    ? 'Pressure test files are structurally valid.\n'
+    : forwardMode
+      ? 'Forward test files are structurally valid.\n'
+      : `Artifacts valid: ${targetDir}\n`
+);
