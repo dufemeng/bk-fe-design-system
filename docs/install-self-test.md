@@ -102,7 +102,7 @@ node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-s
 
 预期行为：
 
-- artifact fixture 校验通过。
+- 示例设计产物校验通过。
 - forward tests 结构校验通过。
 - skill-local 脚本能在不依赖 repo-root `templates/` 的情况下校验 fixture。
 
@@ -124,15 +124,15 @@ node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-s
 预期行为：
 
 - 进入 BFDS Design，而不是直接写实现代码。
-- 先走 Intent Router、Design Context、Surface Change Framing。
+- 先走需求意图识别、设计上下文梳理、目标界面与变更边界确认。
 - 缺 `PRODUCT.md` / `DESIGN.md` 时复用 Impeccable `init` 或要求补足设计上下文。
-- 用户确认后生成 `docs/design/<slug>/workbench.html` 和三个 option。
+- 用户确认后生成 `docs/design/<slug>/workbench.html` 和三个方案。
 
 验收标准：
 
 - 不脑暴产品功能。
 - 不实现 API、数据库、后端。
-- 用户选择方案前不生成 contract pack。
+- 用户选择方案前不生成设计交付包。
 
 实现负例：
 
@@ -143,12 +143,12 @@ node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-s
 在没有完整 `docs/design/<slug>/design-contract.json`、`implementation-handoff.md`、`qa-plan.json` 时，预期行为：
 
 - 停止实现。
-- 要求选择已有 BFDS 设计产物，或回到 `bfds-design` 生成 contract pack。
+- 要求选择已有 BFDS 设计产物，或回到 `bfds-design` 生成设计交付包。
 
 验收标准：
 
 - 不凭聊天记忆写代码。
-- 不绕过 artifact gate。
+- 不绕过设计产物完整性校验。
 
 ## 6. 完整产物恢复冒烟
 
@@ -167,16 +167,16 @@ cp -R /path/to/bk-fe-design-system/fixtures/docs-design-sample/settings-prompt d
 
 预期行为：
 
-- 从 `docs/design/settings-prompt/status.json` 恢复 slug。
+- 从 `docs/design/settings-prompt/status.json` 恢复设计任务。
 - 读取 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
-- 按 handoff 扫描目标项目代码，再决定实现入口。
-- QA 阶段尝试 Impeccable detect；入口不可用时记录未运行，不写成通过。
+- 按实现交接说明扫描目标项目代码，再决定实现入口。
+- 验收阶段尝试 Impeccable 反模式扫描；入口不可用时记录未运行，不写成通过。
 
 验收标准：
 
-- 先读 artifact，再动代码。
+- 先读设计产物，再动代码。
 - 缺目标项目页面或无法截图时停止或记录阻塞。
-- QA 报告覆盖字体、间距、颜色、资产、状态、交互、响应式、可访问性。
+- 验收报告覆盖字体、间距、颜色、资产、状态、交互、响应式、可访问性。
 
 ## 7. 通过标准
 
@@ -184,7 +184,7 @@ cp -R /path/to/bk-fe-design-system/fixtures/docs-design-sample/settings-prompt d
 
 - 安装脚本默认目标是当前目录。
 - Codex 和 Claude Code 的 Impeccable 都安装到各自宿主路径，不嵌进 BFDS skill 内部。
-- BFDS artifact 和 forward tests 校验通过。
+- BFDS 设计产物和 forward tests 校验通过。
 - `bfds-design` 只补齐设计，不做产品规划或工程实现。
-- `bfds-implement` 缺 contract pack 时硬停止。
-- 有完整 contract pack 时，能从 `status.json` 恢复并按 handoff 进入实现和 QA。
+- `bfds-implement` 缺设计交付包时硬停止。
+- 有完整设计交付包时，能从 `status.json` 恢复并按实现交接说明进入实现和验收。

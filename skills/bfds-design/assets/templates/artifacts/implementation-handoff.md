@@ -1,6 +1,6 @@
 # <设计标题>
 
-Slug: `<slug>`
+设计任务标识：`<slug>`
 状态：`contract-ready`
 更新时间：`<ISO 日期>`
 
@@ -13,19 +13,19 @@ Slug: `<slug>`
 - 选中方案：`<A/B/C 或合并>`
 - 合并来源：`<例如 B 为主，导航采用 A，错误态采用 C>`
 - 设计意图：`<信息层级、密度、状态表达、视觉签名>`
-- Workbench：`docs/design/<slug>/workbench.html`
-- Option A：`docs/design/<slug>/option-a.html`
-- Option B：`docs/design/<slug>/option-b.html`
-- Option C：`docs/design/<slug>/option-c.html`
+- 评审工作台：`docs/design/<slug>/workbench.html`
+- 方案 A：`docs/design/<slug>/option-a.html`
+- 方案 B：`docs/design/<slug>/option-b.html`
+- 方案 C：`docs/design/<slug>/option-c.html`
 
-## 3. 当前 Surface 和改动类型
+## 3. 当前目标界面和改动类型
 
-- Surface：`<页面/路由/组件/区域/弹窗/流程/空状态>`
+- 目标界面：`<页面/路由/组件/区域/弹窗/流程/空状态>`
 - 当前来源：`<截图/Figma/URL/browser capture/Storybook/code inference/user description>`
 - 证据置信度：`<verified/user-confirmed/code-inferred-unverified/low>`
 - 改动类型：`<create/extend/modify/remove/replace/merge/restyle>`
 
-如果实现时发现目标代码与这里描述的 surface 不一致，停止并重新确认，不要继续猜。
+如果实现时发现目标代码与这里描述的目标界面不一致，停止并重新确认，不要继续猜。
 
 ## 4. 必须保留
 
@@ -52,7 +52,7 @@ Slug: `<slug>`
 - 禁止廉价“圆角卡片 + 彩色左边框”模板化强调；圆角和左边框至少去掉一个。
 - 80% 使用业内成熟模式，20% 做有产品个性的独特选择。独特选择必须服务产品表达。
 - 必须检查字体、间距、颜色、资产、状态、交互、响应式、可访问性。
-- 选中的 workbench 方案是 composition、hierarchy、density、atmosphere、signature motifs 的合同。
+- 选中的评审工作台方案是 composition、hierarchy、density、atmosphere、signature motifs 的设计契约。
 
 ## 8. 数据与文案来源
 
@@ -81,13 +81,13 @@ Slug: `<slug>`
 - 图片来源：`<真实资产/用户提供/明确占位>`
 - 禁止：用不匹配主题、裁切、比例、清晰度或艺术方向的图片替代设计目标。
 
-## 12. QA 入口
+## 12. 验收入口
 
-- Design contract：`docs/design/<slug>/design-contract.json`
-- QA plan：`docs/design/<slug>/qa-plan.json`
-- QA report：`docs/design/<slug>/qa-report.md`
+- 设计契约：`docs/design/<slug>/design-contract.json`
+- 验收计划：`docs/design/<slug>/qa-plan.json`
+- 验收报告：`docs/design/<slug>/qa-report.md`
 
-实现后运行 Automatic QA。P0/P1/P2 必须修复并复跑；P3 可以记录为 polish。
+实现后运行自动化设计还原检查。P0/P1/P2 必须修复并复跑；P3 可以记录为 polish 风险。
 
 ## 13. 未决事项
 

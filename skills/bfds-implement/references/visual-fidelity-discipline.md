@@ -1,6 +1,6 @@
-# Visual Fidelity Discipline
+# 视觉还原纪律
 
-实现和 QA 都必须执行这些规则。
+实现和验收都必须执行这些规则。
 
 ## 源证据和现状保真
 
@@ -8,11 +8,11 @@
 - 不从记忆、文件名、聊天印象或单张不匹配截图实现。
 - 同一设计对比必须匹配 viewport、设备、主题、route、认证状态、内容状态和交互状态。
 - 局部修改默认保留周边布局、交互、业务逻辑、路由、数据流和已有组件 API。
-- 如果现状和已确认 Surface Change Framing 不一致，停止并重新确认。
+- 如果现状和已确认目标界面与变更边界不一致，停止并重新确认。
 
 ## 视觉目标保真
 
-- 选中的 workbench 方案是 composition、hierarchy、density、atmosphere、signature motifs 的合同。
+- 选中的评审工作台方案是 composition、hierarchy、density、atmosphere、signature motifs 的设计契约。
 - 不要把高保真设计稿降级成普通卡片、项目符号、占位图、CSS 背景块或通用 UI。
 - 字体必须检查 family、fallback、weight、size、line-height、letter-spacing、换行和截断。
 - 间距必须检查 page margin、section gap、item gap、padding、grid、alignment、radius、shadow、divider、vertical rhythm。
@@ -40,10 +40,10 @@
 - 检查触控目标、焦点态、语义标签、表单关联、可访问名称、alt text、状态反馈和 reduced motion。
 - 响应式不是整体缩小。桌面、平板、移动都不能出现重叠、裁切、破坏层级、文字溢出或不可用控件。
 
-## QA 判定
+## 验收判定
 
-- 截图只是证据，不是 QA 结论。
-- 全屏比较不足以通过 QA；重要细节不可读时做局部区域比较。
+- 截图只是证据，不是验收结论。
+- 全屏比较不足以通过验收；重要细节不可读时做局部区域比较。
 - 必须显式检查字体/排版、间距/布局节奏、颜色/tokens、图像/资产质量、copy/content。
 - 同时检查 icons、states/interactions、accessibility、responsiveness 和 AI shortcut artifacts。
-- P0/P1/P2 必须修复并复跑；P3 可以作为 follow-up polish。
+- P0/P1/P2 必须修复并复跑；P3 可以作为后续 polish 风险。

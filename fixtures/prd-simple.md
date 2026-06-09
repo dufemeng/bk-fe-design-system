@@ -7,7 +7,7 @@
 ## BFDS 期望
 
 - 触发 `bfds-design`。
-- 进入 Design Context。
-- 进入 Surface Change Framing。
-- 不生成 workbench，直到用户确认 surface framing。
+- 进入设计上下文梳理。
+- 进入目标界面与变更边界确认。
+- 不生成评审工作台，直到用户确认目标界面与变更边界。
 - 不询问 API、数据库或权限。

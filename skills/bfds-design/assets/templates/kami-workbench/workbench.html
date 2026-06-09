@@ -3,30 +3,30 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{TITLE}} · BFDS Workbench</title>
+    <title>{{TITLE}} · BFDS 设计评审工作台</title>
     <link rel="stylesheet" href="workbench.css">
   </head>
   <body>
     <main class="page">
       <header class="hero">
-        <p class="kicker">BFDS Design Workbench</p>
+        <p class="kicker">BFDS 设计评审工作台</p>
         <h1>{{TITLE}}</h1>
         <p class="lede">{{REQUEST_SUMMARY}}</p>
         <dl class="meta-grid" aria-label="设计上下文">
           <div>
-            <dt>Slug</dt>
+            <dt>设计任务</dt>
             <dd>{{SLUG}}</dd>
           </div>
           <div>
-            <dt>Surface</dt>
+            <dt>目标界面</dt>
             <dd>{{SURFACE}}</dd>
           </div>
           <div>
-            <dt>Change</dt>
+            <dt>改动类型</dt>
             <dd>{{CHANGE_TYPE}}</dd>
           </div>
           <div>
-            <dt>Context</dt>
+            <dt>设计上下文</dt>
             <dd>{{CONTEXT_VERSION}}</dd>
           </div>
         </dl>
@@ -45,7 +45,7 @@
 
       <section class="option-block" aria-labelledby="option-a-title">
         <div class="option-copy">
-          <p class="option-label">Option A</p>
+          <p class="option-label">方案 A</p>
           <h2 id="option-a-title">{{OPTION_A_NAME}}</h2>
           <p>{{OPTION_A_THESIS}}</p>
           <dl>
@@ -55,12 +55,12 @@
             <div><dt>适用</dt><dd>{{OPTION_A_BEST_FOR}}</dd></div>
           </dl>
         </div>
-        <iframe title="Option A interactive design" src="option-a.html"></iframe>
+        <iframe title="方案 A 交互设计" src="option-a.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-b-title">
         <div class="option-copy">
-          <p class="option-label">Option B</p>
+          <p class="option-label">方案 B</p>
           <h2 id="option-b-title">{{OPTION_B_NAME}}</h2>
           <p>{{OPTION_B_THESIS}}</p>
           <dl>
@@ -70,12 +70,12 @@
             <div><dt>适用</dt><dd>{{OPTION_B_BEST_FOR}}</dd></div>
           </dl>
         </div>
-        <iframe title="Option B interactive design" src="option-b.html"></iframe>
+        <iframe title="方案 B 交互设计" src="option-b.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-c-title">
         <div class="option-copy">
-          <p class="option-label">Option C</p>
+          <p class="option-label">方案 C</p>
           <h2 id="option-c-title">{{OPTION_C_NAME}}</h2>
           <p>{{OPTION_C_THESIS}}</p>
           <dl>
@@ -85,7 +85,7 @@
             <div><dt>适用</dt><dd>{{OPTION_C_BEST_FOR}}</dd></div>
           </dl>
         </div>
-        <iframe title="Option C interactive design" src="option-c.html"></iframe>
+        <iframe title="方案 C 交互设计" src="option-c.html"></iframe>
       </section>
     </main>
   </body>

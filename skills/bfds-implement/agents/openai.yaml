@@ -1,7 +1,7 @@
 interface:
   display_name: "BFDS Implement"
-  short_description: "实现已确认 BFDS 设计并 QA"
+  short_description: "实现已确认 BFDS 设计并验收"
   brand_color: "#1B365D"
-  default_prompt: "Use $bfds-implement to implement the confirmed BFDS design contract and run design fidelity QA."
+  default_prompt: "用 $bfds-implement 实现已确认的 BFDS 设计契约，并运行设计还原验收。"
 policy:
   allow_implicit_invocation: true

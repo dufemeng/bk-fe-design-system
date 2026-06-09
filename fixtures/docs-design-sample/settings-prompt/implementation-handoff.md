@@ -1,6 +1,6 @@
 # Settings Prompt Input Redesign
 
-Slug: `settings-prompt`
+设计任务标识：`settings-prompt`
 状态：`contract-ready`
 更新时间：`2026-06-09T12:00:00.000Z`
 
@@ -13,19 +13,19 @@ Slug: `settings-prompt`
 - 选中方案：`B+A+C`
 - 合并来源：B 为主，采用 A 的安静 topbar 和低干扰周边节奏，采用 C 的显性错误状态。
 - 设计意图：操作型 console，编辑区优先，模板和预览作为辅助上下文，错误反馈靠近编辑区。
-- Workbench：`fixtures/docs-design-sample/settings-prompt/workbench.html`
-- Option A：`fixtures/docs-design-sample/settings-prompt/option-a.html`
-- Option B：`fixtures/docs-design-sample/settings-prompt/option-b.html`
-- Option C：`fixtures/docs-design-sample/settings-prompt/option-c.html`
+- 评审工作台：`fixtures/docs-design-sample/settings-prompt/workbench.html`
+- 方案 A：`fixtures/docs-design-sample/settings-prompt/option-a.html`
+- 方案 B：`fixtures/docs-design-sample/settings-prompt/option-b.html`
+- 方案 C：`fixtures/docs-design-sample/settings-prompt/option-c.html`
 
-## 3. 当前 Surface 和改动类型
+## 3. 当前目标界面和改动类型
 
-- Surface：`/settings prompt input component`
+- 目标界面：`/settings prompt input component`
 - 当前来源：用户文字描述 + 代码推断；已在 fixture 中标注未视觉验证，用户确认后才固化。
 - 证据置信度：`user-confirmed`
 - 改动类型：`modify`
 
-如果实现时发现目标代码与这里描述的 surface 不一致，停止并重新确认，不要继续猜。
+如果实现时发现目标代码与这里描述的目标界面不一致，停止并重新确认，不要继续猜。
 
 ## 4. 必须保留
 
@@ -91,13 +91,13 @@ Slug: `settings-prompt`
 - 图片来源：无图片需求。
 - 禁止：使用占位图、emoji、手写 SVG 或不匹配的装饰图形。
 
-## 12. QA 入口
+## 12. 验收入口
 
-- Design contract：`fixtures/docs-design-sample/settings-prompt/design-contract.json`
-- QA plan：`fixtures/docs-design-sample/settings-prompt/qa-plan.json`
-- QA report：`fixtures/docs-design-sample/settings-prompt/qa-report.md`
+- 设计契约：`fixtures/docs-design-sample/settings-prompt/design-contract.json`
+- 验收计划：`fixtures/docs-design-sample/settings-prompt/qa-plan.json`
+- 验收报告：`fixtures/docs-design-sample/settings-prompt/qa-report.md`
 
-实现后运行 Automatic QA。P0/P1/P2 必须修复并复跑；P3 可以记录为 polish。
+实现后运行自动化设计还原检查。P0/P1/P2 必须修复并复跑；P3 可以记录为 polish 风险。
 
 ## 13. 未决事项
 

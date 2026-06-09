@@ -6,7 +6,7 @@
 
 ## 仓库初始状态
 
-- 当前线程没有 slug。
+- 当前线程没有设计任务。
 - `docs/design/` 不存在或没有任何 `contract-ready` status。
 - 没有 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
 
@@ -24,7 +24,7 @@
 
 - 读取 `resume-design-artifacts.md`。
 - 扫描 `docs/design/*/status.json`。
-- 明确缺少 contract pack。
+- 明确缺少设计交付包。
 - 不读聊天记忆实现，不写代码。
 
 ## 停止/继续

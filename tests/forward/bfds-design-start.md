@@ -25,15 +25,15 @@
 ## 期望行为
 
 - 读取 `intent-router.md`。
-- 进入 Design Context，优先复用 Impeccable `init` 建立或刷新 `PRODUCT.md`、`DESIGN.md`。
-- 进入 Surface Change Framing。
-- 只确认前端 surface 和改动范围，不问 API、数据库或权限。
+- 进入设计上下文梳理，优先复用 Impeccable `init` 建立或刷新 `PRODUCT.md`、`DESIGN.md`。
+- 进入目标界面与变更边界确认。
+- 只确认前端目标界面和改动范围，不问 API、数据库或权限。
 
 ## 停止/继续
 
-停在 Surface Change Framing 确认；没有用户确认前不生成 workbench。
+停在目标界面与变更边界确认；没有用户确认前不生成评审工作台。
 
 ## 期望产物
 
 - 本轮不要求产物。
-- 允许在用户确认后创建 `docs/design/<slug>/workbench.html` 和三个 option。
+- 允许在用户确认后创建 `docs/design/<slug>/workbench.html` 和三个方案。

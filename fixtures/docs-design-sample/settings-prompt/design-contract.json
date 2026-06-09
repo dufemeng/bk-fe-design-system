@@ -3,9 +3,9 @@
   "title": "Settings Prompt Input Redesign",
   "selectedOption": {
     "id": "B+A+C",
-    "summary": "Option B operational console as the base, with Option A's quiet top navigation and Option C's explicit error state treatment.",
+    "summary": "以方案 B 的操作型工作台为基础，合并方案 A 的安静顶部导航和方案 C 的显性错误状态处理。",
     "mergedFrom": ["A", "B", "C"],
-    "decisionNotes": "User chose B for efficiency, A for lower surrounding noise, and C for clearer error recovery."
+    "decisionNotes": "用户选择 B 的效率结构、A 的低干扰周边节奏，以及 C 的清晰错误恢复。"
   },
   "sourceArtifacts": {
     "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
@@ -17,8 +17,8 @@
     "productContext": "PRODUCT.md",
     "designContext": "DESIGN.md",
     "surfaceEvidence": [
-      "User description of /settings prompt input component",
-      "Code inference, marked unverified before user confirmation"
+      "用户描述 /settings prompt input component",
+      "代码推断，用户确认前标注为未视觉验证"
     ]
   },
   "surface": {
@@ -50,14 +50,14 @@
   "screens": [
     {
       "id": "settings-prompt-default",
-      "description": "Default prompt editor inside settings",
+      "description": "设置页内的默认提示词编辑器",
       "composition": "Quiet topbar, template rail, central editor, right preview/status panel",
       "hierarchy": "Editor title and textarea first, validation preview second, templates third",
       "density": "snug"
     },
     {
       "id": "settings-prompt-error",
-      "description": "Validation error state for insufficient prompt content",
+      "description": "提示词内容不足时的验证错误状态",
       "composition": "Error message appears near the editor and preview panel without moving the page shell",
       "hierarchy": "Error text is visible but does not override the primary edit action",
       "density": "snug"

@@ -68,7 +68,7 @@ if (json) {
       `state=${row.state}`,
       `updated=${row.lastUpdated || 'unknown'}`,
       `selected=${row.selectedOption ?? 'none'}`,
-      `surface=${row.currentSurface || 'unknown'}`
+      `目标界面=${row.currentSurface || 'unknown'}`
     ].join(' | '));
     process.stdout.write('\n');
   }

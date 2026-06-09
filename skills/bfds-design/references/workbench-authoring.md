@@ -1,6 +1,6 @@
-# Static Kami Workbench
+# 三方案设计评审工作台
 
-Workbench 是静态 HTML 审阅台，不是事件 server。用户在对话中回复“选 A/B/C”或合并意见。
+评审工作台是静态 HTML 审阅台，不是事件 server。用户在对话中回复“选 A/B/C”或合并意见。
 
 ## 文件
 
@@ -21,21 +21,21 @@ Workbench 是静态 HTML 审阅台，不是事件 server。用户在对话中回
 ## 样式边界
 
 - `workbench.html` 使用 Kami 风格外壳：纸感背景、serif-led hierarchy、ink-blue accent、克制阅读排版。
-- 三个 option 必须放在 iframe 中。
+- 三个方案必须放在 iframe 中。
 - iframe 内设计稿必须服从目标项目 `DESIGN.md`，不能继承 Kami 的纸感样式。
-- option 文件应内联或链接自己的目标项目样式，不依赖 workbench.css。
+- 方案文件应内联或链接自己的目标项目样式，不依赖 workbench.css。
 
-## Workbench 必须包含
+## 评审工作台必须包含
 
 - 本次需求摘要。
-- Surface Change Framing 摘要。
+- 目标界面与变更边界摘要。
 - `PRODUCT.md` / `DESIGN.md` 引用和版本或读取日期。
 - 三个方案的设计意图。
 - 三个可交互模拟器。
 - 每个方案的强调、弱化、风险、适用场景。
 - 选择提示：在对话中回复选 A/B/C，合并某些部分，或要求重做。
 
-## Option 质量基线
+## 方案质量基线
 
 - 三个方案必须是真正不同的信息架构、层级、密度、状态处理或交互节奏，不是换色。
 - 每个方案至少体现一个关键交互或关键状态。
@@ -46,7 +46,7 @@ Workbench 是静态 HTML 审阅台，不是事件 server。用户在对话中回
 
 ## 静态交互
 
-允许在 option 内使用少量内联 JS 做本地状态切换，例如：
+允许在方案内使用少量内联 JS 做本地状态切换，例如：
 
 - tabs
 - toggle
@@ -63,4 +63,4 @@ Workbench 是静态 HTML 审阅台，不是事件 server。用户在对话中回
 - iframe 尺寸稳定，可滚动。
 - 基础交互可点击。
 - 文案说明不会遮挡模拟器。
-- 外壳像审阅文档，option 像目标产品 UI。
+- 外壳像审阅文档，方案像目标产品 UI。

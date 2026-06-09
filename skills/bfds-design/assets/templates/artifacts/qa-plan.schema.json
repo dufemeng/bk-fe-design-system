@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bfds.local/schemas/qa-plan.schema.json",
-  "title": "BFDS QA Plan",
+  "title": "BFDS 验收计划",
   "type": "object",
   "additionalProperties": false,
   "required": [

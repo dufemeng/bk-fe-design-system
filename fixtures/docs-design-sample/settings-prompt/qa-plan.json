@@ -65,13 +65,13 @@
   "referenceScreenshots": [
     {
       "artifact": "fixtures/docs-design-sample/settings-prompt/option-b.html",
-      "description": "Primary composition for selected design",
+      "description": "已选设计的主要构图参考",
       "viewport": "desktop",
       "state": "default"
     },
     {
       "artifact": "fixtures/docs-design-sample/settings-prompt/option-c.html",
-      "description": "Reference for explicit error state treatment",
+      "description": "显性错误状态处理参考",
       "viewport": "desktop",
       "state": "error"
     }
@@ -80,7 +80,7 @@
     {
       "id": "QA-001",
       "category": "contract",
-      "description": "Implementation follows selected B+A+C decision and preserve/change/avoid lists.",
+      "description": "实现遵守已选 B+A+C 决策，以及必须保留、允许改变、必须避免清单。",
       "blockingLevel": "P1"
     },
     {
@@ -122,9 +122,9 @@
   ],
   "blockers": [
     "Cannot open /settings or equivalent component preview.",
-    "Cannot capture visual evidence for target surface.",
+    "无法捕获目标界面的视觉证据。",
     "Missing design-contract.json, implementation-handoff.md, or qa-plan.json.",
-    "Current implementation target does not match confirmed surface."
+    "当前实现目标与已确认目标界面不一致。"
   ],
   "impeccable": {
     "detect": {
@@ -135,7 +135,7 @@
     "critique": {
       "enabled": false,
       "target": "<optional screenshot or route>",
-      "notes": "Enable when an additional design review is needed; critique is not a replacement for contract QA."
+      "notes": "需要额外设计评审时启用；critique 不能替代设计契约验收。"
     }
   },
   "reports": {

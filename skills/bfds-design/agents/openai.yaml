@@ -1,7 +1,7 @@
 interface:
   display_name: "BFDS Design"
-  short_description: "生成 BFDS 三方案设计与合同"
+  short_description: "生成 BFDS 三方案设计与设计契约"
   brand_color: "#1B365D"
-  default_prompt: "Use $bfds-design to turn this PRD or existing UI surface into a BFDS workbench and design contract."
+  default_prompt: "用 $bfds-design 把这个 PRD 或现有界面补全成 BFDS 三方案设计评审工作台和设计契约。"
 policy:
   allow_implicit_invocation: true

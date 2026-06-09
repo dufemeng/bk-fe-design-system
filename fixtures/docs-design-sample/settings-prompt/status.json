@@ -3,7 +3,7 @@
   "title": "Settings Prompt Input Redesign",
   "state": "contract-ready",
   "lastUpdated": "2026-06-09T12:00:00.000Z",
-  "selectedOption": "B with A navigation and C error states",
+  "selectedOption": "B 方案合并 A 的导航和 C 的错误状态",
   "artifacts": {
     "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
     "optionA": "fixtures/docs-design-sample/settings-prompt/option-a.html",
@@ -14,8 +14,8 @@
     "qaPlan": "fixtures/docs-design-sample/settings-prompt/qa-plan.json",
     "qaReport": "fixtures/docs-design-sample/settings-prompt/qa-report.md"
   },
-  "sourceSummary": "User-confirmed modify request for /settings prompt input. Current source was user description plus code inference, marked unverified before confirmation.",
+  "sourceSummary": "用户确认的 /settings prompt input 改造请求。现状来源为用户描述加代码推断，确认前标注为未视觉验证。",
   "currentSurface": "/settings prompt input component",
   "changeType": "modify",
-  "notes": "Fixture for BFDS MVP forward tests."
+  "notes": "BFDS MVP forward tests 的示例设计产物。"
 }

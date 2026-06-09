@@ -1,4 +1,4 @@
-# Forward Test: resume one slug
+# Forward Test: resume one design task
 
 ## 用户输入
 
@@ -6,7 +6,7 @@
 
 ## 仓库初始状态
 
-- 新 session，没有当前线程 slug。
+- 新会话，没有当前线程设计任务。
 - 仓库只有一个 `docs/design/settings-prompt/status.json`。
 - `status.json.state` 为 `contract-ready`。
 - 同目录有 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
@@ -28,9 +28,9 @@
 ## 期望行为
 
 - 运行或人工执行 `bfds-status` 恢复。
-- 回放 slug、title、selectedOption、surface、lastUpdated 摘要。
-- 要求用户确认使用该 contract。
-- 用户确认后读取三个 artifact，再扫描代码实现。
+- 回放设计任务标识、title、selectedOption、currentSurface、lastUpdated 摘要。
+- 要求用户确认使用该设计契约。
+- 用户确认后读取三个设计产物，再扫描代码实现。
 
 ## 停止/继续
 

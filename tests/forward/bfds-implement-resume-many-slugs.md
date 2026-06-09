@@ -1,4 +1,4 @@
-# Forward Test: resume many slugs
+# Forward Test: resume many design tasks
 
 ## 用户输入
 
@@ -6,9 +6,9 @@
 
 ## 仓库初始状态
 
-- 新 session，没有当前线程 slug。
+- 新会话，没有当前线程设计任务。
 - 仓库有多个 `docs/design/*/status.json`。
-- 至少两个 slug 为 `contract-ready`、`qa-failed` 或 `implemented`。
+- 至少两个设计任务为 `contract-ready`、`qa-failed` 或 `implemented`。
 
 ## 期望 Skill
 
@@ -29,9 +29,9 @@
 
 ## 停止/继续
 
-停止等待用户选择 slug。
+停止等待用户选择设计任务。
 
 ## 期望产物
 
 - 无代码改动。
-- 用户选择 slug 后才读取 contract pack 并实现。
+- 用户选择设计任务后才读取设计交付包并实现。

@@ -1,6 +1,6 @@
-# Current Surface Fixture
+# 当前目标界面 Fixture
 
-## 当前 Surface
+## 当前目标界面
 
 目标页面是 `/settings`。页面已有左侧设置导航、主内容区域和保存按钮。用户只要求调整团队默认提示词输入组件，不改导航、路由、保存逻辑或组件 API。
 
@@ -10,6 +10,6 @@
 
 ## BFDS 期望
 
-- 用于 `modify` surface framing。
-- 明确 keep/change/avoid。
-- 不凭想象直接生成 workbench。
+- 用于 `modify` 目标界面与变更边界确认。
+- 明确必须保留、允许改变、必须避免。
+- 不凭想象直接生成评审工作台。

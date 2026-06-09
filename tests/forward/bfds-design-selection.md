@@ -6,9 +6,9 @@
 
 ## 仓库初始状态
 
-- 当前线程或用户指定 slug 存在 `docs/design/settings-prompt/workbench.html`。
+- 当前线程或用户指定设计任务存在 `docs/design/settings-prompt/workbench.html`。
 - 存在 `option-a.html`、`option-b.html`、`option-c.html`。
-- `status.json.state` 为 `workbench-ready` 或当前线程明确该 slug。
+- `status.json.state` 为 `workbench-ready` 或当前线程明确该设计任务。
 
 ## 期望 Skill
 
@@ -20,17 +20,17 @@
 - `skills/bfds-design/references/intent-router.md`
 - `skills/bfds-design/references/contract-pack.md`
 - `skills/bfds-design/assets/templates/artifacts/`
-- `docs/design/settings-prompt/status.json` 或当前线程 slug 的 `status.json`
+- `docs/design/settings-prompt/status.json` 或当前线程设计任务的 `status.json`
 
 ## 期望行为
 
 - 读取 `intent-router.md` 和 `contract-pack.md`。
 - 将选择固化为 B+A+C，不把聊天记忆当实现依据。
-- 写入 design contract pack。
+- 写入设计交付包。
 
 ## 停止/继续
 
-继续到 contract pack 生成；生成后停止，等待用户要求实现。
+继续到设计交付包生成；生成后停止，等待用户要求实现。
 
 ## 期望产物
 

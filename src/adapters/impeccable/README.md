@@ -12,10 +12,10 @@ BFDS 只在 adapter 和 skill references 层复用 Impeccable，不修改 `vendo
 
 ## 复用能力
 
-- Design Context：优先执行 Impeccable `init` skill 流程，建立或刷新 `PRODUCT.md`、`DESIGN.md` 和 live config。
-- Automatic QA：使用 Impeccable CLI 的 `detect` 子命令扫描实现文件或页面证据。
-- Design Review：需要额外设计评审时，读取 Impeccable `critique` reference，并标注为审查增强，不替代 BFDS contract QA。
-- Live Region Iteration：局部微调时读取 Impeccable `live` reference，并把 live 结果关联回当前 BFDS slug。
+- 设计上下文梳理：优先执行 Impeccable `init` skill 流程，建立或刷新 `PRODUCT.md`、`DESIGN.md` 和 live config。
+- 自动化设计还原检查：使用 Impeccable CLI 的 `detect` 子命令扫描实现文件或页面证据。
+- 设计评审增强：需要额外设计评审时，读取 Impeccable `critique` reference，并标注为审查增强，不替代 BFDS 设计契约验收。
+- 局部实时微调：局部微调时读取 Impeccable `live` reference，并把 live 结果关联回当前 BFDS 设计任务。
 
 ## 已验证的本地入口
 
