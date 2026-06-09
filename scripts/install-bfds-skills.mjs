@@ -9,10 +9,11 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 
 function usage() {
   console.log(`Usage:
-  node scripts/install-bfds-skills.mjs codex --target <project-root> [--codex-skills-dir <dir>] [--dry-run]
-  node scripts/install-bfds-skills.mjs claude --target <project-root> [--dry-run]
+  node scripts/install-bfds-skills.mjs codex [--target <project-root>] [--codex-skills-dir <dir>] [--dry-run]
+  node scripts/install-bfds-skills.mjs claude [--target <project-root>] [--dry-run]
 
 Installs BFDS skills plus the vendored Impeccable host-native skill bundle.
+When --target is omitted, the target project root is the current working directory.
 `);
 }
 
@@ -123,12 +124,9 @@ try {
     throw new Error(`Mode must be "codex" or "claude", got: ${args.mode}`);
   }
 
-  if (!args.target) {
-    throw new Error('Missing --target <project-root>');
-  }
-
-  const targetRoot = path.resolve(args.target);
+  const targetRoot = path.resolve(args.target || process.cwd());
   assertDir(targetRoot, 'Target project root');
+  console.log(`Target project root: ${targetRoot}`);
 
   if (args.mode === 'codex') {
     const codexSkillsDir = path.resolve(args.codexSkillsDir || defaultCodexSkillsDir());
