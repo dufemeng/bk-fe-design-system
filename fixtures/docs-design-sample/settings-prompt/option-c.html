@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Option C · Guided States</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --surface: #ffffff;
+        --ink: #172033;
+        --muted: #667085;
+        --accent: #5b4fd6;
+        --border: #d8dced;
+        --warning: #9a4d00;
+        --success: #1f7a5f;
+        --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.5; letter-spacing: 0; }
+      .surface { min-height: 100vh; padding: clamp(18px, 4vw, 40px); }
+      .shell { max-width: 1040px; margin: 0 auto; display: grid; gap: 16px; }
+      .topbar, .workspace, .status-tray { background: var(--surface); border: 1px solid var(--border); }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; }
+      .brand { font-weight: 760; }
+      .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 500px; }
+      .editor { padding: clamp(18px, 3vw, 32px); display: grid; gap: 16px; align-content: start; }
+      h1 { margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1.08; letter-spacing: 0; text-wrap: balance; }
+      p { margin: 0; color: var(--muted); }
+      textarea { width: 100%; min-height: 170px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; background: #fbfcff; color: var(--ink); padding: 14px; font: inherit; }
+      .notice { display: grid; gap: 6px; padding: 12px; background: color-mix(in srgb, var(--accent) 8%, white); border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border)); }
+      .notice strong { color: var(--accent); }
+      .side { border-left: 1px solid var(--border); padding: clamp(18px, 3vw, 28px); display: grid; align-content: start; gap: 16px; }
+      .step { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; }
+      .dot { width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center; background: var(--accent); color: white; font-size: 12px; font-weight: 700; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      button { min-height: 36px; border: 1px solid var(--border); background: white; color: var(--ink); padding: 0 12px; border-radius: 6px; font: inherit; cursor: pointer; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+      button:focus-visible, textarea:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+      .status-tray { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; }
+      body[data-state="warning"] .notice strong, body[data-state="warning"] #status { color: var(--warning); }
+      body[data-state="success"] .notice strong, body[data-state="success"] #status { color: var(--success); }
+
+      @media (max-width: 760px) {
+        .workspace { grid-template-columns: 1fr; }
+        .side { border-left: 0; border-top: 1px solid var(--border); }
+        .topbar, .status-tray { align-items: stretch; flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body data-state="default">
+    <main class="surface">
+      <div class="shell">
+        <header class="topbar">
+          <div class="brand">Team Settings</div>
+          <div class="actions">
+            <button type="button" data-state="default">First run</button>
+            <button type="button" data-state="warning">Error</button>
+            <button type="button" data-state="success">Saved</button>
+          </div>
+        </header>
+        <section class="workspace" aria-label="Guided prompt states">
+          <div class="editor">
+            <h1>设置团队默认提示词</h1>
+            <p>引导式状态让首次配置和错误恢复更明确。示例内容是占位，真实内容必须来自用户或项目配置。</p>
+            <div class="notice">
+              <strong id="notice-title">First-run guidance</strong>
+              <p id="notice-copy">Start with a short instruction, then add boundaries your team already agreed on.</p>
+            </div>
+            <textarea aria-label="团队默认提示词">[占位] 输入团队确认过的默认提示词。</textarea>
+            <div class="actions">
+              <button class="primary" type="button">Save prompt</button>
+              <button type="button">Use starter</button>
+            </div>
+          </div>
+          <aside class="side">
+            <div class="step"><span class="dot">1</span><p>先写用户任务，不写后端规则。</p></div>
+            <div class="step"><span class="dot">2</span><p>补充团队已有边界，不编造新策略。</p></div>
+            <div class="step"><span class="dot">3</span><p>保存前检查空态、错误态和长文本。</p></div>
+          </aside>
+        </section>
+        <footer class="status-tray">
+          <span id="status">First-run guidance shown.</span>
+          <button type="button">View state checklist</button>
+        </footer>
+      </div>
+    </main>
+    <script>
+      const copy = {
+        default: ["First-run guidance", "Start with a short instruction, then add boundaries your team already agreed on.", "First-run guidance shown."],
+        warning: ["Prompt needs attention", "The prompt is too short. Add the expected user task before saving.", "Error state shown."],
+        success: ["Prompt saved", "New projects will use this default prompt. Review again if team policy changes.", "Saved state shown."]
+      };
+      document.querySelectorAll("[data-state]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const state = button.dataset.state;
+          document.body.dataset.state = state;
+          document.querySelector("#notice-title").textContent = copy[state][0];
+          document.querySelector("#notice-copy").textContent = copy[state][1];
+          document.querySelector("#status").textContent = copy[state][2];
+        });
+      });
+    </script>
+  </body>
+</html>

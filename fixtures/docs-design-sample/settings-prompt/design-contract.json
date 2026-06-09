@@ -1,0 +1,153 @@
+{
+  "slug": "settings-prompt",
+  "title": "Settings Prompt Input Redesign",
+  "selectedOption": {
+    "id": "B+A+C",
+    "summary": "Option B operational console as the base, with Option A's quiet top navigation and Option C's explicit error state treatment.",
+    "mergedFrom": ["A", "B", "C"],
+    "decisionNotes": "User chose B for efficiency, A for lower surrounding noise, and C for clearer error recovery."
+  },
+  "sourceArtifacts": {
+    "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
+    "options": {
+      "A": "fixtures/docs-design-sample/settings-prompt/option-a.html",
+      "B": "fixtures/docs-design-sample/settings-prompt/option-b.html",
+      "C": "fixtures/docs-design-sample/settings-prompt/option-c.html"
+    },
+    "productContext": "PRODUCT.md",
+    "designContext": "DESIGN.md",
+    "surfaceEvidence": [
+      "User description of /settings prompt input component",
+      "Code inference, marked unverified before user confirmation"
+    ]
+  },
+  "surface": {
+    "name": "/settings prompt input component",
+    "type": "component",
+    "route": "/settings",
+    "currentSource": ["user-description", "code-inference"],
+    "confidence": "user-confirmed"
+  },
+  "changeType": "modify",
+  "keep": [
+    "Existing settings page route and navigation",
+    "Existing submit logic and component API",
+    "Existing product tokens and icon set",
+    "Existing data flow for saved prompt content"
+  ],
+  "change": [
+    "Prompt editor hierarchy",
+    "Template and preview proximity",
+    "Validation and saved-state feedback",
+    "Local density and helper text placement"
+  ],
+  "avoid": [
+    "Do not add permissions, API behavior, or database schema",
+    "Do not invent real team prompt data",
+    "Do not use placeholder imagery",
+    "Do not use rounded cards with colored side borders as emphasis"
+  ],
+  "screens": [
+    {
+      "id": "settings-prompt-default",
+      "description": "Default prompt editor inside settings",
+      "composition": "Quiet topbar, template rail, central editor, right preview/status panel",
+      "hierarchy": "Editor title and textarea first, validation preview second, templates third",
+      "density": "snug"
+    },
+    {
+      "id": "settings-prompt-error",
+      "description": "Validation error state for insufficient prompt content",
+      "composition": "Error message appears near the editor and preview panel without moving the page shell",
+      "hierarchy": "Error text is visible but does not override the primary edit action",
+      "density": "snug"
+    }
+  ],
+  "states": [
+    {
+      "name": "default",
+      "expectation": "Prompt editor is ready, helper copy states that example content is placeholder if no real data exists.",
+      "priority": "P1"
+    },
+    {
+      "name": "error",
+      "expectation": "Validation error is explicit, close to the editor, and reachable by screen readers.",
+      "priority": "P1"
+    },
+    {
+      "name": "success",
+      "expectation": "Saved state confirms scope without inventing downstream workflow.",
+      "priority": "P2"
+    },
+    {
+      "name": "long-text",
+      "expectation": "Long prompt content can scroll or resize without overflowing controls.",
+      "priority": "P2"
+    }
+  ],
+  "interactions": [
+    {
+      "trigger": "Click Validate",
+      "result": "Preview/status panel updates to show validation result.",
+      "accessibility": "Status text is adjacent to the editor and should be announced or reachable."
+    },
+    {
+      "trigger": "Keyboard focus enters textarea and actions",
+      "result": "Focus-visible outline is clear and does not rely only on color.",
+      "accessibility": "Textarea has an accessible label and buttons use action labels."
+    }
+  ],
+  "tokens": {
+    "source": "DESIGN.md or existing project tokens",
+    "rules": [
+      "Map background, surface, ink, muted, accent, border, success, and error to existing tokens.",
+      "Do not introduce a new color system for this component.",
+      "Use existing icon set if icons are needed."
+    ]
+  },
+  "responsive": [
+    {
+      "viewport": "desktop",
+      "rule": "Three-column console may be used when width supports it; editor remains the main column."
+    },
+    {
+      "viewport": "tablet",
+      "rule": "Templates and preview can stack below editor without losing state visibility."
+    },
+    {
+      "viewport": "mobile",
+      "rule": "Single-column layout, no text overflow, actions remain reachable without hover."
+    }
+  ],
+  "motion": [
+    {
+      "name": "state-feedback",
+      "rule": "Use low-presence transitions for validation status only.",
+      "reducedMotion": "Status changes must remain clear with no animation."
+    }
+  ],
+  "assets": [
+    {
+      "name": "icons",
+      "source": "Existing project icon set",
+      "rule": "Use one icon style and size if icons are added; icons are optional in MVP."
+    }
+  ],
+  "acceptanceRules": [
+    {
+      "id": "AR-001",
+      "rule": "Implementation follows selected B+A+C composition and preserves existing route, logic, component API, tokens, and data flow.",
+      "severity": "P1"
+    },
+    {
+      "id": "AR-002",
+      "rule": "No invented data, lorem copy, fake controls, placeholder imagery, or rounded-card plus colored-left-border emphasis.",
+      "severity": "P1"
+    },
+    {
+      "id": "AR-003",
+      "rule": "Default, error, success, long-text, keyboard focus, and mobile layouts are tested.",
+      "severity": "P2"
+    }
+  ]
+}

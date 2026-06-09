@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings Prompt Input Redesign · BFDS Workbench</title>
+    <link rel="stylesheet" href="workbench.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="kicker">BFDS Design Workbench</p>
+        <h1>Settings Prompt Input Redesign</h1>
+        <p class="lede">重新设计设置页里的团队默认提示词输入组件，让高频编辑、状态反馈和错误恢复更清晰。</p>
+        <dl class="meta-grid" aria-label="设计上下文">
+          <div><dt>Slug</dt><dd>settings-prompt</dd></div>
+          <div><dt>Surface</dt><dd>/settings prompt 输入组件</dd></div>
+          <div><dt>Change</dt><dd>modify</dd></div>
+          <div><dt>Context</dt><dd>PRODUCT.md + DESIGN.md, 2026-06-09</dd></div>
+        </dl>
+      </header>
+
+      <section class="brief">
+        <div>
+          <h2>范围确认</h2>
+          <p>Current source: 用户文字描述 + 代码推断，未视觉验证；用户已确认以现有设置页布局、导航、提交逻辑、组件 API 和 tokens 为保留范围。允许改变输入区层级、状态反馈、辅助提示、错误态和局部密度。</p>
+        </div>
+        <div>
+          <h2>选择方式</h2>
+          <p>这是静态 MVP 工作台，不记录点击事件。请在对话中回复“选 A / B / C”，也可以说“选 B，但导航用 A，错误态用 C”。</p>
+        </div>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-a-title">
+        <div class="option-copy">
+          <p class="option-label">Option A</p>
+          <h2 id="option-a-title">Quiet Precision</h2>
+          <p>保留现有页面节奏，把输入、帮助和状态收拢成一个安静的编辑区。</p>
+          <dl>
+            <div><dt>强调</dt><dd>输入内容和保存状态</dd></div>
+            <div><dt>弱化</dt><dd>帮助说明和模板入口</dd></div>
+            <div><dt>风险</dt><dd>视觉记忆点较少</dd></div>
+            <div><dt>适用</dt><dd>高频设置、低干扰编辑</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option A interactive design" src="option-a.html"></iframe>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-b-title">
+        <div class="option-copy">
+          <p class="option-label">Option B</p>
+          <h2 id="option-b-title">Operational Console</h2>
+          <p>以效率为主，把模板、预览和状态放到同一操作上下文里，减少来回切换。</p>
+          <dl>
+            <div><dt>强调</dt><dd>编辑效率、预览和保存反馈</dd></div>
+            <div><dt>弱化</dt><dd>长说明和装饰</dd></div>
+            <div><dt>风险</dt><dd>首次使用信息量更高</dd></div>
+            <div><dt>适用</dt><dd>经常调整提示词的团队管理员</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option B interactive design" src="option-b.html"></iframe>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-c-title">
+        <div class="option-copy">
+          <p class="option-label">Option C</p>
+          <h2 id="option-c-title">Guided States</h2>
+          <p>把错误、空态和成功反馈做得更显性，适合首次配置和多人协作风险较高的场景。</p>
+          <dl>
+            <div><dt>强调</dt><dd>状态解释、错误恢复、提交信心</dd></div>
+            <div><dt>弱化</dt><dd>次要模板入口</dd></div>
+            <div><dt>风险</dt><dd>视觉存在感更强，需要控制密度</dd></div>
+            <div><dt>适用</dt><dd>新团队启用和配置风险较高的环境</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option C interactive design" src="option-c.html"></iframe>
+      </section>
+    </main>
+  </body>
+</html>

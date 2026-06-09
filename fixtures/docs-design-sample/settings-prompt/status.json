@@ -1,0 +1,21 @@
+{
+  "slug": "settings-prompt",
+  "title": "Settings Prompt Input Redesign",
+  "state": "contract-ready",
+  "lastUpdated": "2026-06-09T12:00:00.000Z",
+  "selectedOption": "B with A navigation and C error states",
+  "artifacts": {
+    "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
+    "optionA": "fixtures/docs-design-sample/settings-prompt/option-a.html",
+    "optionB": "fixtures/docs-design-sample/settings-prompt/option-b.html",
+    "optionC": "fixtures/docs-design-sample/settings-prompt/option-c.html",
+    "designContract": "fixtures/docs-design-sample/settings-prompt/design-contract.json",
+    "implementationHandoff": "fixtures/docs-design-sample/settings-prompt/implementation-handoff.md",
+    "qaPlan": "fixtures/docs-design-sample/settings-prompt/qa-plan.json",
+    "qaReport": "fixtures/docs-design-sample/settings-prompt/qa-report.md"
+  },
+  "sourceSummary": "User-confirmed modify request for /settings prompt input. Current source was user description plus code inference, marked unverified before confirmation.",
+  "currentSurface": "/settings prompt input component",
+  "changeType": "modify",
+  "notes": "Fixture for BFDS MVP forward tests."
+}

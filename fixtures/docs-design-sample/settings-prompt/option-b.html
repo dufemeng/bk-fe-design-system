@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Option B · Operational Console</title>
+    <style>
+      :root {
+        --bg: #eef2f6;
+        --surface: #ffffff;
+        --ink: #111827;
+        --muted: #5b6472;
+        --accent: #0f766e;
+        --border: #cfd7e3;
+        --panel: #f7f9fc;
+        --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.45; letter-spacing: 0; }
+      .surface { min-height: 100vh; padding: clamp(16px, 3vw, 34px); }
+      .shell { max-width: 1080px; margin: 0 auto; display: grid; gap: 14px; }
+      .topbar, .workspace, .status-tray { background: var(--surface); border: 1px solid var(--border); }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 16px; }
+      .brand { font-weight: 750; }
+      .workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr) 260px; min-height: 500px; }
+      .rail, .preview { background: var(--panel); padding: 18px; display: grid; align-content: start; gap: 12px; }
+      .rail { border-right: 1px solid var(--border); }
+      .preview { border-left: 1px solid var(--border); }
+      .editor { padding: clamp(18px, 3vw, 30px); display: grid; gap: 12px; align-content: start; }
+      h1 { margin: 0; font-size: clamp(24px, 4vw, 38px); line-height: 1.1; letter-spacing: 0; text-wrap: balance; }
+      p { margin: 0; color: var(--muted); }
+      .template { border: 1px solid var(--border); background: white; padding: 10px; text-align: left; }
+      textarea { width: 100%; min-height: 190px; resize: vertical; border: 1px solid var(--border); background: #fbfcfd; color: var(--ink); padding: 14px; font: inherit; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      button { min-height: 34px; border: 1px solid var(--border); background: white; color: var(--ink); padding: 0 11px; border-radius: 6px; font: inherit; cursor: pointer; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+      button:focus-visible, textarea:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+      .status-tray { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 14px; }
+      .badge { color: var(--accent); font-weight: 700; }
+
+      @media (max-width: 840px) {
+        .workspace { grid-template-columns: 1fr; }
+        .rail, .preview { border: 0; border-top: 1px solid var(--border); }
+        .rail { order: 2; }
+        .preview { order: 3; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="surface">
+      <div class="shell">
+        <header class="topbar">
+          <div class="brand">Team Settings</div>
+          <div class="actions">
+            <button type="button" id="draft">Draft</button>
+            <button type="button" id="validate">Validate</button>
+            <button class="primary" type="button">Save prompt</button>
+          </div>
+        </header>
+        <section class="workspace" aria-label="Operational prompt console">
+          <aside class="rail">
+            <strong>Templates</strong>
+            <button class="template" type="button">Support reply baseline</button>
+            <button class="template" type="button">Research summary baseline</button>
+            <button class="template" type="button">Blank starter</button>
+          </aside>
+          <div class="editor">
+            <h1>默认提示词工作台</h1>
+            <p>模板、输入和预览处在同一操作流里。示例内容是占位，不代表真实团队数据。</p>
+            <textarea aria-label="团队默认提示词">[占位] 写入团队确认过的默认提示词。</textarea>
+            <div class="actions">
+              <button class="primary" type="button">Save prompt</button>
+              <button type="button">Preview response</button>
+            </div>
+          </div>
+          <aside class="preview">
+            <strong>Preview</strong>
+            <p id="preview-copy">Validation has not run yet.</p>
+          </aside>
+        </section>
+        <footer class="status-tray">
+          <span id="status">No validation run.</span>
+          <span class="badge">Option B</span>
+        </footer>
+      </div>
+    </main>
+    <script>
+      document.querySelector("#draft").addEventListener("click", () => {
+        document.querySelector("#status").textContent = "Draft mode. Changes are local.";
+        document.querySelector("#preview-copy").textContent = "Preview waits until validation runs.";
+      });
+      document.querySelector("#validate").addEventListener("click", () => {
+        document.querySelector("#status").textContent = "Validation passed for placeholder content.";
+        document.querySelector("#preview-copy").textContent = "Preview displays structure only; real examples must come from user data.";
+      });
+    </script>
+  </body>
+</html>

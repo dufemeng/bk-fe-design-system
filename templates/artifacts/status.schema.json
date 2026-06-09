@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bfds.local/schemas/status.schema.json",
+  "title": "BFDS Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "title",
+    "state",
+    "lastUpdated",
+    "selectedOption",
+    "artifacts",
+    "sourceSummary",
+    "currentSurface",
+    "changeType"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "workbench-ready",
+        "selected",
+        "contract-ready",
+        "implementing",
+        "implemented",
+        "qa-failed",
+        "qa-passed",
+        "live-iterating",
+        "done"
+      ]
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "selectedOption": {
+      "type": ["string", "null"]
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workbench", "optionA", "optionB", "optionC"],
+      "properties": {
+        "workbench": { "type": "string", "minLength": 1 },
+        "optionA": { "type": "string", "minLength": 1 },
+        "optionB": { "type": "string", "minLength": 1 },
+        "optionC": { "type": "string", "minLength": 1 },
+        "designContract": { "type": ["string", "null"] },
+        "implementationHandoff": { "type": ["string", "null"] },
+        "qaPlan": { "type": ["string", "null"] },
+        "qaReport": { "type": ["string", "null"] }
+      }
+    },
+    "sourceSummary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "currentSurface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changeType": {
+      "type": "string",
+      "enum": ["create", "extend", "modify", "remove", "replace", "merge", "restyle"]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

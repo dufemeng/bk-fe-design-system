@@ -1,0 +1,145 @@
+{
+  "slug": "settings-prompt",
+  "targetRoutes": [
+    {
+      "route": "/settings",
+      "purpose": "Verify the implemented prompt editor in its actual settings page context.",
+      "authState": "authenticated team admin, if the app requires auth",
+      "dataState": "existing saved prompt or explicitly marked placeholder"
+    }
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "states": [
+    {
+      "name": "default",
+      "setup": "Open /settings with prompt editor visible.",
+      "expected": "Editor is primary, templates and preview are secondary, placeholder content is labeled if used.",
+      "blockingLevel": "P1"
+    },
+    {
+      "name": "error",
+      "setup": "Trigger validation with prompt content below the app's minimum valid threshold.",
+      "expected": "Error appears near editor, remains accessible, and does not shift the whole layout unexpectedly.",
+      "blockingLevel": "P1"
+    },
+    {
+      "name": "success",
+      "setup": "Save a valid prompt using existing app behavior.",
+      "expected": "Saved state confirms scope without inventing downstream side effects.",
+      "blockingLevel": "P2"
+    }
+  ],
+  "interactions": [
+    {
+      "name": "keyboard-path",
+      "steps": [
+        "Tab to textarea",
+        "Tab to primary action",
+        "Trigger validation or save"
+      ],
+      "expected": "Focus-visible is clear and every visible action is reachable.",
+      "blockingLevel": "P1"
+    },
+    {
+      "name": "long-text",
+      "steps": [
+        "Paste a long prompt",
+        "Resize or scroll editor",
+        "Check adjacent panels"
+      ],
+      "expected": "Text does not overflow parent controls or occlude adjacent content.",
+      "blockingLevel": "P2"
+    }
+  ],
+  "referenceScreenshots": [
+    {
+      "artifact": "fixtures/docs-design-sample/settings-prompt/option-b.html",
+      "description": "Primary composition for selected design",
+      "viewport": "desktop",
+      "state": "default"
+    },
+    {
+      "artifact": "fixtures/docs-design-sample/settings-prompt/option-c.html",
+      "description": "Reference for explicit error state treatment",
+      "viewport": "desktop",
+      "state": "error"
+    }
+  ],
+  "checks": [
+    {
+      "id": "QA-001",
+      "category": "contract",
+      "description": "Implementation follows selected B+A+C decision and preserve/change/avoid lists.",
+      "blockingLevel": "P1"
+    },
+    {
+      "id": "QA-002",
+      "category": "font",
+      "description": "Font family, weight, size, line-height, fallback, wrapping, and truncation match DESIGN.md or project tokens.",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "QA-003",
+      "category": "spacing",
+      "description": "Editor, rail, preview, actions, and status spacing match selected density without overlap.",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "QA-004",
+      "category": "color",
+      "description": "Colors map to DESIGN.md or project tokens, with no drifted state color or low contrast.",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "QA-005",
+      "category": "content",
+      "description": "No invented data, lorem, filler copy, or fake controls.",
+      "blockingLevel": "P1"
+    },
+    {
+      "id": "QA-006",
+      "category": "interaction",
+      "description": "Validate/save, focus-visible, long text, error, success, and mobile interactions work.",
+      "blockingLevel": "P1"
+    },
+    {
+      "id": "QA-007",
+      "category": "ai-shortcut",
+      "description": "No rounded-card plus colored-left-border emphasis, decorative blobs, placeholder imagery, or repeated icon card grid.",
+      "blockingLevel": "P2"
+    }
+  ],
+  "blockers": [
+    "Cannot open /settings or equivalent component preview.",
+    "Cannot capture visual evidence for target surface.",
+    "Missing design-contract.json, implementation-handoff.md, or qa-plan.json.",
+    "Current implementation target does not match confirmed surface."
+  ],
+  "impeccable": {
+    "detect": {
+      "enabled": true,
+      "targets": ["<implemented route or source files>"],
+      "notes": "Use node vendor/impeccable/cli/bin/cli.js detect when dependencies and Node version are available."
+    },
+    "critique": {
+      "enabled": false,
+      "target": "<optional screenshot or route>",
+      "notes": "Enable when an additional design review is needed; critique is not a replacement for contract QA."
+    }
+  },
+  "reports": {
+    "qaReport": "fixtures/docs-design-sample/settings-prompt/qa-report.md",
+    "evidenceDir": "fixtures/docs-design-sample/settings-prompt/evidence"
+  }
+}

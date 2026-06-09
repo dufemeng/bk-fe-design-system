@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{TITLE}} · BFDS Workbench</title>
+    <link rel="stylesheet" href="workbench.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="kicker">BFDS Design Workbench</p>
+        <h1>{{TITLE}}</h1>
+        <p class="lede">{{REQUEST_SUMMARY}}</p>
+        <dl class="meta-grid" aria-label="设计上下文">
+          <div>
+            <dt>Slug</dt>
+            <dd>{{SLUG}}</dd>
+          </div>
+          <div>
+            <dt>Surface</dt>
+            <dd>{{SURFACE}}</dd>
+          </div>
+          <div>
+            <dt>Change</dt>
+            <dd>{{CHANGE_TYPE}}</dd>
+          </div>
+          <div>
+            <dt>Context</dt>
+            <dd>{{CONTEXT_VERSION}}</dd>
+          </div>
+        </dl>
+      </header>
+
+      <section class="brief">
+        <div>
+          <h2>范围确认</h2>
+          <p>{{FRAMING_SUMMARY}}</p>
+        </div>
+        <div>
+          <h2>选择方式</h2>
+          <p>这是静态 MVP 工作台，不记录点击事件。请在对话中回复“选 A / B / C”，也可以说“选 B，但导航用 A，错误态用 C”。</p>
+        </div>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-a-title">
+        <div class="option-copy">
+          <p class="option-label">Option A</p>
+          <h2 id="option-a-title">{{OPTION_A_NAME}}</h2>
+          <p>{{OPTION_A_THESIS}}</p>
+          <dl>
+            <div><dt>强调</dt><dd>{{OPTION_A_EMPHASIS}}</dd></div>
+            <div><dt>弱化</dt><dd>{{OPTION_A_DEEMPHASIS}}</dd></div>
+            <div><dt>风险</dt><dd>{{OPTION_A_RISK}}</dd></div>
+            <div><dt>适用</dt><dd>{{OPTION_A_BEST_FOR}}</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option A interactive design" src="option-a.html"></iframe>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-b-title">
+        <div class="option-copy">
+          <p class="option-label">Option B</p>
+          <h2 id="option-b-title">{{OPTION_B_NAME}}</h2>
+          <p>{{OPTION_B_THESIS}}</p>
+          <dl>
+            <div><dt>强调</dt><dd>{{OPTION_B_EMPHASIS}}</dd></div>
+            <div><dt>弱化</dt><dd>{{OPTION_B_DEEMPHASIS}}</dd></div>
+            <div><dt>风险</dt><dd>{{OPTION_B_RISK}}</dd></div>
+            <div><dt>适用</dt><dd>{{OPTION_B_BEST_FOR}}</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option B interactive design" src="option-b.html"></iframe>
+      </section>
+
+      <section class="option-block" aria-labelledby="option-c-title">
+        <div class="option-copy">
+          <p class="option-label">Option C</p>
+          <h2 id="option-c-title">{{OPTION_C_NAME}}</h2>
+          <p>{{OPTION_C_THESIS}}</p>
+          <dl>
+            <div><dt>强调</dt><dd>{{OPTION_C_EMPHASIS}}</dd></div>
+            <div><dt>弱化</dt><dd>{{OPTION_C_DEEMPHASIS}}</dd></div>
+            <div><dt>风险</dt><dd>{{OPTION_C_RISK}}</dd></div>
+            <div><dt>适用</dt><dd>{{OPTION_C_BEST_FOR}}</dd></div>
+          </dl>
+        </div>
+        <iframe title="Option C interactive design" src="option-c.html"></iframe>
+      </section>
+    </main>
+  </body>
+</html>
