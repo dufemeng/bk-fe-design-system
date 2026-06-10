@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { validateSchema } from '../lib/schema.mjs';
 
 const args = process.argv.slice(2);
 const forwardMode = args.includes('--forward-tests');
@@ -51,98 +52,6 @@ const pressureFiles = [
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
-}
-
-function typeName(value) {
-  if (value === null) return 'null';
-  if (Array.isArray(value)) return 'array';
-  if (Number.isInteger(value)) return 'integer';
-  return typeof value;
-}
-
-function typeMatches(value, expected) {
-  const allowed = Array.isArray(expected) ? expected : [expected];
-  return allowed.some(type => {
-    if (type === 'integer') return Number.isInteger(value);
-    if (type === 'array') return Array.isArray(value);
-    if (type === 'null') return value === null;
-    return typeof value === type && !Array.isArray(value) && value !== null;
-  });
-}
-
-function validateSchema(schema, value, location, errors) {
-  if (schema.$ref) {
-    const resolved = schema.$ref.startsWith('#/$defs/')
-      ? schema.$root?.$defs?.[schema.$ref.slice('#/$defs/'.length)]
-      : null;
-    if (!resolved) {
-      errors.push(`${location}: unsupported schema ref ${schema.$ref}`);
-      return;
-    }
-    validateSchema({ ...resolved, $root: schema.$root }, value, location, errors);
-    return;
-  }
-
-  if (schema.type && !typeMatches(value, schema.type)) {
-    errors.push(`${location}: expected ${JSON.stringify(schema.type)}, got ${typeName(value)}`);
-    return;
-  }
-
-  if (schema.enum && !schema.enum.includes(value)) {
-    errors.push(`${location}: expected one of ${schema.enum.join(', ')}, got ${JSON.stringify(value)}`);
-  }
-
-  if (schema.pattern && typeof value === 'string') {
-    const regex = new RegExp(schema.pattern);
-    if (!regex.test(value)) errors.push(`${location}: does not match pattern ${schema.pattern}`);
-  }
-
-  if (schema.format === 'date-time' && typeof value === 'string') {
-    if (Number.isNaN(Date.parse(value))) errors.push(`${location}: invalid date-time`);
-  }
-
-  if (typeof schema.minLength === 'number' && typeof value === 'string' && value.length < schema.minLength) {
-    errors.push(`${location}: expected minLength ${schema.minLength}`);
-  }
-
-  if (typeof schema.minimum === 'number' && typeof value === 'number' && value < schema.minimum) {
-    errors.push(`${location}: expected minimum ${schema.minimum}`);
-  }
-
-  if (typeof schema.minItems === 'number' && Array.isArray(value) && value.length < schema.minItems) {
-    errors.push(`${location}: expected at least ${schema.minItems} items`);
-  }
-
-  if (schema.uniqueItems && Array.isArray(value)) {
-    const seen = new Set(value.map(item => JSON.stringify(item)));
-    if (seen.size !== value.length) errors.push(`${location}: expected unique items`);
-  }
-
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
-    for (const required of schema.required ?? []) {
-      if (!Object.prototype.hasOwnProperty.call(value, required)) {
-        errors.push(`${location}.${required}: required property missing`);
-      }
-    }
-
-    if (schema.additionalProperties === false && schema.properties) {
-      for (const key of Object.keys(value)) {
-        if (!Object.prototype.hasOwnProperty.call(schema.properties, key)) {
-          errors.push(`${location}.${key}: additional property not allowed`);
-        }
-      }
-    }
-
-    for (const [key, childSchema] of Object.entries(schema.properties ?? {})) {
-      if (Object.prototype.hasOwnProperty.call(value, key)) {
-        validateSchema({ ...childSchema, $root: schema.$root ?? schema }, value[key], `${location}.${key}`, errors);
-      }
-    }
-  }
-
-  if (Array.isArray(value) && schema.items) {
-    value.forEach((item, index) => validateSchema({ ...schema.items, $root: schema.$root ?? schema }, item, `${location}[${index}]`, errors));
-  }
 }
 
 function assertFile(file, errors) {
@@ -784,6 +693,223 @@ function validateGateTests() {
     if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected default NEEDS_SURFACE, got ${result.phase}`);
     if (!fs.existsSync(path.join(designDirFor(checkOnlyRoot), 'status.json'))) errors.push('default gate must write status.json');
     assertGateLogIncludes(checkOnlyRoot, slug, 'NEEDS_SURFACE', errors, 'default gate');
+
+    const preflightSurfaceRoot = makeProject();
+    const invalidSurface = runBfds(preflightSurfaceRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'surface',
+      '--field',
+      'surface=/settings prompt input',
+      '--field',
+      'currentSource=code',
+      '--field',
+      'changeType=modify',
+      '--field',
+      'keep=Existing navigation',
+      '--field',
+      'change=Prompt input layout',
+      '--field',
+      'avoid=Backend scope',
+      '--field',
+      'confirmationQuote=确认目标界面。'
+    ]);
+    if (invalidSurface.status === 0) errors.push('expected invalid surface currentSource to fail before write');
+    if (fs.existsSync(path.join(evidenceDirFor(preflightSurfaceRoot), 'surface.json'))) {
+      errors.push('invalid surface currentSource must not write evidence/surface.json');
+    }
+    if (!invalidSurface.stdout.includes('currentSource enum')) {
+      errors.push('expected invalid surface card to print currentSource enum');
+    }
+
+    const preflightBrainstormRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(preflightBrainstormRoot), 'surface.json'), baseSurface(slug));
+    const zeroRoundBrainstorm = runBfds(preflightBrainstormRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'brainstorm',
+      '--finalize',
+      '--field',
+      'approach=方案 A',
+      '--field',
+      'approach=方案 B',
+      '--field',
+      'confirmationQuote=确认两个方向。'
+    ]);
+    if (zeroRoundBrainstorm.status === 0) errors.push('expected zero-round brainstorm finalize to fail before write');
+    if (fs.existsSync(path.join(evidenceDirFor(preflightBrainstormRoot), 'brainstorm-dialogue.json'))) {
+      errors.push('zero-round brainstorm must not write evidence/brainstorm-dialogue.json');
+    }
+
+    const preflightDirectionsRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(preflightDirectionsRoot), 'surface.json'), baseSurface(slug));
+    writeJson(path.join(evidenceDirFor(preflightDirectionsRoot), 'brainstorm-dialogue.json'), baseBrainstormDialogue(slug));
+    const oneDimensionDirection = runBfds(preflightDirectionsRoot, [
+      'directions',
+      slug,
+      '--option',
+      'A',
+      '--field',
+      'name=方案 A',
+      '--field',
+      'designThesis=强调输入区。',
+      '--field',
+      'hierarchy=输入区优先。',
+      '--field',
+      'density=snug',
+      '--field',
+      'motion=低存在感反馈。',
+      '--field',
+      'stateTreatment=覆盖 default/error/success。',
+      '--field',
+      'layoutStrategy=保留周边布局。',
+      '--field',
+      'interactionModel=保存和错误反馈局部完成。',
+      '--field',
+      'visualSignature=稳定基线和细分隔。',
+      '--field',
+      'differenceDimension=hierarchy',
+      '--field',
+      'keep=Existing navigation',
+      '--field',
+      'change=Prompt input layout',
+      '--field',
+      'avoid=Backend scope',
+      '--field',
+      'risks=差异不足',
+      '--field',
+      'bestFor=高频设置'
+    ]);
+    if (oneDimensionDirection.status === 0) errors.push('expected one-dimension direction option to fail before write');
+    if (fs.existsSync(path.join(evidenceDirFor(preflightDirectionsRoot), 'directions.draft.json'))) {
+      errors.push('invalid direction option must not write evidence/directions.draft.json');
+    }
+    if (!oneDimensionDirection.stdout.includes('differenceDimension enum')) {
+      errors.push('expected invalid direction card to print differenceDimension enum');
+    }
+
+    const draftCleanupRoot = makeProject(false);
+    let writeResult = runBfds(draftCleanupRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'init',
+      '--append-round',
+      '--field',
+      'question=项目类型是什么？',
+      '--field',
+      'answerQuote=这是设置页设计任务。'
+    ]);
+    if (writeResult.status !== 0) errors.push(`expected init append to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    writeResult = runBfds(draftCleanupRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'init',
+      '--finalize',
+      '--field',
+      'productPath=PRODUCT.md',
+      '--field',
+      'designPath=DESIGN.md',
+      '--field',
+      'userConfirmationQuote=确认项目上下文。'
+    ]);
+    if (writeResult.status !== 0) errors.push(`expected init finalize to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    if (fs.existsSync(path.join(evidenceDirFor(draftCleanupRoot), 'init-interview.draft.json'))) {
+      errors.push('init finalize must remove init-interview.draft.json');
+    }
+
+    writeText(path.join(draftCleanupRoot, 'PRODUCT.md'), validProductMd());
+    writeText(path.join(draftCleanupRoot, 'DESIGN.md'), validDesignMd());
+    writeJson(path.join(evidenceDirFor(draftCleanupRoot), 'surface.json'), baseSurface(slug));
+    for (const [question, answer, implication] of [
+      ['最先看什么？', '先看输入区。', '输入区层级最高。'],
+      ['状态要多强？', '错误和保存要清楚。', '覆盖局部状态。']
+    ]) {
+      writeResult = runBfds(draftCleanupRoot, [
+        'answer',
+        slug,
+        '--stage',
+        'brainstorm',
+        '--append-round',
+        '--field',
+        `question=${question}`,
+        '--field',
+        `answer=${answer}`,
+        '--field',
+        `designImplication=${implication}`
+      ]);
+      if (writeResult.status !== 0) errors.push(`expected brainstorm append to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    }
+    writeResult = runBfds(draftCleanupRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'brainstorm',
+      '--finalize',
+      '--field',
+      'approach=方案 A：输入优先。',
+      '--field',
+      'approach=方案 B：状态优先。',
+      '--field',
+      'confirmationQuote=确认进入三方向。'
+    ]);
+    if (writeResult.status !== 0) errors.push(`expected brainstorm finalize to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    if (fs.existsSync(path.join(evidenceDirFor(draftCleanupRoot), 'brainstorm-dialogue.draft.json'))) {
+      errors.push('brainstorm finalize must remove brainstorm-dialogue.draft.json');
+    }
+
+    for (const [optionId, dimensions] of [
+      ['A', ['hierarchy', 'density']],
+      ['B', ['interaction-model', 'state-treatment']],
+      ['C', ['motion-role', 'visual-signature']]
+    ]) {
+      const args = [
+        'directions',
+        slug,
+        '--option',
+        optionId,
+        '--field',
+        `name=方案 ${optionId}`,
+        '--field',
+        `designThesis=方案 ${optionId} 的主张。`,
+        '--field',
+        `hierarchy=方案 ${optionId} 的层级。`,
+        '--field',
+        'density=snug',
+        '--field',
+        'motion=低存在感反馈。',
+        '--field',
+        'stateTreatment=覆盖 default/error/success。',
+        '--field',
+        `layoutStrategy=方案 ${optionId} 的布局。`,
+        '--field',
+        `interactionModel=方案 ${optionId} 的交互。`,
+        '--field',
+        `visualSignature=方案 ${optionId} 的视觉签名。`,
+        '--field',
+        `differenceDimension=${dimensions[0]}`,
+        '--field',
+        `differenceDimension=${dimensions[1]}`,
+        '--field',
+        'keep=Existing navigation',
+        '--field',
+        'change=Prompt input layout',
+        '--field',
+        'avoid=Backend scope',
+        '--field',
+        'risks=Risk note',
+        '--field',
+        'bestFor=Settings workflow'
+      ];
+      writeResult = runBfds(draftCleanupRoot, args);
+      if (writeResult.status !== 0) errors.push(`expected directions ${optionId} to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    }
+    if (fs.existsSync(path.join(evidenceDirFor(draftCleanupRoot), 'directions.draft.json'))) {
+      errors.push('directions finalize must remove directions.draft.json');
+    }
 
     const noContextRoot = makeProject(false);
     const noContext = runGateFailure(noContextRoot, slug, ['--request', '用 /bfds-design 给首页新增一个内容型页面入口。']);

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { validateSchema } from './lib/schema.mjs';
 
 const runtimeDir = path.dirname(fileURLToPath(import.meta.url));
 const runtimeScriptsDir = path.join(runtimeDir, 'scripts');
@@ -11,6 +12,26 @@ const runtimeTemplatesDir = path.join(runtimeDir, 'templates');
 const cwd = process.cwd();
 const PLACEHOLDER = 'BFDS_PLACEHOLDER';
 const OPTION_IDS = ['A', 'B', 'C'];
+const CURRENT_SOURCE_VALUES = ['screenshot', 'figma', 'prototype', 'url', 'browser-capture', 'storybook', 'code-inference', 'user-description'];
+const CHANGE_TYPE_VALUES = ['create', 'extend', 'modify', 'remove', 'replace', 'merge', 'restyle'];
+const DIFFERENCE_DIMENSION_VALUES = ['information-architecture', 'hierarchy', 'density', 'state-treatment', 'interaction-model', 'motion-role', 'local-preservation', 'visual-signature'];
+const INVALID_SELECTION_PATTERNS = [
+  /你来选/,
+  /挑.*稳/,
+  /帮我.*推荐/,
+  /你.*推荐/,
+  /推荐\s*(一个|个|下|一下|一版|方案|最|吧)/,
+  /你觉得.*用/,
+  /都差不多/,
+  /三个都行/,
+  /都行.*(你|帮我)?.*(定|选|决定)?/,
+  /都可以.*(你|帮我)?.*(定|选|决定)?/,
+  /你.*(定|决定|选)/,
+  /随便(选|挑|定|一个|哪个|你|吧)/,
+  /agent.*选/i,
+  /choose.*for me/i,
+  /you pick/i
+];
 
 export function main(argv = process.argv.slice(2)) {
   const parsed = parseGlobal(argv);
@@ -242,6 +263,10 @@ function writeJson(file, data) {
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 }
 
+function removeIfExists(file) {
+  if (fs.existsSync(file)) fs.rmSync(file, { force: true });
+}
+
 function readText(file, fallback = '') {
   if (!fs.existsSync(file)) return fallback;
   return fs.readFileSync(file, 'utf8');
@@ -281,6 +306,39 @@ function runGate(target, args = [], root = 'docs/design') {
   }
 }
 
+function schemaPath(name) {
+  return path.join(runtimeDir, 'schemas', name);
+}
+
+function readSchema(name) {
+  return readJson(schemaPath(name));
+}
+
+function assertSchemaValue(schema, value, label, target, global, rootSchema = schema) {
+  const errors = [];
+  validateSchema(schema, value, label, errors, rootSchema);
+  if (errors.length > 0) throwInvalid(`${label} is invalid:\n- ${errors.join('\n- ')}`, target, global);
+}
+
+function assertSchemaFile(schemaName, value, label, target, global) {
+  const schema = readSchema(schemaName);
+  assertSchemaValue(schema, value, label, target, global);
+}
+
+function assertDirectionOption(option, target, global) {
+  const schema = readSchema('directions-evidence.schema.json');
+  assertSchemaValue(schema.$defs.option, option, `directions.options.${option.optionId}`, target, global, schema);
+}
+
+function nextCardForTarget(target, global) {
+  if (!target || !global) return null;
+  return renderNextCard(runGate(target, [], global.root), false);
+}
+
+function throwInvalid(message, target, global) {
+  throw withNext(message, nextCardForTarget(target, global));
+}
+
 function commandNext(rest, global) {
   const parsed = parseCommand(rest);
   const request = parsed.options.get('request');
@@ -314,14 +372,14 @@ function commandAnswer(rest, global) {
   const dir = resolveDesignDir(parsed.target, global.root);
   ensureDir(path.join(dir, 'evidence'));
   if (stage === 'surface') writeSurface(dir, parsed, global);
-  else if (stage === 'init') writeInit(dir, parsed);
-  else if (stage === 'brainstorm') writeBrainstorm(dir, parsed);
+  else if (stage === 'init') writeInit(dir, parsed, global);
+  else if (stage === 'brainstorm') writeBrainstorm(dir, parsed, global);
   else throw new Error(`Unsupported answer stage: ${stage}`);
   const result = runGate(parsed.target, [], global.root);
   return renderNextCard(result, global.json);
 }
 
-function writeInit(dir, parsed) {
+function writeInit(dir, parsed, global) {
   const slug = path.basename(dir);
   const draftFile = path.join(dir, 'evidence', 'init-interview.draft.json');
   const finalFile = path.join(dir, 'evidence', 'init-interview.json');
@@ -348,7 +406,9 @@ function writeInit(dir, parsed) {
   };
   const notes = fieldOne(parsed, 'notes');
   if (notes) data.notes = notes;
+  assertSchemaFile('init-interview.schema.json', data, 'evidence/init-interview.json', parsed.target, global);
   writeJson(finalFile, data);
+  removeIfExists(draftFile);
 }
 
 function writeSurface(dir, parsed, global) {
@@ -384,10 +444,11 @@ function writeSurface(dir, parsed, global) {
   if (sourceSummary) data.sourceSummary = sourceSummary;
   const confirmedBy = fieldOne(parsed, 'confirmedBy');
   if (confirmedBy) data.confirmation.confirmedBy = confirmedBy;
+  assertSchemaFile('surface-evidence.schema.json', data, 'evidence/surface.json', parsed.target, global);
   writeJson(path.join(dir, 'evidence', 'surface.json'), data);
 }
 
-function writeBrainstorm(dir, parsed) {
+function writeBrainstorm(dir, parsed, global) {
   const slug = path.basename(dir);
   const draftFile = path.join(dir, 'evidence', 'brainstorm-dialogue.draft.json');
   const finalFile = path.join(dir, 'evidence', 'brainstorm-dialogue.json');
@@ -410,7 +471,12 @@ function writeBrainstorm(dir, parsed) {
     const tradeoff = fieldOne(parsed, 'directionTradeoff');
     if (tradeoff) approaches.push(...tradeoff.split('|').map(value => value.trim()).filter(Boolean));
   }
-  if (approaches.length < 2) throw new Error('brainstorm finalize requires at least two --field approach=... values');
+  if (approaches.length < 2) {
+    throwInvalid('brainstorm finalize requires at least two --field approach=... values', parsed.target, global);
+  }
+  if (mode === 'socratic' && draft.turns.length < 2) {
+    throwInvalid('brainstorm finalize requires at least two design-question rounds before writing evidence/brainstorm-dialogue.json', parsed.target, global);
+  }
   const data = {
     slug,
     createdAt: new Date().toISOString(),
@@ -424,7 +490,9 @@ function writeBrainstorm(dir, parsed) {
   if (mode === 'user-skipped') data.skipReasonQuote = skipReasonQuote || fieldRequired(parsed, 'skipReasonQuote');
   const notes = fieldOne(parsed, 'notes');
   if (notes) data.notes = notes;
+  assertSchemaFile('brainstorm-dialogue.schema.json', data, 'evidence/brainstorm-dialogue.json', parsed.target, global);
   writeJson(finalFile, data);
+  removeIfExists(draftFile);
 }
 
 function commandDirections(rest, global) {
@@ -443,17 +511,24 @@ function commandDirections(rest, global) {
   });
   const optionId = parsed.options.get('option');
   if (!OPTION_IDS.includes(optionId)) throw new Error('directions requires --option A|B|C');
-  draft.options[optionId] = directionOption(optionId, parsed);
-  writeJson(draftFile, draft);
-  if (OPTION_IDS.every(id => draft.options[id])) {
+  const option = directionOption(optionId, parsed);
+  assertDirectionOption(option, parsed.target, global);
+  const nextDraft = {
+    ...draft,
+    options: {
+      ...draft.options,
+      [optionId]: option
+    }
+  };
+  if (OPTION_IDS.every(id => nextDraft.options[id])) {
     const finalData = {
-      ...draft,
+      ...nextDraft,
       createdAt: new Date().toISOString(),
       selfCheck: {
         usesTrustedContext: true,
         noProductScopeAdded: true,
-        differencesAreSubstantial: substantialDifferences(draft.options),
-        criticalStateOrInteractionCovered: criticalStateCovered(draft.options),
+        differencesAreSubstantial: substantialDifferences(nextDraft.options),
+        criticalStateOrInteractionCovered: criticalStateCovered(nextDraft.options),
         notes: fieldOne(parsed, 'selfCheckNotes', 'Generated by BFDS runtime directions command.')
       }
     };
@@ -463,7 +538,11 @@ function commandDirections(rest, global) {
     if (!finalData.selfCheck.criticalStateOrInteractionCovered) {
       throw withNext('At least one direction must cover a critical state or interaction', renderNextCard(runGate(parsed.target, [], global.root), false));
     }
+    assertSchemaFile('directions-evidence.schema.json', finalData, 'evidence/directions.json', parsed.target, global);
     writeJson(finalFile, finalData);
+    removeIfExists(draftFile);
+  } else {
+    writeJson(draftFile, nextDraft);
   }
   const result = runGate(parsed.target, [], global.root);
   return renderNextCard(result, global.json);
@@ -577,9 +656,17 @@ function commandSelect(rest, global) {
   };
   const decisionNotes = fieldOne(parsed, 'decisionNotes') || fieldOne(parsed, 'confirmationQuote');
   if (decisionNotes) data.selectedOption.decisionNotes = decisionNotes;
+  if (invalidSelectionQuote(data.selectionQuote)) {
+    throwInvalid('selectionQuote delegates the choice to the agent; ask the user to explicitly choose A/B/C or a merge', parsed.target, global);
+  }
+  assertSchemaFile('selection-evidence.schema.json', data, 'evidence/selection.json', parsed.target, global);
   writeJson(path.join(dir, 'evidence', 'selection.json'), data);
   const result = runGate(parsed.target, [], global.root);
   return renderNextCard(result, global.json);
+}
+
+function invalidSelectionQuote(quote) {
+  return INVALID_SELECTION_PATTERNS.some(pattern => pattern.test(quote));
 }
 
 function normalizeMergedFrom(values, selectedOptionId) {
@@ -608,11 +695,14 @@ function commandPack(rest, global) {
     assets: null
   });
   if (parsed.flags.has('confirm')) {
-    judgment.echoConfirmQuote = fieldRequired(parsed, 'echoConfirmQuote');
-    writeJson(file, judgment);
-    const missing = contractJudgmentMissing(judgment);
+    const nextJudgment = {
+      ...judgment,
+      echoConfirmQuote: fieldRequired(parsed, 'echoConfirmQuote')
+    };
+    const missing = contractJudgmentMissing(nextJudgment);
     if (missing.length > 0) throw withNext(`Cannot confirm contract; missing ${missing.join(', ')}`, renderContractMissingCard(slug, missing));
-    writeContractPack(dir, judgment);
+    writeJson(file, nextJudgment);
+    writeContractPack(dir, nextJudgment, parsed.target, global);
   } else if (parsed.options.has('add')) {
     addContractEntry(judgment, parsed.options.get('add'), parsed);
     writeJson(file, judgment);
@@ -721,7 +811,7 @@ function contractJudgmentMissing(judgment) {
   return missing;
 }
 
-function writeContractPack(dir, judgment) {
+function writeContractPack(dir, judgment, target, global) {
   const slug = path.basename(dir);
   const surface = readJson(path.join(dir, 'evidence', 'surface.json'));
   const selection = readJson(path.join(dir, 'evidence', 'selection.json'));
@@ -755,9 +845,12 @@ function writeContractPack(dir, judgment) {
     assets: judgment.assets ?? [],
     acceptanceRules: cleanObjects(judgment.acceptanceRules)
   };
+  const qaPlan = renderQaPlan(contract);
+  assertSchemaFile('design-contract.schema.json', contract, 'design-contract.json', target, global);
+  assertSchemaFile('qa-plan.schema.json', qaPlan, 'qa-plan.json', target, global);
   writeJson(path.join(dir, 'design-contract.json'), contract);
   writeText(path.join(dir, 'implementation-handoff.md'), renderHandoff(contract, judgment));
-  writeJson(path.join(dir, 'qa-plan.json'), renderQaPlan(contract));
+  writeJson(path.join(dir, 'qa-plan.json'), qaPlan);
 }
 
 function cleanObjects(items) {
@@ -985,19 +1078,29 @@ function cardForResult(result) {
     card.references = ['impeccable-integration.md'];
   } else if (phase === 'NEEDS_SURFACE') {
     card.required = ['目标界面', '现状来源', '改动类型', '必须保留', '允许改变', '必须避免', '用户确认原话'];
-    card.guidance = ['先归纳候选边界，再让用户确认或修正。', '选择/确认类优先使用问答 UI。'];
+    card.guidance = [
+      '先归纳候选边界，再让用户确认或修正。',
+      '选择/确认类优先使用问答 UI。',
+      `currentSource enum: ${formatEnum(CURRENT_SOURCE_VALUES)}`,
+      `changeType enum: ${formatEnum(CHANGE_TYPE_VALUES)}`
+    ];
     card.forbidden = ['生成三方案', '生成评审工作台', '生成设计交付包'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage surface --field surface="..." --field currentSource="user-description" --field changeType="modify" --field keep="..." --field change="..." --field avoid="..." --field confirmationQuote="..."`;
+    card.references = ['surface-change-framing.md'];
   } else if (phase === 'NEEDS_DIRECTIONS') {
     card.required = missing.includes('evidence/brainstorm-dialogue.json')
       ? ['设计表达问答', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
       : ['A/B/C 三个方向规格', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
-    card.guidance = ['一次只问一个设计表达问题。', '不脑暴产品/API/数据库/权限。'];
+    card.guidance = [
+      '一次只问一个设计表达问题。',
+      '不脑暴产品/API/数据库/权限。',
+      `differenceDimension enum: ${formatEnum(DIFFERENCE_DIMENSION_VALUES)}`
+    ];
     card.forbidden = ['生成评审工作台', '临时扩大产品范围'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
       ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field question="..." --field answer="..." --field designImplication="..."`
-      : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." ...`;
-    card.references = missing.includes('evidence/brainstorm-dialogue.json') ? [] : ['design-brainstorm.md'];
+      : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
+    card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {
     card.required = ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html', '无 BFDS_PLACEHOLDER'];
     card.guidance = ['方案必须忠于 directions.json。', '方案自带目标产品 UI 样式，不依赖 workbench.css。', '不用假资产、emoji、文本符号或 CSS art 冒充真实资产。', '文本不溢出，移动和桌面模拟器不互相挤压。'];
@@ -1020,6 +1123,11 @@ function cardForResult(result) {
     card.guidance = ['实现必须读取 design-contract.json、implementation-handoff.md、qa-plan.json。'];
     card.forbidden = ['凭聊天记忆改写设计契约'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs mark ${result.slug} --state implementing`;
+  } else if (phase === 'INCONSISTENT') {
+    card.required = ['修正或删除错误产物', '重新运行 next 确认阶段回到可继续状态'];
+    card.guidance = ['优先处理“错误”和“缺失”中点名的文件；越序写入时删除已写的下游 evidence/artifacts 后重走当前阶段。', '不要补猜缺失证据。'];
+    card.forbidden = ['继续下游阶段', '保留无效 evidence 反复重跑'];
+    card.nextCommand = `node <skill-dir>/scripts/bfds.mjs next ${result.slug}`;
   } else {
     card.required = ['修正错误后重跑 next'];
     card.guidance = ['不要补猜缺失证据。'];
@@ -1049,6 +1157,10 @@ function renderCardText(card) {
   lines.push('必要 reference:');
   lines.push(card.references.length ? card.references.join(', ') : '无');
   return `${lines.join('\n')}\n`;
+}
+
+function formatEnum(values) {
+  return values.join(', ');
 }
 
 function pushSection(lines, title, items) {

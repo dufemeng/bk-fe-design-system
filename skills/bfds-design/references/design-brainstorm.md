@@ -5,7 +5,7 @@
 1. `docs/design/<slug>/evidence/brainstorm-dialogue.json`
 2. `docs/design/<slug>/evidence/directions.json`
 
-写完每个 evidence 后都运行 `bfds.mjs next`。next-card 没进入 `NEEDS_WORKBENCH` 前，不生成评审工作台或方案 HTML。
+写命令会自动返回 next-card；按返回卡片继续。只有恢复中断状态或卡片明确要求时，才额外运行 `bfds.mjs next`。next-card 没进入 `NEEDS_WORKBENCH` 前，不生成评审工作台或方案 HTML。
 
 ## 苏格拉底式问答
 
