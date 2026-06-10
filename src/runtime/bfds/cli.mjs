@@ -392,10 +392,20 @@ function writeInit(dir, parsed, global) {
   const finalFile = path.join(dir, 'evidence', 'init-interview.json');
   const draft = readJson(draftFile, { slug, questions: [] });
   if (parsed.flags.has('append-round')) {
-    draft.questions.push({
-      question: fieldRequired(parsed, 'question'),
-      answerQuote: fieldRequired(parsed, 'answerQuote')
-    });
+    const questions = fieldAll(parsed, 'question');
+    const answers = fieldAll(parsed, 'answerQuote');
+    if (questions.length === 0 || answers.length === 0) {
+      throwInvalid('init append-round requires at least one --field question=... and --field answerQuote=...', parsed.target, global);
+    }
+    if (questions.length !== answers.length) {
+      throwInvalid(`init append-round requires paired question/answerQuote fields; got ${questions.length} question and ${answers.length} answerQuote`, parsed.target, global);
+    }
+    for (let index = 0; index < questions.length; index += 1) {
+      draft.questions.push({
+        question: questions[index],
+        answerQuote: answers[index]
+      });
+    }
     writeJson(draftFile, draft);
     return;
   }
@@ -1079,9 +1089,9 @@ function cardForResult(result) {
   };
   if (phase === 'CONTEXT_BLOCKED') {
     card.required = ['项目级 PRODUCT.md / DESIGN.md', 'init 多轮用户问答', '用户确认原话'];
-    card.guidance = ['只补项目级上下文；选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
+    card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
     card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文'];
-    card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..."`;
+    card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..." --field question="..." --field answerQuote="..."`;
     card.references = ['impeccable-integration.md'];
   } else if (phase === 'NEEDS_SURFACE') {
     card.required = ['目标界面', '现状来源', '改动类型', '必须保留', '允许改变', '必须避免', '用户确认原话'];

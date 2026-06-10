@@ -8,13 +8,13 @@ next-card 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续
 
 ## 分车道
 
-- 父会话：逐题问用户并等待回答；Claude Code 的选择/确认必须用 `AskUserQuestion`；写 `docs/design/<slug>/evidence/init-interview.json`。
+- 父会话：先扫描可推断信息，再每轮成组询问 2-3 个项目级问题并等待回答；Claude Code 的选择/确认必须用 `AskUserQuestion`；写 `docs/design/<slug>/evidence/init-interview.json`。
 - 隔离写作：优先用 fresh subagent 根据 `init-interview.json`、代码扫描和 Impeccable 规范摘要写 `PRODUCT.md` / `DESIGN.md`。
 - gate：验证访谈证据、`PRODUCT.md` 形状、`DESIGN.md` 形状。gate 未解除 `CONTEXT_BLOCKED` 前，不进入 BFDS 后续阶段。
 
 ## 必问主题
 
-逐题问用户，用户未回答前禁止写 `PRODUCT.md` / `DESIGN.md`，禁止代答：
+每轮成组询问 2-3 个项目级问题，用户未回答前禁止写 `PRODUCT.md` / `DESIGN.md`，禁止代答。可把扫描推断作为选项或假设呈现给用户确认：
 
 - 默认 register 用 `AskUserQuestion` 单选 `product` / `brand`；不要问 register 名称、品牌 ID 或产品 ID。
 - 当前项目服务谁、主要场景是什么、产品目的是什么。

@@ -89,4 +89,5 @@ node skills/bfds-implement/scripts/bfds.mjs validate fixtures/docs-design-sample
 - 没有意外改动 `vendor/impeccable/`。
 - 没有新增术语映射文件或重复说明文件。
 - 没有把用户可见流程术语改回内部英文阶段名。
+- 提交信息使用中文，说明本次 BFDS 行为变化和验证结果。
 - 验证结果和未能运行的验证项在最终回复中说明。

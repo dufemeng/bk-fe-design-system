@@ -800,7 +800,11 @@ function validateGateTests() {
       '--field',
       'question=项目类型是什么？',
       '--field',
-      'answerQuote=这是设置页设计任务。'
+      'answerQuote=这是设置页设计任务。',
+      '--field',
+      'question=用户和目的是什么？',
+      '--field',
+      'answerQuote=用户是运营人员，目的是高频编辑设置。'
     ]);
     if (writeResult.status !== 0) errors.push(`expected init append to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
     writeResult = runBfds(draftCleanupRoot, [
@@ -817,6 +821,10 @@ function validateGateTests() {
       'userConfirmationQuote=确认项目上下文。'
     ]);
     if (writeResult.status !== 0) errors.push(`expected init finalize to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    const finalizedInit = readJson(path.join(evidenceDirFor(draftCleanupRoot), 'init-interview.json'));
+    if (finalizedInit.questions.length !== 2) {
+      errors.push(`expected grouped init append to keep two Q/A entries, got ${finalizedInit.questions.length}`);
+    }
     if (fs.existsSync(path.join(evidenceDirFor(draftCleanupRoot), 'init-interview.draft.json'))) {
       errors.push('init finalize must remove init-interview.draft.json');
     }

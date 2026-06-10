@@ -300,7 +300,7 @@ function phaseRules(phase) {
   const rules = {
     CONTEXT_BLOCKED: [
       '停止 BFDS 设计推进：Impeccable 项目级上下文未就绪。',
-      '父会话逐题问用户并等待回答；Claude Code 选择/确认必须用 AskUserQuestion。',
+      '父会话先扫描可推断信息，再每轮成组询问 2-3 个项目级问题并等待回答；Claude Code 选择/确认必须用 AskUserQuestion。',
       'Register 只问单选 product/brand；不要问 register 名称、品牌 ID 或产品 ID。',
       '写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
       'PRODUCT.md 必须是 Impeccable strategic context，DESIGN.md 必须是 Stitch 视觉系统文档，不是技术架构文档。',
@@ -440,7 +440,8 @@ function contextBlockedTask(missing, errors) {
   if (missing.includes(INIT_INTERVIEW_FILE)) {
     return [
       'Claude Code 用 AskUserQuestion 单选 register: product / brand；不要问 register 名称、品牌 ID 或产品 ID。',
-      '逐题询问项目级上下文：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
+      '先扫描可推断信息，再每轮成组询问 2-3 个项目级上下文问题：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
+      '把扫描推断作为选项或假设让用户确认，不缩减 Impeccable init 的问题覆盖面。',
       `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
       '用户确认后，再用 fresh subagent 或同等隔离流程写 PRODUCT.md / DESIGN.md。'
     ];
