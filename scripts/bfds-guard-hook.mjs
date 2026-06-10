@@ -112,6 +112,7 @@ function assertContextWriteAllowed(file, content) {
 function allowedPhaseForWrite(relFile) {
   if (relFile.endsWith('/evidence/init-interview.json')) return ['CONTEXT_BLOCKED'];
   if (relFile.endsWith('/evidence/surface.json')) return ['NEEDS_SURFACE'];
+  if (relFile.endsWith('/evidence/brainstorm-dialogue.json')) return ['NEEDS_DIRECTIONS'];
   if (relFile.endsWith('/evidence/directions.json')) return ['NEEDS_DIRECTIONS'];
   if (relFile.endsWith('/workbench.html')) return ['NEEDS_WORKBENCH'];
   if (relFile.endsWith('/option-a.html')) return ['NEEDS_WORKBENCH'];
@@ -133,6 +134,13 @@ function assertDesignArtifactWriteAllowed(file) {
   const allowed = allowedPhaseForWrite(relFile);
   if (allowed === null) return;
   if (allowed.length === 0) deny(`${relFile} is managed by BFDS scripts and must not be written manually`);
+
+  if (relFile.endsWith('/evidence/directions.json')) {
+    const brainstormFile = path.join(path.dirname(file), 'brainstorm-dialogue.json');
+    if (!fs.existsSync(brainstormFile)) {
+      deny(`writing ${relFile} requires ${projectPath(brainstormFile)} first`);
+    }
+  }
 
   const gate = runGate(slug);
   if (!allowed.includes(gate.phase)) {

@@ -106,12 +106,14 @@ function installClaude(targetRoot, dryRun) {
   const impeccableClaude = path.join(repoRoot, 'vendor', 'impeccable', '.claude', 'skills', 'impeccable');
   const impeccableClaudeAgents = path.join(repoRoot, 'vendor', 'impeccable', '.claude', 'agents');
   const bfdsGuardHook = path.join(repoRoot, 'scripts', 'bfds-guard-hook.mjs');
+  const bfdsSessionStartHook = path.join(repoRoot, 'scripts', 'bfds-session-start.mjs');
 
   copyDir(bfdsDesign, path.join(targetRoot, '.claude', 'skills', 'bfds-design'), dryRun);
   copyDir(bfdsImplement, path.join(targetRoot, '.claude', 'skills', 'bfds-implement'), dryRun);
   copyDir(impeccableClaude, path.join(targetRoot, '.claude', 'skills', 'impeccable'), dryRun);
   copyDirContents(impeccableClaudeAgents, path.join(targetRoot, '.claude', 'agents'), dryRun);
   copyPath(bfdsGuardHook, path.join(targetRoot, '.claude', 'hooks', 'bfds-guard-hook.mjs'), dryRun);
+  copyPath(bfdsSessionStartHook, path.join(targetRoot, '.claude', 'hooks', 'bfds-session-start.mjs'), dryRun);
 }
 
 try {

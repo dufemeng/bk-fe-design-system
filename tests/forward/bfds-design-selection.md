@@ -8,6 +8,7 @@
 
 - 可信 `PRODUCT.md` 和 `DESIGN.md` 存在。
 - 存在 `docs/design/settings-prompt/evidence/surface.json`。
+- 存在 `docs/design/settings-prompt/evidence/brainstorm-dialogue.json`。
 - 存在 `docs/design/settings-prompt/evidence/directions.json`。
 - 当前线程或用户指定设计任务存在 `docs/design/settings-prompt/workbench.html`。
 - 存在 `option-a.html`、`option-b.html`、`option-c.html`。
@@ -25,6 +26,7 @@
 - `skills/bfds-design/assets/templates/artifacts/`
 - `docs/design/settings-prompt/status.json` 或当前线程设计任务的 `status.json`
 - `docs/design/settings-prompt/evidence/surface.json`
+- `docs/design/settings-prompt/evidence/brainstorm-dialogue.json`
 - `docs/design/settings-prompt/evidence/directions.json`
 
 ## 期望行为

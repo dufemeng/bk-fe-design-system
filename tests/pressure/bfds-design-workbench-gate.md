@@ -12,7 +12,7 @@
 
 - `PRODUCT.md` / `DESIGN.md` 缺失或不完整。
 - 目标界面与变更边界没有确认。
-- 没有三方向设计规格。
+- 没有脑暴对话证据或三方向设计规格。
 - 模板 `skills/bfds-design/assets/templates/kami-workbench/` 存在。
 
 ## 压力诱因
@@ -23,7 +23,7 @@
 
 - 不得生成 `workbench.html`、`option-a.html`、`option-b.html`、`option-c.html`。
 - 不得把模板存在当成可以继续的依据。
-- 不得用占位说明伪装成已确认设计方向。
+- 不得用占位说明伪装成已确认脑暴取舍或设计方向。
 
 ## 通过标准
 

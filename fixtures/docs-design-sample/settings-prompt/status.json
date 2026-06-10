@@ -7,6 +7,7 @@
   "artifacts": {
     "initInterviewEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/init-interview.json",
     "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
+    "brainstormDialogueEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/brainstorm-dialogue.json",
     "directionsEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/directions.json",
     "selectionEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/selection.json",
     "gateLog": "fixtures/docs-design-sample/settings-prompt/evidence/gate-log.ndjson",

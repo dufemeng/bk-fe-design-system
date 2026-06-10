@@ -13,6 +13,7 @@
 - 可信 `PRODUCT.md` 存在。
 - 可信 `DESIGN.md` 存在。
 - `docs/design/settings-prompt/evidence/surface.json` 存在。
+- `docs/design/settings-prompt/evidence/brainstorm-dialogue.json` 存在。
 - `docs/design/settings-prompt/evidence/directions.json` 存在。
 - `docs/design/settings-prompt/workbench.html` 存在。
 - `option-a.html`、`option-b.html`、`option-c.html` 存在。

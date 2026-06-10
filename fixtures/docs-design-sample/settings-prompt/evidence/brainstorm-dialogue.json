@@ -1,0 +1,24 @@
+{
+  "slug": "settings-prompt",
+  "createdAt": "2026-06-09T12:03:00.000Z",
+  "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
+  "mode": "socratic",
+  "turns": [
+    {
+      "question": "这个设置页提示词输入组件最先要被用户看见的信息是什么？",
+      "answerQuote": "输入框和保存状态最重要，说明文字可以弱一点，不要压过编辑。",
+      "designImplication": "层级要把输入区和保存反馈放到第一优先，说明内容降低视觉权重。"
+    },
+    {
+      "question": "错误、保存、加载这些状态需要做到什么精度？",
+      "answerQuote": "错误要很清楚，保存成功也要明确，但 loading 不要把整个页面锁住。",
+      "designImplication": "方案必须覆盖局部 loading、错误原因、保存成功和恢复动作。"
+    }
+  ],
+  "approachesPresented": [
+    "方案 A：保留安静导航和低干扰节奏，让提示词输入成为稳定主区域。",
+    "方案 B：把输入、模板、预览和操作状态组织成更高效的工作台。",
+    "方案 C：突出错误恢复和保存反馈，降低配置失败时的操作成本。"
+  ],
+  "userConfirmationQuote": "这三个方向可以，先按 A/B/C 展开。"
+}

@@ -53,6 +53,7 @@
         "pendingRequest": { "type": ["string", "null"] },
         "initInterviewEvidence": { "type": ["string", "null"] },
         "surfaceEvidence": { "type": ["string", "null"] },
+        "brainstormDialogueEvidence": { "type": ["string", "null"] },
         "directionsEvidence": { "type": ["string", "null"] },
         "selectionEvidence": { "type": ["string", "null"] },
         "gateLog": { "type": ["string", "null"] },

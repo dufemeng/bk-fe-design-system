@@ -27,7 +27,7 @@ gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT
 
 - `CONTEXT_BLOCKED`：读 [impeccable-integration.md](references/impeccable-integration.md)，只补项目级 `PRODUCT.md` / `DESIGN.md`。
 - `NEEDS_SURFACE`：读 [surface-change-framing.md](references/surface-change-framing.md)，写 `evidence/surface.json` 后重跑 gate。
-- `NEEDS_DIRECTIONS`：读 [design-brainstorm.md](references/design-brainstorm.md)，写 `evidence/directions.json` 后重跑 gate。
+- `NEEDS_DIRECTIONS`：读 [design-brainstorm.md](references/design-brainstorm.md)，先写 `evidence/brainstorm-dialogue.json`，再写 `evidence/directions.json`，每步后重跑 gate。
 - `NEEDS_WORKBENCH`：读 [workbench-authoring.md](references/workbench-authoring.md)，生成 `workbench.html` 和 `option-a/b/c.html` 后重跑 gate。
 - `NEEDS_SELECTION`：等待用户明确选择 A/B/C 或合并方案；写 `evidence/selection.json` 后重跑 gate。
 - `NEEDS_CONTRACT`：读 [contract-pack.md](references/contract-pack.md)，生成设计交付包并校验。
@@ -39,6 +39,7 @@ gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT
 
 - `init-interview.json`：Impeccable 项目级访谈问答、用户确认原话、PRODUCT/DESIGN 路径和生成模式。
 - `surface.json`：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免、用户确认原话。
+- `brainstorm-dialogue.json`：设计表达问答、2-3 个方向取舍、用户确认原话。
 - `directions.json`：A/B/C 三个方向规格和自检结果。
 - `selection.json`：用户选择原话、选中方案、工作台与三个方案路径。
 

@@ -28,6 +28,7 @@ function schemaPath(file) {
 const schemaFiles = {
   'evidence/init-interview.json': schemaPath('init-interview.schema.json'),
   'evidence/surface.json': schemaPath('surface-evidence.schema.json'),
+  'evidence/brainstorm-dialogue.json': schemaPath('brainstorm-dialogue.schema.json'),
   'evidence/directions.json': schemaPath('directions-evidence.schema.json'),
   'evidence/selection.json': schemaPath('selection-evidence.schema.json'),
   'design-contract.json': schemaPath('design-contract.schema.json'),
@@ -214,6 +215,7 @@ function validateArtifactDir(dir) {
     status.artifacts?.optionB,
     status.artifacts?.optionC,
     status.artifacts?.surfaceEvidence,
+    status.artifacts?.brainstormDialogueEvidence,
     status.artifacts?.directionsEvidence,
     status.artifacts?.selectionEvidence,
     status.artifacts?.gateLog,
@@ -350,6 +352,7 @@ function validateBundledCopyParity() {
     );
     for (const schema of [
       'design-contract.schema.json',
+      'brainstorm-dialogue.schema.json',
       'directions-evidence.schema.json',
       'init-interview.schema.json',
       'qa-plan.schema.json',
@@ -376,6 +379,18 @@ function runHook(projectRoot, input) {
   return spawnSync(process.execPath, [hookScript], {
     cwd: projectRoot,
     input: `${JSON.stringify(input)}\n`,
+    encoding: 'utf8'
+  });
+}
+
+function runSessionStartHook() {
+  const repoRoot = findRepoRoot();
+  if (!repoRoot) return { status: 0, stdout: '', stderr: '' };
+  const hookScript = path.join(repoRoot, 'scripts', 'bfds-session-start.mjs');
+  if (!fs.existsSync(hookScript)) return { status: 0, stdout: '', stderr: '' };
+  return spawnSync(process.execPath, [hookScript], {
+    cwd: repoRoot,
+    input: '{}\n',
     encoding: 'utf8'
   });
 }
@@ -525,6 +540,33 @@ function baseInitInterview(slug) {
   };
 }
 
+function baseBrainstormDialogue(slug) {
+  return {
+    slug,
+    createdAt: '2026-06-09T12:03:00.000Z',
+    surfaceEvidence: `docs/design/${slug}/evidence/surface.json`,
+    mode: 'socratic',
+    turns: [
+      {
+        question: '这个目标界面最先要被用户看见的信息是什么？',
+        answerQuote: '提示词输入本身必须最先被看见，其他说明都要弱一点。',
+        designImplication: '层级以输入区为主，说明和导航降低视觉存在感。'
+      },
+      {
+        question: '错误、保存和加载状态需要做到什么精度？',
+        answerQuote: '错误和保存要清楚，加载不要占满屏幕，保持局部反馈。',
+        designImplication: '方案必须覆盖 default/error/success/loading 的局部状态表达。'
+      }
+    ],
+    approachesPresented: [
+      '方案 A：保留安静导航和低干扰节奏，强调输入区。',
+      '方案 B：组织为操作工作台，让输入、模板、预览和状态更近。',
+      '方案 C：突出错误恢复和保存反馈，降低配置失败成本。'
+    ],
+    userConfirmationQuote: '这三个方向可以，先按 A/B/C 展开。'
+  };
+}
+
 function baseDirections(slug) {
   const option = (id, dimensions) => ({
     optionId: id,
@@ -549,6 +591,7 @@ function baseDirections(slug) {
     slug,
     createdAt: '2026-06-09T12:05:00.000Z',
     surfaceEvidence: `docs/design/${slug}/evidence/surface.json`,
+    brainstormDialogueEvidence: `docs/design/${slug}/evidence/brainstorm-dialogue.json`,
     options: {
       A: option('A', ['hierarchy', 'density']),
       B: option('B', ['interaction-model', 'state-treatment']),
@@ -674,6 +717,18 @@ function validateGateTests() {
   };
 
   try {
+    const sessionStart = runSessionStartHook();
+    if (sessionStart.status !== 0) errors.push('expected SessionStart hook to exit 0');
+    try {
+      const sessionStartOutput = JSON.parse(sessionStart.stdout || '{}');
+      const context = sessionStartOutput.hookSpecificOutput?.additionalContext ?? '';
+      if (!context.includes('bfds-gate.mjs') || !context.includes('brainstorm-dialogue.json')) {
+        errors.push('expected SessionStart hook context to mention bfds-gate.mjs and brainstorm-dialogue.json');
+      }
+    } catch {
+      errors.push('expected SessionStart hook to emit JSON');
+    }
+
     const checkOnlyRoot = makeProject();
     let result = runGate(checkOnlyRoot, slug, ['--check-only']);
     if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected check-only NEEDS_SURFACE, got ${result.phase}`);
@@ -722,6 +777,15 @@ function validateGateTests() {
     });
     if (hook.status === 0) errors.push('expected hook to block Bash write into docs/design/**');
 
+    hook = runHook(hookRoot, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'docs/design/settings-prompt/evidence/directions.json',
+        content: JSON.stringify(baseDirections(slug), null, 2)
+      }
+    });
+    if (hook.status === 0) errors.push('expected hook to block directions.json before brainstorm-dialogue.json');
+
     const skippedRoot = makeProject();
     writeWorkbench(skippedRoot);
     const skipped = runGateFailure(skippedRoot, slug);
@@ -730,6 +794,7 @@ function validateGateTests() {
 
     const partialRoot = makeProject();
     writeJson(path.join(evidenceDirFor(partialRoot), 'surface.json'), baseSurface(slug));
+    writeJson(path.join(evidenceDirFor(partialRoot), 'brainstorm-dialogue.json'), baseBrainstormDialogue(slug));
     writeJson(path.join(evidenceDirFor(partialRoot), 'directions.json'), baseDirections(slug));
     writeWorkbench(partialRoot, ['workbench.html', 'option-a.html', 'option-b.html']);
     const partial = runGateFailure(partialRoot, slug);
@@ -757,6 +822,18 @@ function validateGateTests() {
     writeJson(path.join(evidenceDir, 'surface.json'), baseSurface(slug));
     result = runGate(projectRoot, slug);
     if (result.phase !== 'NEEDS_DIRECTIONS') errors.push(`expected NEEDS_DIRECTIONS, got ${result.phase}`);
+    if (!result.missing?.includes('evidence/brainstorm-dialogue.json')) errors.push(`expected missing brainstorm-dialogue.json, got ${result.missing?.join(', ')}`);
+
+    const noBrainstormRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(noBrainstormRoot), 'surface.json'), baseSurface(slug));
+    writeJson(path.join(evidenceDirFor(noBrainstormRoot), 'directions.json'), baseDirections(slug));
+    const noBrainstorm = runGateFailure(noBrainstormRoot, slug);
+    if (!noBrainstorm.failed || noBrainstorm.result.phase !== 'INCONSISTENT') errors.push(`expected directions before brainstorm to be INCONSISTENT, got ${noBrainstorm.result.phase}`);
+
+    writeJson(path.join(evidenceDir, 'brainstorm-dialogue.json'), baseBrainstormDialogue(slug));
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_DIRECTIONS') errors.push(`expected NEEDS_DIRECTIONS after brainstorm, got ${result.phase}`);
+    if (!result.missing?.includes('evidence/directions.json')) errors.push(`expected missing directions.json, got ${result.missing?.join(', ')}`);
 
     writeJson(path.join(evidenceDir, 'directions.json'), baseDirections(slug));
     result = runGate(projectRoot, slug);

@@ -1,10 +1,15 @@
 # 设计方向探索
 
-本阶段只产出 A/B/C 三个方向规格，并写 `docs/design/<slug>/evidence/directions.json`。可以跳过提问，不能跳过三方向。
+本阶段只处理设计表达，不扩展产品能力。输出顺序固定：
 
-## 提问边界
+1. `docs/design/<slug>/evidence/brainstorm-dialogue.json`
+2. `docs/design/<slug>/evidence/directions.json`
 
-只问设计表达问题：
+写完每个 evidence 后都重跑 gate。gate 没进入 `NEEDS_WORKBENCH` 前，不生成评审工作台或方案 HTML。
+
+## 苏格拉底式问答
+
+一次只问一个设计表达问题，并等待用户回答。问题只覆盖：
 
 - 哪个信息应该最先被看见？
 - 哪些内容要弱化、折叠或延后出现？
@@ -16,7 +21,20 @@
 
 不要问 API、数据模型、权限、商业模式、后端架构，也不要在本阶段重新确认目标界面。
 
+至少完成两轮有效设计问答后，提出 2-3 个方向及取舍，让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
+
+如果用户明确拒绝继续追问，`brainstorm-dialogue.json` 使用 `mode: "user-skipped"`，记录 `skipReasonQuote`，仍要先提出 2-3 个方向取舍并取得用户确认。
+
 ## 方向规格
+
+`directions.json` 必须引用同目录的 `surface.json` 和 `brainstorm-dialogue.json`：
+
+```json
+{
+  "surfaceEvidence": "docs/design/<slug>/evidence/surface.json",
+  "brainstormDialogueEvidence": "docs/design/<slug>/evidence/brainstorm-dialogue.json"
+}
+```
 
 每个方案必须包含：
 
@@ -48,9 +66,8 @@
 
 写入 `directions.json` 前确认：
 
+- 已写入并通过 gate 检查 `brainstorm-dialogue.json`。
 - 使用了可信 `PRODUCT.md` / `DESIGN.md` 和 `surface.json`。
 - 没有新增未确认产品能力。
 - A/B/C 都包含 keep/change/avoid。
 - 至少一个方案覆盖关键状态或关键交互。
-
-写完后重跑 gate。

@@ -89,6 +89,7 @@ test -f .claude/skills/impeccable/SKILL.md
 test -f .claude/skills/impeccable/scripts/context.mjs
 test -f .claude/agents/impeccable-manual-edit-applier.md
 test -f .claude/hooks/bfds-guard-hook.mjs
+test -f .claude/hooks/bfds-session-start.mjs
 ```
 
 ## 4. BFDS 仓库自检
@@ -196,4 +197,4 @@ cp -R /path/to/bk-fe-design-system/fixtures/docs-design-sample/settings-prompt d
 - `bfds-design` 只补齐设计，不做产品规划或工程实现。
 - `bfds-implement` 缺设计交付包时硬停止。
 - 有完整设计交付包时，能从 `status.json` 恢复并按实现交接说明进入实现和验收。
-- `bfds-design` 压力测试场景下不会误用第三方设计上下文、不会跳过三方向设计规格、不会越过评审工作台/设计交付包门禁。
+- `bfds-design` 压力测试场景下不会误用第三方设计上下文、不会跳过脑暴证据和三方向设计规格、不会越过评审工作台/设计交付包门禁。

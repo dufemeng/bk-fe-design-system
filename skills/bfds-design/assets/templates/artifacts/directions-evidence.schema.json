@@ -8,6 +8,7 @@
     "slug",
     "createdAt",
     "surfaceEvidence",
+    "brainstormDialogueEvidence",
     "options",
     "selfCheck"
   ],
@@ -21,6 +22,10 @@
       "format": "date-time"
     },
     "surfaceEvidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brainstormDialogueEvidence": {
       "type": "string",
       "minLength": 1
     },

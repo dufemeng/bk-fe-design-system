@@ -2,6 +2,7 @@
   "slug": "settings-prompt",
   "createdAt": "2026-06-09T12:05:00.000Z",
   "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
+  "brainstormDialogueEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/brainstorm-dialogue.json",
   "options": {
     "A": {
       "optionId": "A",

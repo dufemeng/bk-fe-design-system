@@ -13,6 +13,7 @@ const PRODUCT_NAMES = ['PRODUCT.md', 'Product.md', 'product.md'];
 const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
 const TRUSTED_CONTEXT_DIRS = ['.', '.agents/context', 'docs'];
 const INIT_INTERVIEW_FILE = 'evidence/init-interview.json';
+const BRAINSTORM_DIALOGUE_FILE = 'evidence/brainstorm-dialogue.json';
 const CHANGE_TYPES_REQUIRING_CURRENT_SURFACE = new Set(['modify', 'remove', 'replace', 'restyle']);
 const IMPLEMENTABLE_STATUS = new Set(['contract-ready', 'implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
 const MARKABLE_STATUS = new Set(['implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
@@ -407,10 +408,12 @@ function phaseRules(phase) {
       '写完后重新运行 gate。'
     ],
     NEEDS_DIRECTIONS: [
-      '只做设计方向探索；可以跳过提问，不能跳过 A/B/C 三方向规格。',
+      '只做设计方向探索；父会话一次只问一个设计表达问题并等待用户回答。',
+      '先写 evidence/brainstorm-dialogue.json；用户确认 2-3 个方向取舍后，才写 evidence/directions.json。',
+      '用户明确拒绝继续追问时，brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
       '三个方向至少在两个维度上不同，换色、换圆角、换阴影不算差异。',
       '不得新增未确认的产品能力、API、数据库、权限或后端范围。',
-      '写 evidence/directions.json 后重新运行 gate。'
+      '写每个 evidence 后都重新运行 gate。'
     ],
     NEEDS_WORKBENCH: [
       '只生成评审工作台和三个方案 HTML。',
@@ -467,6 +470,7 @@ function collectArtifacts(dir) {
     pendingRequest: artifact('evidence/pending-request.json'),
     initInterviewEvidence: artifact(INIT_INTERVIEW_FILE),
     surfaceEvidence: artifact('evidence/surface.json'),
+    brainstormDialogueEvidence: artifact(BRAINSTORM_DIALOGUE_FILE),
     directionsEvidence: artifact('evidence/directions.json'),
     selectionEvidence: artifact('evidence/selection.json'),
     gateLog: evidenceDirExists ? toProjectPath(path.join(dir, 'evidence', 'gate-log.ndjson')) : null,
@@ -577,12 +581,14 @@ function evaluate(dir) {
 
   const initInterviewResult = validateJsonFile(path.join(dir, INIT_INTERVIEW_FILE), schemaPath('init-interview.schema.json'), 'init interview evidence');
   const surfaceResult = validateJsonFile(path.join(dir, 'evidence', 'surface.json'), schemaPath('surface-evidence.schema.json'), 'surface evidence');
+  const brainstormResult = validateJsonFile(path.join(dir, BRAINSTORM_DIALOGUE_FILE), schemaPath('brainstorm-dialogue.schema.json'), 'brainstorm dialogue evidence');
   const directionsResult = validateJsonFile(path.join(dir, 'evidence', 'directions.json'), schemaPath('directions-evidence.schema.json'), 'directions evidence');
   const selectionResult = validateJsonFile(path.join(dir, 'evidence', 'selection.json'), schemaPath('selection-evidence.schema.json'), 'selection evidence');
   const contractResult = validateJsonFile(path.join(dir, 'design-contract.json'), schemaPath('design-contract.schema.json'), 'design contract');
   const qaPlanResult = validateJsonFile(path.join(dir, 'qa-plan.json'), schemaPath('qa-plan.schema.json'), 'qa plan');
 
   const surfaceExists = surfaceResult.exists;
+  const brainstormExists = brainstormResult.exists;
   const directionsExists = directionsResult.exists;
   const selectionExists = selectionResult.exists;
   const workbenchFiles = ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'].filter(name => fileExists(dir, name));
@@ -626,10 +632,12 @@ function evaluate(dir) {
   }
 
   if (surfaceExists && !surfaceResult.ok) errors.push(...surfaceResult.errors);
+  if (brainstormExists && !brainstormResult.ok) errors.push(...brainstormResult.errors);
   if (directionsExists && !directionsResult.ok) errors.push(...directionsResult.errors);
   if (selectionExists && !selectionResult.ok) errors.push(...selectionResult.errors);
 
   if (surfaceResult.ok && surfaceResult.data?.slug !== slug) errors.push(`surface evidence slug must equal directory slug ${slug}`);
+  if (brainstormResult.ok && brainstormResult.data?.slug !== slug) errors.push(`brainstorm dialogue evidence slug must equal directory slug ${slug}`);
   if (directionsResult.ok && directionsResult.data?.slug !== slug) errors.push(`directions evidence slug must equal directory slug ${slug}`);
   if (selectionResult.ok && selectionResult.data?.slug !== slug) errors.push(`selection evidence slug must equal directory slug ${slug}`);
 
@@ -641,7 +649,25 @@ function evaluate(dir) {
     }
   }
 
+  if (brainstormResult.ok) {
+    if (brainstormResult.data.surfaceEvidence !== toProjectPath(path.join(dir, 'evidence', 'surface.json'))) {
+      errors.push(`brainstorm dialogue evidence surfaceEvidence must equal ${toProjectPath(path.join(dir, 'evidence', 'surface.json'))}`);
+    }
+    if (brainstormResult.data.mode === 'socratic' && brainstormResult.data.turns.length < 2) {
+      errors.push('brainstorm dialogue evidence mode socratic requires at least two user Q/A turns');
+    }
+    if (brainstormResult.data.mode === 'user-skipped' && !brainstormResult.data.skipReasonQuote?.trim()) {
+      errors.push('brainstorm dialogue evidence mode user-skipped requires skipReasonQuote');
+    }
+  }
+
   if (directionsResult.ok) {
+    if (directionsResult.data.surfaceEvidence !== toProjectPath(path.join(dir, 'evidence', 'surface.json'))) {
+      errors.push(`directions evidence surfaceEvidence must equal ${toProjectPath(path.join(dir, 'evidence', 'surface.json'))}`);
+    }
+    if (directionsResult.data.brainstormDialogueEvidence !== toProjectPath(path.join(dir, BRAINSTORM_DIALOGUE_FILE))) {
+      errors.push(`directions evidence brainstormDialogueEvidence must equal ${toProjectPath(path.join(dir, BRAINSTORM_DIALOGUE_FILE))}`);
+    }
     for (const [key, option] of Object.entries(directionsResult.data.options)) {
       if (option.optionId !== key) errors.push(`directions evidence options.${key}.optionId must be ${key}`);
     }
@@ -675,7 +701,9 @@ function evaluate(dir) {
     errors.push('implementation-handoff.md is empty');
   }
 
+  if (brainstormExists && !surfaceExists) errors.push('brainstorm dialogue evidence exists before surface evidence');
   if (directionsExists && !surfaceExists) errors.push('directions evidence exists before surface evidence');
+  if (directionsExists && !brainstormExists) errors.push('directions evidence exists before brainstorm dialogue evidence');
   if ((hasWorkbench || hasPartialWorkbench) && !directionsExists) errors.push('workbench files exist before directions evidence');
   if (selectionExists && !hasWorkbench) errors.push('selection evidence exists before complete workbench files');
   if ((hasContractPack || hasPartialContractPack) && !selectionExists) errors.push('contract files exist before selection evidence');
@@ -683,6 +711,8 @@ function evaluate(dir) {
   if (hasPartialContractPack) errors.push(`incomplete contract pack: found ${contractFiles.join(', ')}`);
 
   warnIfOlder(warnings, dir, 'evidence/surface.json', ['evidence/directions.json'], 'stale evidence');
+  warnIfOlder(warnings, dir, 'evidence/surface.json', [BRAINSTORM_DIALOGUE_FILE], 'stale brainstorm');
+  warnIfOlder(warnings, dir, BRAINSTORM_DIALOGUE_FILE, ['evidence/directions.json'], 'stale directions');
   warnIfOlder(warnings, dir, 'evidence/directions.json', ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'], 'stale workbench');
   warnIfOlder(warnings, dir, 'workbench.html', ['evidence/selection.json'], 'stale selection');
   warnIfOlder(warnings, dir, 'evidence/selection.json', ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'], 'stale contract pack');
@@ -691,7 +721,8 @@ function evaluate(dir) {
     return { phase: 'INCONSISTENT', slug, dir: toProjectPath(dir), context, missing: [], errors, warnings };
   }
   if (!surfaceExists) return { phase: 'NEEDS_SURFACE', slug, dir: toProjectPath(dir), context, missing: ['evidence/surface.json'], errors, warnings };
-  if (!directionsExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: ['evidence/directions.json'], errors, warnings, surface: surfaceResult.data };
+  if (!brainstormExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: [BRAINSTORM_DIALOGUE_FILE], errors, warnings, surface: surfaceResult.data };
+  if (!directionsExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: ['evidence/directions.json'], errors, warnings, surface: surfaceResult.data, brainstorm: brainstormResult.data };
   if (!hasWorkbench) return { phase: 'NEEDS_WORKBENCH', slug, dir: toProjectPath(dir), context, missing: ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'].filter(name => !fileExists(dir, name)), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
   if (!selectionExists) return { phase: 'NEEDS_SELECTION', slug, dir: toProjectPath(dir), context, missing: ['evidence/selection.json'], errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
   if (!hasContractPack) return { phase: 'NEEDS_CONTRACT', slug, dir: toProjectPath(dir), context, missing: ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'].filter(name => !fileExists(dir, name)), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data, selection: selectionResult.data };

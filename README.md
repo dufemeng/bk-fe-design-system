@@ -6,7 +6,7 @@ BFDS 是一个面向前端需求生命周期的设计补全层（Design Completi
 
 - 设计上下文梳理：用 Impeccable `init` 建立 `PRODUCT.md` 和 `DESIGN.md`。
 - 目标界面与变更边界确认：明确当前目标界面、现状来源、本次新增/修改/删除/替换/局部设计范围。
-- 设计方向探索：只脑暴设计稿，不脑暴产品能力。
+- 设计方向探索：先做苏格拉底式设计问答和方向取舍确认，再产出 A/B/C 方向规格；不脑暴产品能力。
 - 三方案设计评审工作台：生成 `docs/design/<slug>/workbench.html`，用 Kami 风格外壳承载三个 iframe 交互模拟器。
 - 设计交付包：用户选择方案后，生成 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`、`status.json`。
 - 实现与设计还原验收：由 `bfds-implement` 消费设计产物，实现代码并运行设计还原验收。
@@ -45,11 +45,19 @@ node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs claude
 Codex 模式会把 BFDS 两个 skill 复制到 `${CODEX_HOME:-$HOME/.codex}/skills/`，并把内置 Impeccable 复制到目标项目的 `.agents/skills/impeccable/`。
 
 Claude Code 模式会把 BFDS 两个 skill 和内置 Impeccable 都复制到目标项目的 `.claude/skills/`，并复制 Impeccable 的 `.claude/agents/` 辅助 agent。
-同时会复制 BFDS 写入防火墙脚本到 `.claude/hooks/bfds-guard-hook.mjs`。在 Claude Code settings 中把它挂到 `PreToolUse`：
+同时会复制 BFDS 写入防火墙脚本和 SessionStart 上下文脚本到 `.claude/hooks/`。在 Claude Code settings 中把它们挂到 `PreToolUse` 和 `SessionStart`：
 
 ```json
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/bfds-session-start.mjs", "timeout": 15 }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -87,6 +95,7 @@ cp -R "$BFDS/vendor/impeccable/.claude/skills/impeccable" "$TARGET/.claude/skill
 cp -R "$BFDS/vendor/impeccable/.claude/agents/"* "$TARGET/.claude/agents/"
 mkdir -p "$TARGET/.claude/hooks"
 cp "$BFDS/scripts/bfds-guard-hook.mjs" "$TARGET/.claude/hooks/"
+cp "$BFDS/scripts/bfds-session-start.mjs" "$TARGET/.claude/hooks/"
 ```
 
 两个 BFDS skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
@@ -100,6 +109,7 @@ docs/design/<slug>/
   evidence/
     init-interview.json
     surface.json
+    brainstorm-dialogue.json
     directions.json
     selection.json
     gate-log.ndjson
@@ -165,4 +175,4 @@ node scripts/validate-artifacts.mjs --gate-tests
 3. 前向测试结构校验：`node scripts/validate-artifacts.mjs --forward-tests`。
 4. 压力测试结构校验：`node scripts/validate-artifacts.mjs --pressure-tests`。
 5. gate 状态机校验：`node scripts/validate-artifacts.mjs --gate-tests`。
-6. 人工走读 `tests/forward/`，并按 `tests/pressure/RUNBOOK.md` 做新会话 agent 压力测试，确认开始设计、上下文陷阱、跳过提问、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合规格。
+6. 人工走读 `tests/forward/`，并按 `tests/pressure/RUNBOOK.md` 做新会话 agent 压力测试，确认开始设计、上下文陷阱、拒绝继续追问、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合规格。

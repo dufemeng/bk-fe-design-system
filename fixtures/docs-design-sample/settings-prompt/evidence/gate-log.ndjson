@@ -1,4 +1,5 @@
-{"time":"2026-06-09T12:00:00.000Z","phase":"NEEDS_DIRECTIONS","status":"draft","missing":["evidence/directions.json"],"errors":[]}
+{"time":"2026-06-09T12:00:00.000Z","phase":"NEEDS_DIRECTIONS","status":"draft","missing":["evidence/brainstorm-dialogue.json"],"errors":[]}
+{"time":"2026-06-09T12:03:00.000Z","phase":"NEEDS_DIRECTIONS","status":"draft","missing":["evidence/directions.json"],"errors":[]}
 {"time":"2026-06-09T12:05:00.000Z","phase":"NEEDS_WORKBENCH","status":"draft","missing":["workbench.html","option-a.html","option-b.html","option-c.html"],"errors":[]}
 {"time":"2026-06-09T12:10:00.000Z","phase":"NEEDS_CONTRACT","status":"selected","missing":["design-contract.json","implementation-handoff.md","qa-plan.json"],"errors":[]}
 {"time":"2026-06-09T12:20:00.000Z","phase":"CONTRACT_READY","status":"contract-ready","missing":[],"errors":[]}

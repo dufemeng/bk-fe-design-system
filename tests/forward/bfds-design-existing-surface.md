@@ -40,4 +40,4 @@
 
 - 最多生成 `status.json` 和 `evidence/gate-log.ndjson`。
 - 用户确认后允许生成 `evidence/surface.json`。
-- 用户确认后才允许生成 `workbench.html` 和 `option-a/b/c.html`。
+- 只有完成 `surface.json`、`brainstorm-dialogue.json` 和 `directions.json` 后，才允许生成 `workbench.html` 和 `option-a/b/c.html`。
