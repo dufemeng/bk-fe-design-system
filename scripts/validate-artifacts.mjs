@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const args = process.argv.slice(2);
@@ -26,6 +26,7 @@ function schemaPath(file) {
 }
 
 const schemaFiles = {
+  'evidence/init-interview.json': schemaPath('init-interview.schema.json'),
   'evidence/surface.json': schemaPath('surface-evidence.schema.json'),
   'evidence/directions.json': schemaPath('directions-evidence.schema.json'),
   'evidence/selection.json': schemaPath('selection-evidence.schema.json'),
@@ -207,6 +208,7 @@ function validateArtifactDir(dir) {
     contract.sourceArtifacts?.options?.B,
     contract.sourceArtifacts?.options?.C,
     status.artifacts?.pendingRequest,
+    status.artifacts?.initInterviewEvidence,
     status.artifacts?.workbench,
     status.artifacts?.optionA,
     status.artifacts?.optionB,
@@ -349,6 +351,7 @@ function validateBundledCopyParity() {
     for (const schema of [
       'design-contract.schema.json',
       'directions-evidence.schema.json',
+      'init-interview.schema.json',
       'qa-plan.schema.json',
       'selection-evidence.schema.json',
       'status.schema.json',
@@ -363,6 +366,18 @@ function validateBundledCopyParity() {
   }
 
   return errors;
+}
+
+function runHook(projectRoot, input) {
+  const repoRoot = findRepoRoot();
+  if (!repoRoot) return { status: 0, stdout: '', stderr: '' };
+  const hookScript = path.join(repoRoot, 'scripts', 'bfds-guard-hook.mjs');
+  if (!fs.existsSync(hookScript)) return { status: 0, stdout: '', stderr: '' };
+  return spawnSync(process.execPath, [hookScript], {
+    cwd: projectRoot,
+    input: `${JSON.stringify(input)}\n`,
+    encoding: 'utf8'
+  });
 }
 
 function baseSurface(slug) {
@@ -387,6 +402,126 @@ function baseSurface(slug) {
     confirmation: {
       quote: '确认这个目标界面和边界。'
     }
+  };
+}
+
+function validProductMd() {
+  return `# Product
+
+## Register
+
+product
+
+## Users
+Operators use this product to complete repeated work with confidence.
+
+## Product Purpose
+The product helps users manage settings without leaving the current workflow.
+
+## Brand Personality
+Calm, precise, and trustworthy.
+
+## Anti-references
+Avoid decorative dashboards, fake metrics, and loud gradients.
+
+## Design Principles
+1. Keep the primary task obvious.
+2. Show state close to the action.
+3. Preserve operational density.
+
+## Accessibility & Inclusion
+Support keyboard access, readable contrast, and reduced motion.
+`;
+}
+
+function validDesignMd() {
+  return `---
+name: Demo Product
+description: Operational UI design system
+colors:
+  primary: "#1B365D"
+  surface: "#F7F8FA"
+typography:
+  body:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "14px"
+    lineHeight: 1.5
+rounded:
+  sm: "4px"
+  md: "8px"
+spacing:
+  sm: "8px"
+  md: "16px"
+components:
+  button-primary:
+    backgroundColor: "{colors.primary}"
+    textColor: "#FFFFFF"
+    rounded: "{rounded.sm}"
+---
+
+# Design System: Demo Product
+
+## 1. Overview
+Quiet operational screens with clear hierarchy and restrained visual accents.
+
+## 2. Colors
+Primary ink blue is reserved for durable actions and selected states.
+
+## 3. Typography
+Body text uses a compact sans-serif stack with predictable line height.
+
+## 4. Elevation
+Depth is mostly tonal; shadows are reserved for overlays.
+
+## 5. Components
+Buttons, inputs, cards, and navigation use stable spacing and modest radius.
+
+## 6. Do's and Don'ts
+Do keep controls close to their data. Don't use decorative gradients or architecture diagrams as design guidance.
+`;
+}
+
+function architectureDesignMd() {
+  return `# DESIGN.md - Demo Frontend Architecture
+
+## 技术栈
+- React
+- Less
+- tnpm
+
+## 项目结构
+\`\`\`text
+src/
+  components/
+  pages/
+  hooks/
+\`\`\`
+
+## 包管理
+Use internal npm registry.
+`;
+}
+
+function baseInitInterview(slug) {
+  return {
+    slug,
+    confirmedAt: '2026-06-09T11:55:00.000Z',
+    source: 'user-interview',
+    productPath: 'PRODUCT.md',
+    designPath: 'DESIGN.md',
+    productMode: 'created',
+    designMode: 'scan',
+    questions: [
+      {
+        question: '默认 register 是 product 还是 brand？',
+        answerQuote: '这是 product，设计服务高频设置工作流。'
+      },
+      {
+        question: '用户、品牌人格、反参考和可访问性要求是什么？',
+        answerQuote: '用户是运营人员；风格要冷静精确；不要花哨渐变；需要键盘可达和清晰对比度。'
+      }
+    ],
+    userConfirmationQuote: '确认以上项目级上下文，可以生成 PRODUCT.md 和 DESIGN.md。'
   };
 }
 
@@ -526,8 +661,9 @@ function validateGateTests() {
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bfds-gate-'));
     projectRoots.push(projectRoot);
     if (withContext) {
-      writeText(path.join(projectRoot, 'PRODUCT.md'), '# Product\n');
-      writeText(path.join(projectRoot, 'DESIGN.md'), '# Design\n');
+      writeText(path.join(projectRoot, 'PRODUCT.md'), validProductMd());
+      writeText(path.join(projectRoot, 'DESIGN.md'), validDesignMd());
+      writeJson(path.join(projectRoot, 'docs', 'design', slug, 'evidence', 'init-interview.json'), baseInitInterview(slug));
     }
     return projectRoot;
   };
@@ -553,6 +689,38 @@ function validateGateTests() {
     if (!noContext.failed || noContext.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected CONTEXT_BLOCKED, got ${noContext.result.phase}`);
     if (!fs.existsSync(path.join(evidenceDirFor(noContextRoot), 'pending-request.json'))) errors.push('expected pending-request.json for blocked request');
     assertGateLogIncludes(noContextRoot, slug, 'CONTEXT_BLOCKED', errors, 'context blocked');
+
+    const noInterviewRoot = makeProject(false);
+    writeText(path.join(noInterviewRoot, 'PRODUCT.md'), validProductMd());
+    writeText(path.join(noInterviewRoot, 'DESIGN.md'), validDesignMd());
+    const noInterview = runGateFailure(noInterviewRoot, slug);
+    if (!noInterview.failed || noInterview.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected missing init interview to be CONTEXT_BLOCKED, got ${noInterview.result.phase}`);
+
+    const architectureRoot = makeProject(false);
+    writeText(path.join(architectureRoot, 'PRODUCT.md'), validProductMd());
+    writeText(path.join(architectureRoot, 'DESIGN.md'), architectureDesignMd());
+    writeJson(path.join(evidenceDirFor(architectureRoot), 'init-interview.json'), baseInitInterview(slug));
+    const architecture = runGateFailure(architectureRoot, slug);
+    if (!architecture.failed || architecture.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected architecture DESIGN.md to be CONTEXT_BLOCKED, got ${architecture.result.phase}`);
+
+    const hookRoot = makeProject(false);
+    writeJson(path.join(evidenceDirFor(hookRoot), 'init-interview.json'), baseInitInterview(slug));
+    let hook = runHook(hookRoot, {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'DESIGN.md',
+        content: architectureDesignMd()
+      }
+    });
+    if (hook.status === 0) errors.push('expected hook to block architecture DESIGN.md write');
+
+    hook = runHook(hookRoot, {
+      tool_name: 'Bash',
+      tool_input: {
+        command: 'cat > docs/design/settings-prompt/workbench.html'
+      }
+    });
+    if (hook.status === 0) errors.push('expected hook to block Bash write into docs/design/**');
 
     const skippedRoot = makeProject();
     writeWorkbench(skippedRoot);

@@ -1,0 +1,20 @@
+{
+  "slug": "settings-prompt",
+  "confirmedAt": "2026-06-09T11:55:00.000Z",
+  "source": "user-interview",
+  "productPath": "PRODUCT.md",
+  "designPath": "DESIGN.md",
+  "productMode": "created",
+  "designMode": "scan",
+  "questions": [
+    {
+      "question": "默认 register 是 product 还是 brand？",
+      "answerQuote": "这是 product，设计服务高频设置工作流。"
+    },
+    {
+      "question": "用户、品牌人格、反参考和可访问性要求是什么？",
+      "answerQuote": "用户是运营人员；风格要冷静精确；不要花哨渐变；需要键盘可达和清晰对比度。"
+    }
+  ],
+  "userConfirmationQuote": "确认以上项目级上下文，可以生成 PRODUCT.md 和 DESIGN.md。"
+}

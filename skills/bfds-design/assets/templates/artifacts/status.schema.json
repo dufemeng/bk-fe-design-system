@@ -51,6 +51,7 @@
       "additionalProperties": false,
       "properties": {
         "pendingRequest": { "type": ["string", "null"] },
+        "initInterviewEvidence": { "type": ["string", "null"] },
         "surfaceEvidence": { "type": ["string", "null"] },
         "directionsEvidence": { "type": ["string", "null"] },
         "selectionEvidence": { "type": ["string", "null"] },

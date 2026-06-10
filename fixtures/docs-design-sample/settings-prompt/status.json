@@ -5,6 +5,7 @@
   "lastUpdated": "2026-06-09T12:00:00.000Z",
   "selectedOption": "B 方案合并 A 的导航和 C 的错误状态",
   "artifacts": {
+    "initInterviewEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/init-interview.json",
     "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
     "directionsEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/directions.json",
     "selectionEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/selection.json",

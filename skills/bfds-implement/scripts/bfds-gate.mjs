@@ -12,9 +12,53 @@ const cwd = process.cwd();
 const PRODUCT_NAMES = ['PRODUCT.md', 'Product.md', 'product.md'];
 const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
 const TRUSTED_CONTEXT_DIRS = ['.', '.agents/context', 'docs'];
+const INIT_INTERVIEW_FILE = 'evidence/init-interview.json';
 const CHANGE_TYPES_REQUIRING_CURRENT_SURFACE = new Set(['modify', 'remove', 'replace', 'restyle']);
 const IMPLEMENTABLE_STATUS = new Set(['contract-ready', 'implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
 const MARKABLE_STATUS = new Set(['implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
+const PRODUCT_CONTEXT_HEADINGS = [
+  /^##\s+Users\b/im,
+  /^##\s+Product Purpose\b/im,
+  /^##\s+Brand Personality\b/im,
+  /^##\s+Anti-references\b/im,
+  /^##\s+Design Principles\b/im,
+  /^##\s+Accessibility & Inclusion\b/im,
+  /^##\s+用户/im,
+  /^##\s+产品目的/im,
+  /^##\s+品牌人格/im,
+  /^##\s+反参考/im,
+  /^##\s+设计原则/im,
+  /^##\s+可访问/im
+];
+const DESIGN_STITCH_HEADINGS = [
+  /^##\s*(?:\d+\.\s*)?Overview\b/im,
+  /^##\s*(?:\d+\.\s*)?Colors\b/im,
+  /^##\s*(?:\d+\.\s*)?Typography\b/im,
+  /^##\s*(?:\d+\.\s*)?Elevation\b/im,
+  /^##\s*(?:\d+\.\s*)?Components\b/im,
+  /^##\s*(?:\d+\.\s*)?Do'?s and Don'?ts\b/im
+];
+const DESIGN_VISUAL_MARKERS = [
+  /\bcolors?\b/i,
+  /\btypography\b/i,
+  /\belevation\b/i,
+  /\bcomponents?\b/i,
+  /\bspacing\b/i,
+  /\btokens?\b/i,
+  /\bvisual\b/i,
+  /颜色|色彩|字体|排版|间距|组件|动效|视觉|设计系统|设计\s*token|设计变量/i
+];
+const DESIGN_ARCHITECTURE_HEADINGS = [
+  /^#{1,3}\s*.*\bArchitecture\b.*$/im,
+  /^#{1,3}\s*.*技术栈.*$/m,
+  /^#{1,3}\s*.*项目结构.*$/m,
+  /^#{1,3}\s*.*目录结构.*$/m,
+  /^#{1,3}\s*.*工程结构.*$/m,
+  /^#{1,3}\s*.*架构设计.*$/m,
+  /^#{1,3}\s*.*前端架构.*$/m,
+  /^#{1,3}\s*.*包管理.*$/m,
+  /^#{1,3}\s*.*运行环境.*$/m
+];
 const INVALID_SELECTION_PATTERNS = [
   /你来选/,
   /挑.*稳/,
@@ -243,6 +287,73 @@ function validateJsonFile(file, schemaFile, label) {
   return { ok: errors.length === 0, exists: true, data, errors };
 }
 
+function readTextFile(file) {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+function countMatches(text, patterns) {
+  return patterns.filter(pattern => pattern.test(text)).length;
+}
+
+function validateProductContext(file) {
+  const errors = [];
+  const text = readTextFile(file);
+  const registerMatch = text.match(/^##\s+Register\s*\n+([^\n#]+)/im);
+
+  if (!registerMatch) {
+    errors.push(`${toProjectPath(file)} must include ## Register with bare brand or product`);
+  } else {
+    const register = registerMatch[1].trim().toLowerCase();
+    if (!['brand', 'product'].includes(register)) {
+      errors.push(`${toProjectPath(file)} ## Register must be exactly brand or product, got ${JSON.stringify(registerMatch[1].trim())}`);
+    }
+  }
+
+  const headingCount = countMatches(text, PRODUCT_CONTEXT_HEADINGS);
+  if (headingCount < 3) {
+    errors.push(`${toProjectPath(file)} does not look like Impeccable PRODUCT.md; expected users/purpose/brand/anti-reference/principles/accessibility context`);
+  }
+
+  return { ok: errors.length === 0, errors };
+}
+
+function yamlFrontmatter(text) {
+  if (!text.startsWith('---')) return null;
+  const match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+  return match?.[1] ?? null;
+}
+
+function validateDesignContext(file) {
+  const errors = [];
+  const text = readTextFile(file);
+  const frontmatter = yamlFrontmatter(text);
+  const frontmatterHasTokens = Boolean(frontmatter && /\b(colors|typography|rounded|spacing|components)\s*:/i.test(frontmatter));
+  const stitchHeadingCount = countMatches(text, DESIGN_STITCH_HEADINGS);
+  const visualMarkerCount = countMatches(text, DESIGN_VISUAL_MARKERS);
+  const architectureHeadings = DESIGN_ARCHITECTURE_HEADINGS
+    .map(pattern => text.match(pattern)?.[0]?.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  if (architectureHeadings.length > 0) {
+    errors.push(`${toProjectPath(file)} looks like a technical architecture document, not a Stitch visual DESIGN.md: ${architectureHeadings.join('; ')}`);
+  }
+  if (!frontmatterHasTokens) {
+    errors.push(`${toProjectPath(file)} must include YAML frontmatter with visual tokens such as colors, typography, rounded, spacing, or components`);
+  }
+  if (stitchHeadingCount < 4) {
+    errors.push(`${toProjectPath(file)} must follow Stitch DESIGN.md body shape; expected Overview, Colors, Typography, Elevation, Components, and Do's and Don'ts sections`);
+  }
+  if (visualMarkerCount < 3) {
+    errors.push(`${toProjectPath(file)} does not contain enough visual-system markers; expected color, typography, spacing, component, token, motion, or visual guidance`);
+  }
+
+  return { ok: errors.length === 0, errors };
+}
+
 function firstExistingContext(rootDir, names) {
   for (const name of names) {
     const file = path.join(rootDir, name);
@@ -260,10 +371,20 @@ function resolveContext() {
   })).filter(match => match.productPath || match.designPath);
   const productMatch = matches.find(match => match.productPath);
   const designMatch = matches.find(match => match.designPath);
+  const productValidation = productMatch?.productPath
+    ? validateProductContext(productMatch.productPath)
+    : { ok: false, errors: [] };
+  const designValidation = designMatch?.designPath
+    ? validateDesignContext(designMatch.designPath)
+    : { ok: false, errors: [] };
+
   return {
-    ready: Boolean(productMatch?.productPath && designMatch?.designPath),
+    ready: Boolean(productMatch?.productPath && designMatch?.designPath && productValidation.ok && designValidation.ok),
     productPath: productMatch?.productPath ? rel(productMatch.productPath) : null,
-    designPath: designMatch?.designPath ? rel(designMatch.designPath) : null
+    designPath: designMatch?.designPath ? rel(designMatch.designPath) : null,
+    productOk: productValidation.ok,
+    designOk: designValidation.ok,
+    problems: [...productValidation.errors, ...designValidation.errors]
   };
 }
 
@@ -274,9 +395,10 @@ function fileExists(dir, name) {
 function phaseRules(phase) {
   const rules = {
     CONTEXT_BLOCKED: [
-      '停止 BFDS 设计推进：可信 PRODUCT.md / DESIGN.md 缺失。',
-      '只补项目级上下文，不追问当前目标界面的任务级信息。',
-      '完成 Impeccable init/document 或用户提供可信上下文后，重新运行 gate。'
+      '停止 BFDS 设计推进：Impeccable 项目级上下文未就绪。',
+      '父会话逐题问用户并等待回答，写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
+      'PRODUCT.md 必须是 Impeccable strategic context，DESIGN.md 必须是 Stitch 视觉系统文档，不是技术架构文档。',
+      '可用 fresh subagent 只根据 init-interview evidence 写 PRODUCT.md / DESIGN.md；完成后重新运行 gate。'
     ],
     NEEDS_SURFACE: [
       '只确认目标界面与变更边界，不生成三方向、不写工作台。',
@@ -343,6 +465,7 @@ function collectArtifacts(dir) {
   const evidenceDirExists = fs.existsSync(path.join(dir, 'evidence'));
   return {
     pendingRequest: artifact('evidence/pending-request.json'),
+    initInterviewEvidence: artifact(INIT_INTERVIEW_FILE),
     surfaceEvidence: artifact('evidence/surface.json'),
     directionsEvidence: artifact('evidence/directions.json'),
     selectionEvidence: artifact('evidence/selection.json'),
@@ -401,6 +524,33 @@ function writePendingRequest(dir, slug, request) {
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 }
 
+function contextBlockedTask(missing, errors) {
+  if (missing.includes(INIT_INTERVIEW_FILE)) {
+    return [
+      '逐题询问用户项目级上下文：默认 register、用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
+      `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
+      '用户确认后，再用 fresh subagent 或同等隔离流程写 PRODUCT.md / DESIGN.md。'
+    ];
+  }
+  if (errors.some(error => error.includes('DESIGN.md'))) {
+    return [
+      '修正 DESIGN.md：必须是 Stitch 视觉系统文档，包含 token frontmatter 和 Overview/Colors/Typography/Elevation/Components/Do\'s and Don\'ts。',
+      '不要写技术栈、项目结构、目录结构、包管理或前端架构文档。',
+      '写完后重新运行 gate。'
+    ];
+  }
+  if (errors.some(error => error.includes('PRODUCT.md'))) {
+    return [
+      '修正 PRODUCT.md：必须包含 ## Register，值只能是 brand 或 product。',
+      '补齐用户、产品目的、品牌人格、反参考、设计原则、可访问性等项目级战略上下文。',
+      '写完后重新运行 gate。'
+    ];
+  }
+  return [
+    '补齐 Impeccable 项目级上下文后重新运行 gate。'
+  ];
+}
+
 function mtimeMs(file) {
   return fs.statSync(file).mtimeMs;
 }
@@ -425,6 +575,7 @@ function evaluate(dir) {
   const statusPath = path.join(dir, 'status.json');
   const existingStatus = fs.existsSync(statusPath) ? readJson(statusPath, errors, 'status.json') : null;
 
+  const initInterviewResult = validateJsonFile(path.join(dir, INIT_INTERVIEW_FILE), schemaPath('init-interview.schema.json'), 'init interview evidence');
   const surfaceResult = validateJsonFile(path.join(dir, 'evidence', 'surface.json'), schemaPath('surface-evidence.schema.json'), 'surface evidence');
   const directionsResult = validateJsonFile(path.join(dir, 'evidence', 'directions.json'), schemaPath('directions-evidence.schema.json'), 'directions evidence');
   const selectionResult = validateJsonFile(path.join(dir, 'evidence', 'selection.json'), schemaPath('selection-evidence.schema.json'), 'selection evidence');
@@ -441,8 +592,37 @@ function evaluate(dir) {
   const hasContractPack = contractFiles.length === 3;
   const hasPartialContractPack = contractFiles.length > 0 && contractFiles.length < 3;
 
-  if (!context.ready) {
-    return { phase: 'CONTEXT_BLOCKED', slug, dir: toProjectPath(dir), context, missing: ['trusted PRODUCT.md', 'trusted DESIGN.md'].filter((_, index) => index === 0 ? !context.productPath : !context.designPath), errors, warnings };
+  const contextMissing = [];
+  const contextErrors = [];
+  if (!context.productPath) contextMissing.push('trusted PRODUCT.md');
+  if (!context.designPath) contextMissing.push('trusted DESIGN.md');
+  if (!initInterviewResult.exists) contextMissing.push(INIT_INTERVIEW_FILE);
+  if (context.problems.length > 0) contextErrors.push(...context.problems);
+  if (initInterviewResult.exists && !initInterviewResult.ok) contextErrors.push(...initInterviewResult.errors);
+  if (initInterviewResult.ok) {
+    if (initInterviewResult.data.slug !== slug) contextErrors.push(`init interview evidence slug must equal directory slug ${slug}`);
+    if (initInterviewResult.data.productPath !== context.productPath) {
+      contextErrors.push(`init interview evidence productPath ${initInterviewResult.data.productPath} differs from current trusted path ${context.productPath}`);
+    }
+    if (initInterviewResult.data.designPath !== context.designPath) {
+      contextErrors.push(`init interview evidence designPath ${initInterviewResult.data.designPath} differs from current trusted path ${context.designPath}`);
+    }
+    if (initInterviewResult.data.source === 'user-interview' && initInterviewResult.data.questions.length < 2) {
+      contextErrors.push('init interview evidence source user-interview requires at least two user Q/A entries');
+    }
+  }
+
+  if (contextMissing.length > 0 || contextErrors.length > 0 || !context.ready) {
+    return {
+      phase: 'CONTEXT_BLOCKED',
+      slug,
+      dir: toProjectPath(dir),
+      context,
+      missing: contextMissing,
+      errors: contextErrors,
+      warnings,
+      contextTask: contextBlockedTask(contextMissing, contextErrors)
+    };
   }
 
   if (surfaceExists && !surfaceResult.ok) errors.push(...surfaceResult.errors);
@@ -531,6 +711,10 @@ function renderText(result) {
   if (result.missing?.length) lines.push(`缺失: ${result.missing.join(', ')}`);
   if (result.errors?.length) lines.push(...result.errors.map(error => `错误: ${error}`));
   if (result.warnings?.length) lines.push(...result.warnings.map(warning => `警告: ${warning}`));
+  if (result.contextTask?.length) {
+    lines.push('Impeccable 子流程任务:');
+    lines.push(...result.contextTask.map(task => `- ${task}`));
+  }
   if (result.phase === 'NEEDS_CONTRACT' && result.selection) {
     lines.push(`用户选择原话: ${result.selection.selectionQuote}`);
     lines.push(`选中方案摘要: ${result.selection.selectedOption?.summary ?? 'missing'}`);

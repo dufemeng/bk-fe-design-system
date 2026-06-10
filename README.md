@@ -45,6 +45,24 @@ node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs claude
 Codex 模式会把 BFDS 两个 skill 复制到 `${CODEX_HOME:-$HOME/.codex}/skills/`，并把内置 Impeccable 复制到目标项目的 `.agents/skills/impeccable/`。
 
 Claude Code 模式会把 BFDS 两个 skill 和内置 Impeccable 都复制到目标项目的 `.claude/skills/`，并复制 Impeccable 的 `.claude/agents/` 辅助 agent。
+同时会复制 BFDS 写入防火墙脚本到 `.claude/hooks/bfds-guard-hook.mjs`。在 Claude Code settings 中把它挂到 `PreToolUse`：
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/bfds-guard-hook.mjs" }]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/bfds-guard-hook.mjs" }]
+      }
+    ]
+  }
+}
+```
 
 手动安装 Codex 时，执行：
 
@@ -67,6 +85,8 @@ cp -R "$BFDS/skills/bfds-design" "$TARGET/.claude/skills/"
 cp -R "$BFDS/skills/bfds-implement" "$TARGET/.claude/skills/"
 cp -R "$BFDS/vendor/impeccable/.claude/skills/impeccable" "$TARGET/.claude/skills/"
 cp -R "$BFDS/vendor/impeccable/.claude/agents/"* "$TARGET/.claude/agents/"
+mkdir -p "$TARGET/.claude/hooks"
+cp "$BFDS/scripts/bfds-guard-hook.mjs" "$TARGET/.claude/hooks/"
 ```
 
 两个 BFDS skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
@@ -78,6 +98,7 @@ cp -R "$BFDS/vendor/impeccable/.claude/agents/"* "$TARGET/.claude/agents/"
 ```text
 docs/design/<slug>/
   evidence/
+    init-interview.json
     surface.json
     directions.json
     selection.json

@@ -78,6 +78,7 @@ node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs claude
 - BFDS 两个 skill 安装到目标项目 `.claude/skills/`。
 - Impeccable 安装到目标项目 `.claude/skills/impeccable/`。
 - Impeccable auxiliary agent 安装到目标项目 `.claude/agents/`。
+- BFDS Claude Code hook 脚本安装到目标项目 `.claude/hooks/`。
 
 验收标准：
 
@@ -87,6 +88,7 @@ test -f .claude/skills/bfds-implement/SKILL.md
 test -f .claude/skills/impeccable/SKILL.md
 test -f .claude/skills/impeccable/scripts/context.mjs
 test -f .claude/agents/impeccable-manual-edit-applier.md
+test -f .claude/hooks/bfds-guard-hook.mjs
 ```
 
 ## 4. BFDS 仓库自检
@@ -94,27 +96,28 @@ test -f .claude/agents/impeccable-manual-edit-applier.md
 在 BFDS 仓库根目录运行：
 
 ```bash
-node skills/bfds-design/scripts/bfds-context.mjs --json
 node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node scripts/validate-artifacts.mjs --forward-tests
 node scripts/validate-artifacts.mjs --pressure-tests
+node scripts/validate-artifacts.mjs --gate-tests
 node skills/bfds-design/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node skills/bfds-design/scripts/validate-artifacts.mjs --pressure-tests
+node skills/bfds-design/scripts/validate-artifacts.mjs --gate-tests
 node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 ```
 
 预期行为：
 
 - 示例设计产物校验通过。
-- BFDS 设计上下文脚本只报告可信上下文位置，不误用 `vendor/`、`open-sources/`、`fixtures/`。
 - 前向测试结构校验通过。
 - 压力测试结构校验通过。
+- gate 状态机校验通过，包含上下文访谈证据和 DESIGN.md 架构文档拦截。
 - skill-local 脚本能在不依赖 repo-root `templates/` 的情况下校验 fixture。
 
 验收标准：
 
 - 所有命令退出码为 0。
-- 输出包含 `Artifacts valid`、`Forward test files are structurally valid.` 和 `Pressure test files are structurally valid.`。
+- 输出包含 `Artifacts valid`、`Forward test files are structurally valid.`、`Pressure test files are structurally valid.` 和 `Gate tests passed.`。
 
 ## 5. Skill 触发冒烟
 

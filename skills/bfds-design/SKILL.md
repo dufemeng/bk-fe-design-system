@@ -37,6 +37,7 @@ gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT
 
 证据写入 `docs/design/<slug>/evidence/`：
 
+- `init-interview.json`：Impeccable 项目级访谈问答、用户确认原话、PRODUCT/DESIGN 路径和生成模式。
 - `surface.json`：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免、用户确认原话。
 - `directions.json`：A/B/C 三个方向规格和自检结果。
 - `selection.json`：用户选择原话、选中方案、工作台与三个方案路径。
