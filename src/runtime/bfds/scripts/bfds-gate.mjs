@@ -83,9 +83,9 @@ function usage() {
     'Usage: node bfds-gate.mjs <slug|docs/design/slug> [--json] [--check-only] [--root docs/design] [--title "..."] [--mark <state>] [--request "..."]',
     '',
     'Examples:',
-    '  node skills/bfds-design/scripts/bfds-gate.mjs settings-prompt',
-    '  node scripts/bfds-gate.mjs docs/design/settings-prompt --json',
-    '  node scripts/bfds-gate.mjs settings-prompt --check-only'
+    '  node <skill-dir>/scripts/bfds.mjs next settings-prompt',
+    '  node scripts/bfds.mjs next docs/design/settings-prompt --json',
+    '  node scripts/bfds.mjs next settings-prompt'
   ].join('\n');
 }
 
@@ -139,18 +139,8 @@ function parseArgs(argv) {
   return parsed;
 }
 
-function firstExisting(...candidates) {
-  return candidates.find(candidate => fs.existsSync(candidate)) ?? candidates[0];
-}
-
 function schemaPath(file) {
-  return firstExisting(
-    path.join('templates/artifacts', file),
-    path.join(scriptDir, '..', 'schemas', file),
-    path.join(scriptDir, '..', 'templates', 'artifacts', file),
-    path.join(scriptDir, '..', 'assets', 'templates', 'artifacts', file),
-    path.join(scriptDir, '..', '..', 'templates', 'artifacts', file)
-  );
+  return path.join(scriptDir, '..', 'schemas', file);
 }
 
 function rel(file) {
@@ -424,24 +414,24 @@ function phaseRules(phase) {
       '用户明确拒绝继续追问时，brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
       '三个方向至少在两个维度上不同，换色、换圆角、换阴影不算差异。',
       '不得新增未确认的产品能力、API、数据库、权限或后端范围。',
-      '写每个 evidence 后都重新运行 gate。'
+      '写每个 evidence 后都重新运行 bfds.mjs next。'
     ],
     NEEDS_WORKBENCH: [
       '只生成评审工作台和三个方案 HTML。',
       '必须使用 directions evidence 的 A/B/C 方向，不临时改方向。',
-      '生成 workbench.html 和 option-a/b/c.html 后重新运行 gate。'
+      '生成 workbench.html 和 option-a/b/c.html 后重新运行 bfds.mjs next。'
     ],
     NEEDS_SELECTION: [
       '停止等待用户用 AskUserQuestion 选择，不写设计交付包。',
       'Claude Code 必须用 AskUserQuestion 单选 A/B/C/合并或调整；推荐方案不算选择。',
       '用户必须明确选择 A/B/C 或给出合并方案。',
-      '有明确选择后写 evidence/selection.json，再重新运行 gate。'
+      '有明确选择后写 evidence/selection.json，再重新运行 bfds.mjs next。'
     ],
     NEEDS_CONTRACT: [
       '只生成设计交付包：design-contract.json、implementation-handoff.md、qa-plan.json。',
       '交付包必须使用 selection evidence 和前置证据，不凭聊天记忆补写。',
       '生成前先回显 selection evidence 的用户选择原话和选中方案摘要；Claude Code 用 AskUserQuestion 单选确认无误/需要修正。',
-      '生成后运行 validate-artifacts，再重新运行 gate。'
+      '生成后运行 bfds.mjs validate，再重新运行 bfds.mjs next。'
     ],
     CONTRACT_READY: [
       '设计交付包完整；等待用户发起实现或验收。',
@@ -509,7 +499,7 @@ function buildStatus(dir, slug, title, phase, existingStatus, surface, selection
     sourceSummary: surface?.sourceSummary || existingStatus?.sourceSummary || null,
     currentSurface: surface?.surface?.name ?? existingStatus?.currentSurface ?? null,
     changeType: surface?.changeType ?? existingStatus?.changeType ?? null,
-    notes: existingStatus?.notes ?? 'Managed by bfds-gate.mjs.'
+    notes: existingStatus?.notes ?? 'Managed by BFDS runtime.'
   };
 }
 

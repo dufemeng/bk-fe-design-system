@@ -17,7 +17,7 @@
 ## 预期读取文件
 
 - `skills/bfds-implement/SKILL.md`
-- `skills/bfds-implement/scripts/bfds-status.mjs`
+- `skills/bfds-implement/scripts/bfds.mjs`
 
 ## 期望行为
 

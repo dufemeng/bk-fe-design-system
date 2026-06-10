@@ -63,8 +63,10 @@ test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/SKILL.md"
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/SKILL.md"
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/scripts/bfds.mjs"
 test -d "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/runtime/bfds"
+test ! -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/scripts/bfds-gate.mjs"
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/scripts/bfds.mjs"
 test -d "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/runtime/bfds"
+test ! -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/scripts/bfds-status.mjs"
 test -f .agents/skills/impeccable/SKILL.md
 test -f .agents/skills/impeccable/scripts/context.mjs
 ```
@@ -91,8 +93,10 @@ test -f .claude/skills/bfds-design/SKILL.md
 test -f .claude/skills/bfds-implement/SKILL.md
 test -f .claude/skills/bfds-design/scripts/bfds.mjs
 test -d .claude/skills/bfds-design/runtime/bfds
+test ! -f .claude/skills/bfds-design/scripts/bfds-gate.mjs
 test -f .claude/skills/bfds-implement/scripts/bfds.mjs
 test -d .claude/skills/bfds-implement/runtime/bfds
+test ! -f .claude/skills/bfds-implement/scripts/bfds-status.mjs
 test -f .claude/skills/impeccable/SKILL.md
 test -f .claude/skills/impeccable/scripts/context.mjs
 test -f .claude/agents/impeccable-manual-edit-applier.md
@@ -105,15 +109,14 @@ test -f .claude/hooks/bfds-session-start.mjs
 在 BFDS 仓库根目录运行：
 
 ```bash
-node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
-node scripts/validate-artifacts.mjs --forward-tests
-node scripts/validate-artifacts.mjs --pressure-tests
-node scripts/validate-artifacts.mjs --gate-tests
 node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
-node skills/bfds-design/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
-node skills/bfds-design/scripts/validate-artifacts.mjs --pressure-tests
-node skills/bfds-design/scripts/validate-artifacts.mjs --gate-tests
-node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
+node scripts/bfds.mjs validate --forward-tests
+node scripts/bfds.mjs validate --pressure-tests
+node scripts/bfds.mjs validate --gate-tests
+node skills/bfds-design/scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
+node skills/bfds-design/scripts/bfds.mjs validate --pressure-tests
+node skills/bfds-design/scripts/bfds.mjs validate --gate-tests
+node skills/bfds-implement/scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
 ```
 
 预期行为：

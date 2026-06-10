@@ -55,10 +55,9 @@ function allow() {
 
 function findGateScript() {
   const candidates = [
-    path.join(cwd, 'scripts', 'bfds-gate.mjs'),
-    path.join(cwd, '.claude', 'skills', 'bfds-design', 'scripts', 'bfds-gate.mjs'),
-    path.join(cwd, '.agents', 'skills', 'bfds-design', 'scripts', 'bfds-gate.mjs'),
-    path.join(process.env.HOME ?? '', '.codex', 'skills', 'bfds-design', 'scripts', 'bfds-gate.mjs')
+    path.join(cwd, '.claude', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs'),
+    path.join(cwd, '.agents', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs'),
+    path.join(process.env.HOME ?? '', '.codex', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs')
   ];
   return candidates.find(candidate => candidate && fs.existsSync(candidate)) ?? null;
 }
@@ -72,7 +71,7 @@ function designSlugFor(file) {
 
 function runGate(slug) {
   const gateScript = findGateScript();
-  if (!gateScript) return { phase: 'UNKNOWN', errors: ['missing bfds-gate.mjs'] };
+  if (!gateScript) return { phase: 'UNKNOWN', errors: ['missing BFDS runtime gate'] };
   const result = spawnSync(process.execPath, [gateScript, slug, '--json', '--check-only'], {
     cwd,
     encoding: 'utf8'
@@ -160,9 +159,9 @@ const toolInput = input.tool_input ?? input.toolInput ?? input.input ?? {};
 
 if (/^bash$/i.test(toolName)) {
   const command = toolInput.command ?? '';
-  if (/\bbfds\.mjs\b/.test(command) || /\bbfds-gate\.mjs\b/.test(command) || /\bvalidate-artifacts\.mjs\b/.test(command)) allow();
+  if (/\bbfds\.mjs\b/.test(command)) allow();
   if (likelyProtectedBashWrite(command)) {
-    deny('write-like Bash commands targeting PRODUCT.md, DESIGN.md, or docs/design/** are blocked. Use BFDS runtime commands, Write/Edit in the correct BFDS phase, or run validate-artifacts.');
+    deny('write-like Bash commands targeting PRODUCT.md, DESIGN.md, or docs/design/** are blocked. Use bfds.mjs, or Write/Edit in the correct BFDS phase.');
   }
   allow();
 }

@@ -16,7 +16,7 @@
 ## 预期读取文件
 
 - `skills/bfds-design/SKILL.md`
-- `skills/bfds-design/scripts/bfds-gate.mjs`
+- `skills/bfds-design/scripts/bfds.mjs`
 - `skills/bfds-design/references/impeccable-integration.md`
 - `skills/bfds-design/references/surface-change-framing.md`
 - `fixtures/current-surface-description.md`
@@ -24,13 +24,13 @@
 
 ## 期望行为
 
-- 先运行 `bfds-gate.mjs <slug>`，只接受 gate 从可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
-- 如果 gate 输出 `CONTEXT_BLOCKED`，停在设计上下文梳理，不进入页面重设计。
-- gate 输出 `NEEDS_SURFACE` 后，读取 `surface-change-framing.md`。
+- 先运行 `bfds.mjs next <slug>`，只接受 next-card 从可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
+- 如果 next-card 输出 `CONTEXT_BLOCKED`，停在设计上下文梳理，不进入页面重设计。
+- next-card 输出 `NEEDS_SURFACE` 后，读取 `surface-change-framing.md`。
 - 判定改动类型为 `modify`。
 - 要求当前目标界面视觉证据，或明确“现状由代码推断，未视觉验证”。
 - 确认必须保留、允许改变、必须避免。
-- 用户结构化确认后写 `docs/design/<slug>/evidence/surface.json`，并重跑 gate。
+- 用户结构化确认后用 `bfds.mjs answer --stage surface` 提交证据，并读取返回的 next-card。
 
 ## 停止/继续
 

@@ -28,9 +28,9 @@
 
 ## 通过标准
 
-- 运行 `bfds-gate.mjs <slug>` 或等价 gate，输出 `CONTEXT_BLOCKED`。
+- 运行 `bfds.mjs next <slug>`，输出 `CONTEXT_BLOCKED`。
 - 读取 Impeccable `init` reference。
 - 明确把用户当前输入拆成“挂起的任务级设计请求”和“项目级初始化上下文”。
 - init 阶段只问项目级问题；Claude Code 用 `AskUserQuestion` 单选 `product` / `brand`，不得问 register 名称、品牌 ID 或产品 ID。
-- init/document 完成后重跑 gate；只有 gate 不再输出 `CONTEXT_BLOCKED` 后才恢复挂起的任务级设计请求。
+- init/document 完成后重跑 `bfds.mjs next`；只有 next-card 不再输出 `CONTEXT_BLOCKED` 后才恢复挂起的任务级设计请求。
 - `evidence/gate-log.ndjson` 记录至少一次 `CONTEXT_BLOCKED`。

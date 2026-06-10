@@ -25,7 +25,7 @@ Use the repository at /path/to/project.
 不要这样写：
 
 ```text
-Review this skill and confirm it runs bfds-gate.mjs first.
+Review this skill and confirm it follows its next-card flow.
 ```
 
 ## 最小新会话场景

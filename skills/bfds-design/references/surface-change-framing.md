@@ -25,8 +25,8 @@ Claude Code 中，改动类型、证据来源和确认类选择必须用 `AskUse
 
 ## 写入后
 
-写入 `evidence/surface.json`，然后运行：
+提交目标界面字段，然后读取返回的 next-card：
 
 ```bash
-node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug>
+node <bfds-design-skill-dir>/scripts/bfds.mjs answer <slug> --stage surface --field surface="..." --field currentSource="..." --field changeType="..." --field keep="..." --field change="..." --field avoid="..." --field confirmationQuote="..."
 ```

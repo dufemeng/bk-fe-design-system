@@ -5,12 +5,13 @@
 ```text
 docs/design/<slug>/
   workbench.html
+  workbench.css
   option-a.html
   option-b.html
   option-c.html
 ```
 
-模板优先使用本 skill 自带 `assets/templates/kami-workbench/`，开发态可用 repo-root `templates/kami-workbench/`。
+用 `node <bfds-design-skill-dir>/scripts/bfds.mjs workbench <slug> --scaffold` 生成脚手架；runtime 模板在安装后随 skill 注入，模型不需要读取模板文件。
 
 ## 样式边界
 
@@ -30,4 +31,4 @@ docs/design/<slug>/
 
 ## 生成后
 
-检查三个 iframe 可加载、可滚动，基础交互可点击。然后重跑 gate。
+检查三个 iframe 可加载、可滚动，基础交互可点击。然后运行 `node <bfds-design-skill-dir>/scripts/bfds.mjs workbench <slug> --validate`，继续读取返回的 next-card。

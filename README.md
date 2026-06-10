@@ -80,6 +80,9 @@ BFDS=/path/to/bk-fe-design-system
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills" "$TARGET/.agents/skills"
 cp -R "$BFDS/skills/bfds-design" "${CODEX_HOME:-$HOME/.codex}/skills/"
 cp -R "$BFDS/skills/bfds-implement" "${CODEX_HOME:-$HOME/.codex}/skills/"
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/runtime" "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/runtime"
+cp -R "$BFDS/src/runtime/bfds" "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/runtime/"
+cp -R "$BFDS/src/runtime/bfds" "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/runtime/"
 cp -R "$BFDS/vendor/impeccable/.agents/skills/impeccable" "$TARGET/.agents/skills/"
 ```
 
@@ -91,6 +94,9 @@ BFDS=/path/to/bk-fe-design-system
 mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/agents"
 cp -R "$BFDS/skills/bfds-design" "$TARGET/.claude/skills/"
 cp -R "$BFDS/skills/bfds-implement" "$TARGET/.claude/skills/"
+mkdir -p "$TARGET/.claude/skills/bfds-design/runtime" "$TARGET/.claude/skills/bfds-implement/runtime"
+cp -R "$BFDS/src/runtime/bfds" "$TARGET/.claude/skills/bfds-design/runtime/"
+cp -R "$BFDS/src/runtime/bfds" "$TARGET/.claude/skills/bfds-implement/runtime/"
 cp -R "$BFDS/vendor/impeccable/.claude/skills/impeccable" "$TARGET/.claude/skills/"
 cp -R "$BFDS/vendor/impeccable/.claude/agents/"* "$TARGET/.claude/agents/"
 mkdir -p "$TARGET/.claude/hooks"
@@ -98,7 +104,7 @@ cp "$BFDS/scripts/bfds-guard-hook.mjs" "$TARGET/.claude/hooks/"
 cp "$BFDS/scripts/bfds-session-start.mjs" "$TARGET/.claude/hooks/"
 ```
 
-两个 BFDS skill 自带 BFDS runtime、模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
+安装脚本会把 BFDS runtime、schema、模板和辅助脚本注入两个 BFDS skill；仓库内只保留一份 runtime 源码：`src/runtime/bfds/`。安装后不要求保留本仓库的 `src/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
 
 ## 设计产物目录
 
@@ -124,11 +130,11 @@ docs/design/<slug>/
   status.json
 ```
 
-MVP 模板和 schema 位于：
+MVP runtime、模板和 schema 位于：
 
 ```text
-templates/artifacts/
-templates/kami-workbench/
+src/runtime/bfds/schemas/
+src/runtime/bfds/templates/kami-workbench/
 ```
 
 完整样例位于：
@@ -154,14 +160,11 @@ fixtures/docs-design-sample/settings-prompt/
 node scripts/install-bfds-skills.mjs codex --dry-run
 node scripts/install-bfds-skills.mjs claude --dry-run
 node scripts/bfds.mjs next settings-prompt
-node scripts/bfds-gate.mjs settings-prompt
-node scripts/bfds-gate.mjs settings-prompt --check-only
-node scripts/bfds-status.mjs
-node scripts/bfds-status.mjs --json --root fixtures/docs-design-sample
-node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
-node scripts/validate-artifacts.mjs --forward-tests
-node scripts/validate-artifacts.mjs --pressure-tests
-node scripts/validate-artifacts.mjs --gate-tests
+node scripts/bfds.mjs list --json --root fixtures/docs-design-sample
+node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
+node scripts/bfds.mjs validate --forward-tests
+node scripts/bfds.mjs validate --pressure-tests
+node scripts/bfds.mjs validate --gate-tests
 ```
 
 脚本只做确定性辅助：扫描状态、从磁盘证据裁决 gate 阶段、校验设计产物结构、校验前向测试和压力测试文件结构。核心设计判断仍由 BFDS skill references 和用户确认完成。
@@ -173,8 +176,8 @@ node scripts/validate-artifacts.mjs --gate-tests
 推荐验证顺序：
 
 1. skill frontmatter 校验：`python3 /Users/loomisli/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/bfds-design` 和 `skills/bfds-implement`。
-2. 示例设计产物校验：`node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt`。
-3. 前向测试结构校验：`node scripts/validate-artifacts.mjs --forward-tests`。
-4. 压力测试结构校验：`node scripts/validate-artifacts.mjs --pressure-tests`。
-5. gate 状态机校验：`node scripts/validate-artifacts.mjs --gate-tests`。
+2. 示例设计产物校验：`node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt`。
+3. 前向测试结构校验：`node scripts/bfds.mjs validate --forward-tests`。
+4. 压力测试结构校验：`node scripts/bfds.mjs validate --pressure-tests`。
+5. gate 状态机校验：`node scripts/bfds.mjs validate --gate-tests`。
 6. 人工走读 `tests/forward/`，并按 `tests/pressure/RUNBOOK.md` 做新会话 agent 压力测试，确认开始设计、上下文陷阱、拒绝继续追问、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合规格。

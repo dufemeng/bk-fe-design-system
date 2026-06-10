@@ -18,8 +18,7 @@
 ## 预期读取文件
 
 - `skills/bfds-implement/SKILL.md`
-- `skills/bfds-implement/scripts/bfds-status.mjs`
-- `skills/bfds-implement/scripts/bfds-gate.mjs`
+- `skills/bfds-implement/scripts/bfds.mjs`
 - `skills/bfds-implement/references/implementation-protocol.md`
 - `docs/design/settings-prompt/status.json`
 - `docs/design/settings-prompt/design-contract.json`
@@ -28,8 +27,8 @@
 
 ## 期望行为
 
-- 运行或人工执行 `bfds-status` 恢复。
-- 对唯一设计任务运行 gate，确认阶段为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
+- 运行 `bfds.mjs list --json --limit 4` 恢复候选。
+- 对唯一设计任务运行 `bfds.mjs next`，确认阶段为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
 - 回放设计任务标识、title、selectedOption、currentSurface、lastUpdated 摘要。
 - Claude Code 用 `AskUserQuestion` 要求用户确认使用该设计契约。
 - 用户确认后读取三个设计产物，再扫描代码实现。

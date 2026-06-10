@@ -21,9 +21,8 @@
 ## 预期读取文件
 
 - `skills/bfds-design/SKILL.md`
-- `skills/bfds-design/scripts/bfds-gate.mjs`
+- `skills/bfds-design/scripts/bfds.mjs`
 - `skills/bfds-design/references/contract-pack.md`
-- `skills/bfds-design/assets/templates/artifacts/`
 - `docs/design/settings-prompt/status.json` 或当前线程设计任务的 `status.json`
 - `docs/design/settings-prompt/evidence/surface.json`
 - `docs/design/settings-prompt/evidence/brainstorm-dialogue.json`
@@ -31,9 +30,9 @@
 
 ## 期望行为
 
-- 先运行 gate，确认阶段为 `NEEDS_SELECTION`。
-- 写 `docs/design/settings-prompt/evidence/selection.json` 固化 B+A+C，并重跑 gate。
-- gate 输出 `NEEDS_CONTRACT` 后读取 `contract-pack.md`。
+- 先运行 `bfds.mjs next settings-prompt`，确认阶段为 `NEEDS_SELECTION`。
+- 用 `bfds.mjs select` 固化 B+A+C，并读取返回的 next-card。
+- next-card 输出 `NEEDS_CONTRACT` 后读取 `contract-pack.md`。
 - 将选择固化为 B+A+C，不把聊天记忆当实现依据。
 - 写入设计交付包。
 

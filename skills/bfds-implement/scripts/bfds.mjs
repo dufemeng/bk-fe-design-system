@@ -6,8 +6,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const candidates = [
+  path.resolve(scriptDir, '..', 'runtime', 'bfds', 'cli.mjs'),
   path.resolve(scriptDir, '..', 'src', 'runtime', 'bfds', 'cli.mjs'),
-  path.resolve(scriptDir, '..', 'runtime', 'bfds', 'cli.mjs')
+  path.resolve(scriptDir, '..', '..', '..', 'src', 'runtime', 'bfds', 'cli.mjs')
 ];
 const cli = candidates.find(candidate => fs.existsSync(candidate));
 

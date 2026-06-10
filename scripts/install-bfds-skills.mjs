@@ -63,7 +63,7 @@ function copyDir(src, dest, dryRun) {
 function noteRuntime(skillDir, dryRun) {
   const runtimeDir = path.join(skillDir, 'runtime', 'bfds');
   const runtimeCli = path.join(runtimeDir, 'cli.mjs');
-  if (!fs.existsSync(runtimeCli)) {
+  if (!dryRun && !fs.existsSync(runtimeCli)) {
     throw new Error(`BFDS runtime is missing from skill: ${runtimeCli}`);
   }
   console.log(`${dryRun ? '[dry-run] ' : ''}runtime included ${runtimeDir}`);
@@ -91,6 +91,30 @@ function copyPath(src, dest, dryRun) {
   }
 }
 
+function copyRuntimeInto(skillDest, dryRun) {
+  const runtimeSource = path.join(repoRoot, 'src', 'runtime', 'bfds');
+  const runtimeDest = path.join(skillDest, 'runtime', 'bfds');
+  copyDir(runtimeSource, runtimeDest, dryRun);
+}
+
+function resetDir(dest, dryRun) {
+  console.log(`${dryRun ? '[dry-run] ' : ''}reset ${dest}`);
+  if (dryRun) return;
+  fs.rmSync(dest, { recursive: true, force: true });
+  fs.mkdirSync(dest, { recursive: true });
+}
+
+function copyBfdsSkill(skillName, dest, dryRun) {
+  const source = path.join(repoRoot, 'skills', skillName);
+  resetDir(dest, dryRun);
+  copyPath(path.join(source, 'SKILL.md'), path.join(dest, 'SKILL.md'), dryRun);
+  copyDir(path.join(source, 'agents'), path.join(dest, 'agents'), dryRun);
+  copyDir(path.join(source, 'references'), path.join(dest, 'references'), dryRun);
+  copyDir(path.join(source, 'scripts'), path.join(dest, 'scripts'), dryRun);
+  copyRuntimeInto(dest, dryRun);
+  noteRuntime(dest, dryRun);
+}
+
 function copyDirContents(srcDir, destDir, dryRun) {
   assertDir(srcDir, 'Source directory');
 
@@ -100,29 +124,21 @@ function copyDirContents(srcDir, destDir, dryRun) {
 }
 
 function installCodex(targetRoot, codexSkillsDir, dryRun) {
-  const bfdsDesign = path.join(repoRoot, 'skills', 'bfds-design');
-  const bfdsImplement = path.join(repoRoot, 'skills', 'bfds-implement');
   const impeccableAgents = path.join(repoRoot, 'vendor', 'impeccable', '.agents', 'skills', 'impeccable');
 
-  copyDir(bfdsDesign, path.join(codexSkillsDir, 'bfds-design'), dryRun);
-  noteRuntime(bfdsDesign, dryRun);
-  copyDir(bfdsImplement, path.join(codexSkillsDir, 'bfds-implement'), dryRun);
-  noteRuntime(bfdsImplement, dryRun);
+  copyBfdsSkill('bfds-design', path.join(codexSkillsDir, 'bfds-design'), dryRun);
+  copyBfdsSkill('bfds-implement', path.join(codexSkillsDir, 'bfds-implement'), dryRun);
   copyDir(impeccableAgents, path.join(targetRoot, '.agents', 'skills', 'impeccable'), dryRun);
 }
 
 function installClaude(targetRoot, dryRun) {
-  const bfdsDesign = path.join(repoRoot, 'skills', 'bfds-design');
-  const bfdsImplement = path.join(repoRoot, 'skills', 'bfds-implement');
   const impeccableClaude = path.join(repoRoot, 'vendor', 'impeccable', '.claude', 'skills', 'impeccable');
   const impeccableClaudeAgents = path.join(repoRoot, 'vendor', 'impeccable', '.claude', 'agents');
   const bfdsGuardHook = path.join(repoRoot, 'scripts', 'bfds-guard-hook.mjs');
   const bfdsSessionStartHook = path.join(repoRoot, 'scripts', 'bfds-session-start.mjs');
 
-  copyDir(bfdsDesign, path.join(targetRoot, '.claude', 'skills', 'bfds-design'), dryRun);
-  noteRuntime(bfdsDesign, dryRun);
-  copyDir(bfdsImplement, path.join(targetRoot, '.claude', 'skills', 'bfds-implement'), dryRun);
-  noteRuntime(bfdsImplement, dryRun);
+  copyBfdsSkill('bfds-design', path.join(targetRoot, '.claude', 'skills', 'bfds-design'), dryRun);
+  copyBfdsSkill('bfds-implement', path.join(targetRoot, '.claude', 'skills', 'bfds-implement'), dryRun);
   copyDir(impeccableClaude, path.join(targetRoot, '.claude', 'skills', 'impeccable'), dryRun);
   copyDirContents(impeccableClaudeAgents, path.join(targetRoot, '.claude', 'agents'), dryRun);
   copyPath(bfdsGuardHook, path.join(targetRoot, '.claude', 'hooks', 'bfds-guard-hook.mjs'), dryRun);

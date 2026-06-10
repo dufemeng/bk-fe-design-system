@@ -13,17 +13,8 @@ const gateMode = args.includes('--gate-tests');
 const targetDir = args.find(arg => !arg.startsWith('--')) ?? 'fixtures/docs-design-sample/settings-prompt';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 
-function firstExisting(...candidates) {
-  return candidates.find(candidate => fs.existsSync(candidate)) ?? candidates[0];
-}
-
 function schemaPath(file) {
-  return firstExisting(
-    path.join('templates/artifacts', file),
-    path.join(scriptDir, '..', 'schemas', file),
-    path.join(scriptDir, '..', 'assets', 'templates', 'artifacts', file),
-    path.join(scriptDir, '..', '..', 'templates', 'artifacts', file)
-  );
+  return path.join(scriptDir, '..', 'schemas', file);
 }
 
 const schemaFiles = {
@@ -322,11 +313,11 @@ function assertGateLogIncludes(projectRoot, slug, phase, errors, label) {
 
 function findRepoRoot() {
   const candidates = [
-    path.resolve(scriptDir, '..'),
-    path.resolve(scriptDir, '..', '..', '..')
+    path.resolve(scriptDir, '..', '..', '..', '..'),
+    path.resolve(scriptDir, '..')
   ];
   return candidates.find(candidate =>
-    fs.existsSync(path.join(candidate, 'templates', 'artifacts')) &&
+    fs.existsSync(path.join(candidate, 'src', 'runtime', 'bfds', 'cli.mjs')) &&
     fs.existsSync(path.join(candidate, 'skills', 'bfds-design')) &&
     fs.existsSync(path.join(candidate, 'skills', 'bfds-implement'))
   ) ?? null;
@@ -338,33 +329,32 @@ function assertSameFile(left, right, errors) {
   if (!fs.existsSync(left) || !fs.existsSync(right)) return;
   const leftBytes = fs.readFileSync(left);
   const rightBytes = fs.readFileSync(right);
-  if (!leftBytes.equals(rightBytes)) errors.push(`bundled copy drift: ${right} differs from ${left}`);
+  if (!leftBytes.equals(rightBytes)) errors.push(`wrapper drift: ${right} differs from ${left}`);
 }
 
-function listFilesRecursive(dir) {
-  if (!fs.existsSync(dir)) return [];
+function assertAbsent(file, errors) {
+  if (!fs.existsSync(file)) return;
+  const stat = fs.statSync(file);
+  if (stat.isFile()) {
+    errors.push(`unexpected redundant BFDS copy: ${file}`);
+    return;
+  }
+  if (stat.isDirectory() && listFiles(file).length > 0) {
+    errors.push(`unexpected redundant BFDS copy: ${file}`);
+  }
+}
+
+function listFiles(dir) {
   const files = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) files.push(...listFilesRecursive(fullPath));
+    if (entry.isDirectory()) files.push(...listFiles(fullPath));
     else if (entry.isFile()) files.push(fullPath);
   }
   return files;
 }
 
-function assertSameDirectory(leftDir, rightDir, errors) {
-  assertFile(leftDir, errors);
-  assertFile(rightDir, errors);
-  if (!fs.existsSync(leftDir) || !fs.existsSync(rightDir)) return;
-  const leftFiles = listFilesRecursive(leftDir).map(file => path.relative(leftDir, file)).sort();
-  const rightFiles = listFilesRecursive(rightDir).map(file => path.relative(rightDir, file)).sort();
-  const allFiles = new Set([...leftFiles, ...rightFiles]);
-  for (const relativeFile of allFiles) {
-    assertSameFile(path.join(leftDir, relativeFile), path.join(rightDir, relativeFile), errors);
-  }
-}
-
-function validateBundledCopyParity() {
+function validateSlimRuntimeLayout() {
   const errors = [];
   const repoRoot = findRepoRoot();
   if (!repoRoot) return errors;
@@ -375,37 +365,40 @@ function validateBundledCopyParity() {
       path.join(repoRoot, 'skills', skill, 'scripts', 'bfds.mjs'),
       errors
     );
-    assertSameDirectory(
-      path.join(repoRoot, 'src', 'runtime', 'bfds'),
-      path.join(repoRoot, 'skills', skill, 'runtime', 'bfds'),
-      errors
-    );
-    assertSameFile(
-      path.join(repoRoot, 'scripts', 'bfds-gate.mjs'),
-      path.join(repoRoot, 'skills', skill, 'scripts', 'bfds-gate.mjs'),
-      errors
-    );
-    assertSameFile(
-      path.join(repoRoot, 'scripts', 'validate-artifacts.mjs'),
-      path.join(repoRoot, 'skills', skill, 'scripts', 'validate-artifacts.mjs'),
-      errors
-    );
-    for (const schema of [
-      'design-contract.schema.json',
-      'brainstorm-dialogue.schema.json',
-      'directions-evidence.schema.json',
-      'init-interview.schema.json',
-      'qa-plan.schema.json',
-      'selection-evidence.schema.json',
-      'status.schema.json',
-      'surface-evidence.schema.json'
-    ]) {
-      assertSameFile(
-        path.join(repoRoot, 'templates', 'artifacts', schema),
-        path.join(repoRoot, 'skills', skill, 'assets', 'templates', 'artifacts', schema),
-        errors
-      );
-    }
+    assertAbsent(path.join(repoRoot, 'skills', skill, 'runtime'), errors);
+    assertAbsent(path.join(repoRoot, 'skills', skill, 'scripts', 'bfds-gate.mjs'), errors);
+    assertAbsent(path.join(repoRoot, 'skills', skill, 'scripts', 'bfds-status.mjs'), errors);
+    assertAbsent(path.join(repoRoot, 'skills', skill, 'scripts', 'validate-artifacts.mjs'), errors);
+    assertAbsent(path.join(repoRoot, 'skills', skill, 'assets', 'templates'), errors);
+  }
+
+  for (const schema of [
+    'design-contract.schema.json',
+    'brainstorm-dialogue.schema.json',
+    'directions-evidence.schema.json',
+    'init-interview.schema.json',
+    'qa-plan.schema.json',
+    'selection-evidence.schema.json',
+    'status.schema.json',
+    'surface-evidence.schema.json'
+  ]) {
+    assertFile(path.join(repoRoot, 'src', 'runtime', 'bfds', 'schemas', schema), errors);
+  }
+
+  for (const template of [
+    'option.html',
+    'workbench.css',
+    'workbench.html'
+  ]) {
+    assertFile(path.join(repoRoot, 'src', 'runtime', 'bfds', 'templates', 'kami-workbench', template), errors);
+  }
+
+  for (const legacyPath of [
+    path.join(repoRoot, 'templates'),
+    path.join(repoRoot, 'skills', 'bfds-design', 'assets', 'templates'),
+    path.join(repoRoot, 'skills', 'bfds-implement', 'assets', 'templates')
+  ]) {
+    assertAbsent(legacyPath, errors);
   }
 
   return errors;
@@ -737,7 +730,7 @@ function baseQaPlan(slug) {
 }
 
 function validateGateTests() {
-  const errors = validateBundledCopyParity();
+  const errors = validateSlimRuntimeLayout();
   const slug = 'settings-prompt';
   const projectRoots = [];
   const makeProject = (withContext = true) => {

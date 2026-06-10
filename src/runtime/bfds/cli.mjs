@@ -301,9 +301,8 @@ function commandList(rest, global) {
 }
 
 function commandValidate(rest, global) {
-  const parsed = parseCommand(rest);
-  const target = parsed.target ?? 'fixtures/docs-design-sample/settings-prompt';
-  const child = runNode(scriptPath('validate-artifacts.mjs'), [target]);
+  const validateArgs = rest.length > 0 ? rest : ['fixtures/docs-design-sample/settings-prompt'];
+  const child = runNode(scriptPath('validate-artifacts.mjs'), validateArgs);
   if (child.status !== 0) throw new Error(child.stderr || child.stdout);
   return child.stdout;
 }

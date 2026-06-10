@@ -53,7 +53,7 @@
 
 - 优先做最小可验证改动。不要为了“统一”而大范围重写无关文档。
 - 不改 `docs/bfds-mvp-design-spec.md`、`docs/implementation-prompt.md` 等源设计/历史规格，除非用户明确要求。
-- 修改模板时，必须同步 repo-root `templates/` 和 skill 内置 `assets/templates/`。
+- 修改 runtime schema 或模板时，只改 `src/runtime/bfds/`；安装脚本会把它注入到安装后的 skill。
 - 修改示例设计产物时，保持 schema key、状态枚举和路径不变。
 - 不用脚本承载核心设计判断；脚本只能做状态扫描、artifact 校验、安装、自检等确定性辅助。
 
@@ -63,10 +63,10 @@
 
 ```bash
 git diff --check
-node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
-node scripts/validate-artifacts.mjs --forward-tests
-node skills/bfds-design/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
-node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
+node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
+node scripts/bfds.mjs validate --forward-tests
+node skills/bfds-design/scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
+node skills/bfds-implement/scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
 ```
 
 如果修改 skill frontmatter 或 `agents/openai.yaml`，还要做 frontmatter/openai 元数据校验。若 `quick_validate.py` 因缺依赖无法运行，明确记录失败原因，不假装通过。
