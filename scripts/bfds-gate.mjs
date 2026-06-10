@@ -303,6 +303,7 @@ function phaseRules(phase) {
     NEEDS_CONTRACT: [
       '只生成设计交付包：design-contract.json、implementation-handoff.md、qa-plan.json。',
       '交付包必须使用 selection evidence 和前置证据，不凭聊天记忆补写。',
+      '生成前先向用户回显 selection evidence 的用户选择原话和选中方案摘要；用户确认回显无误后才写设计交付包。',
       '生成后运行 validate-artifacts，再重新运行 gate。'
     ],
     CONTRACT_READY: [
@@ -530,6 +531,10 @@ function renderText(result) {
   if (result.missing?.length) lines.push(`缺失: ${result.missing.join(', ')}`);
   if (result.errors?.length) lines.push(...result.errors.map(error => `错误: ${error}`));
   if (result.warnings?.length) lines.push(...result.warnings.map(warning => `警告: ${warning}`));
+  if (result.phase === 'NEEDS_CONTRACT' && result.selection) {
+    lines.push(`用户选择原话: ${result.selection.selectionQuote}`);
+    lines.push(`选中方案摘要: ${result.selection.selectedOption?.summary ?? 'missing'}`);
+  }
   lines.push('下一步规则:');
   for (const rule of phaseRules(result.phase)) lines.push(`- ${rule}`);
   return `${lines.join('\n')}\n`;

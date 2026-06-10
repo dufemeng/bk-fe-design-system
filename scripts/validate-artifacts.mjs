@@ -309,6 +309,62 @@ function assertGateLogIncludes(projectRoot, slug, phase, errors, label) {
   if (!phases.includes(phase)) errors.push(`${label}: expected gate log to include ${phase}, got ${phases.join(', ')}`);
 }
 
+function findRepoRoot() {
+  const candidates = [
+    path.resolve(scriptDir, '..'),
+    path.resolve(scriptDir, '..', '..', '..')
+  ];
+  return candidates.find(candidate =>
+    fs.existsSync(path.join(candidate, 'templates', 'artifacts')) &&
+    fs.existsSync(path.join(candidate, 'skills', 'bfds-design')) &&
+    fs.existsSync(path.join(candidate, 'skills', 'bfds-implement'))
+  ) ?? null;
+}
+
+function assertSameFile(left, right, errors) {
+  assertFile(left, errors);
+  assertFile(right, errors);
+  if (!fs.existsSync(left) || !fs.existsSync(right)) return;
+  const leftBytes = fs.readFileSync(left);
+  const rightBytes = fs.readFileSync(right);
+  if (!leftBytes.equals(rightBytes)) errors.push(`bundled copy drift: ${right} differs from ${left}`);
+}
+
+function validateBundledCopyParity() {
+  const errors = [];
+  const repoRoot = findRepoRoot();
+  if (!repoRoot) return errors;
+
+  for (const skill of ['bfds-design', 'bfds-implement']) {
+    assertSameFile(
+      path.join(repoRoot, 'scripts', 'bfds-gate.mjs'),
+      path.join(repoRoot, 'skills', skill, 'scripts', 'bfds-gate.mjs'),
+      errors
+    );
+    assertSameFile(
+      path.join(repoRoot, 'scripts', 'validate-artifacts.mjs'),
+      path.join(repoRoot, 'skills', skill, 'scripts', 'validate-artifacts.mjs'),
+      errors
+    );
+    for (const schema of [
+      'design-contract.schema.json',
+      'directions-evidence.schema.json',
+      'qa-plan.schema.json',
+      'selection-evidence.schema.json',
+      'status.schema.json',
+      'surface-evidence.schema.json'
+    ]) {
+      assertSameFile(
+        path.join(repoRoot, 'templates', 'artifacts', schema),
+        path.join(repoRoot, 'skills', skill, 'assets', 'templates', 'artifacts', schema),
+        errors
+      );
+    }
+  }
+
+  return errors;
+}
+
 function baseSurface(slug) {
   return {
     slug,
@@ -463,7 +519,7 @@ function baseQaPlan(slug) {
 }
 
 function validateGateTests() {
-  const errors = [];
+  const errors = validateBundledCopyParity();
   const slug = 'settings-prompt';
   const projectRoots = [];
   const makeProject = (withContext = true) => {
@@ -554,6 +610,9 @@ function validateGateTests() {
     writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug));
     result = runGate(projectRoot, slug);
     if (result.phase !== 'NEEDS_CONTRACT') errors.push(`expected NEEDS_CONTRACT, got ${result.phase}`);
+    if (!result.rules?.some(rule => rule.includes('回显') && rule.includes('selection evidence'))) {
+      errors.push('expected NEEDS_CONTRACT rules to require selection evidence echo confirmation');
+    }
 
     writeJson(path.join(designDir, 'design-contract.json'), baseContract(slug));
     writeJson(path.join(designDir, 'qa-plan.json'), baseQaPlan(slug));

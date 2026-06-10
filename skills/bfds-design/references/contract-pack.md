@@ -24,6 +24,17 @@
 
 `你来选`、`挑最稳的`、`推荐一个`、`三个都行你定`、`三个都差不多` 不算选择；只能给推荐并要求用户确认。
 
+## 回显确认
+
+生成设计交付包前，先向用户回显：
+
+- `selectionQuote`
+- `selectedOption.id`
+- `selectedOption.summary`
+- `selectedOption.mergedFrom`
+
+用户确认回显无误后，才写 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。用户指出不一致时，先修正 `evidence/selection.json` 并重跑 gate。
+
 ## design-contract.json
 
 机器权威合同，必须覆盖 schema 要求字段：`selectedOption`、`sourceArtifacts`、`surface`、`changeType`、`keep`、`change`、`avoid`、`screens`、`states`、`interactions`、`tokens`、`responsive`、`motion`、`assets`、`acceptanceRules`。
