@@ -398,14 +398,14 @@ function phaseRules(phase) {
       'Register 只问单选 product/brand；不要问 register 名称、品牌 ID 或产品 ID。',
       '写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
       'PRODUCT.md 必须是 Impeccable strategic context，DESIGN.md 必须是 Stitch 视觉系统文档，不是技术架构文档。',
-      '可用 fresh subagent 只根据 init-interview evidence 写 PRODUCT.md / DESIGN.md；完成后重新运行 gate。'
+      '可用 fresh subagent 只根据 init-interview evidence 写 PRODUCT.md / DESIGN.md；完成后运行 bfds.mjs next。'
     ],
     NEEDS_SURFACE: [
       '只确认目标界面与变更边界，不生成三方向、不写工作台。',
       'Claude Code 中改动类型、证据来源或确认类选择必须用 AskUserQuestion；开放说明一次只问一个问题。',
       '写 evidence/surface.json：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免。',
       'modify/remove/replace/restyle 必须有视觉证据或用户确认；仅代码推断要标注未视觉验证。',
-      '写完后重新运行 gate。'
+      '写完后运行 bfds.mjs next。'
     ],
     NEEDS_DIRECTIONS: [
       '只做设计方向探索；父会话一次只问一个设计表达问题并等待用户回答。',
@@ -443,7 +443,7 @@ function phaseRules(phase) {
     ],
     INCONSISTENT: [
       '停止：发现下游产物存在但上游证据缺失或证据无效。',
-      '不要补猜缺失证据；先修正 evidence 或删除错误下游产物后再运行 gate。'
+      '不要补猜缺失证据；先修正 evidence 或删除错误下游产物后再运行 bfds.mjs next。'
     ]
   };
   return rules[phase] ?? [];
@@ -543,18 +543,18 @@ function contextBlockedTask(missing, errors) {
     return [
       '修正 DESIGN.md：必须是 Stitch 视觉系统文档，包含 token frontmatter 和 Overview/Colors/Typography/Elevation/Components/Do\'s and Don\'ts。',
       '不要写技术栈、项目结构、目录结构、包管理或前端架构文档。',
-      '写完后重新运行 gate。'
+      '写完后运行 bfds.mjs next。'
     ];
   }
   if (errors.some(error => error.includes('PRODUCT.md'))) {
     return [
       '修正 PRODUCT.md：必须包含 ## Register，值只能是 brand 或 product。',
       '补齐用户、产品目的、品牌人格、反参考、设计原则、可访问性等项目级战略上下文。',
-      '写完后重新运行 gate。'
+      '写完后运行 bfds.mjs next。'
     ];
   }
   return [
-    '补齐 Impeccable 项目级上下文后重新运行 gate。'
+    '补齐 Impeccable 项目级上下文后运行 bfds.mjs next。'
   ];
 }
 
@@ -684,7 +684,7 @@ function evaluate(dir) {
 
   if (selectionResult.ok) {
     if (invalidSelectionQuote(selectionResult.data.selectionQuote)) {
-      warnings.push('selection evidence quote may not be an explicit user choice; confirm A/B/C or merge selection with the user');
+      warnings.push('selection evidence quote may delegate the choice to the agent; confirm A/B/C or merge selection with the user');
     }
     for (const file of [
       selectionResult.data.workbench,
@@ -711,8 +711,10 @@ function evaluate(dir) {
   if (directionsExists && !surfaceExists) errors.push('directions evidence exists before surface evidence');
   if (directionsExists && !brainstormExists) errors.push('directions evidence exists before brainstorm dialogue evidence');
   if ((existingWorkbenchFiles.length > 0) && !directionsExists) errors.push('workbench files exist before directions evidence');
+  const delegatedSelection = selectionResult.ok && invalidSelectionQuote(selectionResult.data.selectionQuote);
   if (selectionExists && !hasWorkbench) errors.push('selection evidence exists before complete workbench files');
   if ((hasContractPack || hasPartialContractPack) && !selectionExists) errors.push('contract files exist before selection evidence');
+  if ((hasContractPack || hasPartialContractPack) && delegatedSelection) errors.push('contract files exist before explicit user selection');
   if (hasPartialWorkbench) errors.push(`incomplete workbench files: found ${existingWorkbenchFiles.join(', ')}`);
   if (hasPartialContractPack) errors.push(`incomplete contract pack: found ${contractFiles.join(', ')}`);
 
@@ -730,14 +732,26 @@ function evaluate(dir) {
   if (!brainstormExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: [BRAINSTORM_DIALOGUE_FILE], errors, warnings, surface: surfaceResult.data };
   if (!directionsExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: ['evidence/directions.json'], errors, warnings, surface: surfaceResult.data, brainstorm: brainstormResult.data };
   if (!hasWorkbench) return { phase: 'NEEDS_WORKBENCH', slug, dir: toProjectPath(dir), context, missing: expectedWorkbenchFiles.filter(name => !fileExists(dir, name) || fileContains(dir, name, 'BFDS_PLACEHOLDER')), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
-  if (!selectionExists) return { phase: 'NEEDS_SELECTION', slug, dir: toProjectPath(dir), context, missing: ['evidence/selection.json'], errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
+  if (!selectionExists || delegatedSelection) {
+    return {
+      phase: 'NEEDS_SELECTION',
+      slug,
+      dir: toProjectPath(dir),
+      context,
+      missing: delegatedSelection ? ['explicit user A/B/C or merge confirmation'] : ['evidence/selection.json'],
+      errors,
+      warnings,
+      surface: surfaceResult.data,
+      directions: directionsResult.data
+    };
+  }
   if (!hasContractPack) return { phase: 'NEEDS_CONTRACT', slug, dir: toProjectPath(dir), context, missing: ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'].filter(name => !fileExists(dir, name)), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data, selection: selectionResult.data };
   return { phase: IMPLEMENTABLE_STATUS.has(existingStatus?.state) ? 'IMPLEMENT_READY' : 'CONTRACT_READY', slug, dir: toProjectPath(dir), context, missing: [], errors, warnings, surface: surfaceResult.data, directions: directionsResult.data, selection: selectionResult.data };
 }
 
 function renderText(result) {
   const lines = [
-    `BFDS_GATE: ${result.phase}`,
+    `BFDS_STAGE: ${result.phase}`,
     `设计任务: ${result.slug}`,
     `目录: ${result.dir}`
   ];
@@ -756,7 +770,7 @@ function renderText(result) {
     lines.push(`用户选择原话: ${result.selection.selectionQuote}`);
     lines.push(`选中方案摘要: ${result.selection.selectedOption?.summary ?? 'missing'}`);
   }
-  lines.push('下一步规则:');
+  lines.push('下一步纪律:');
   for (const rule of phaseRules(result.phase)) lines.push(`- ${rule}`);
   return `${lines.join('\n')}\n`;
 }

@@ -908,9 +908,9 @@ function validateGateTests() {
     for (const quote of ['你来选一个最稳的。', '推荐一个。', '你帮我推荐一个吧。', '三个都行你定。']) {
       writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug, quote));
       const warned = runGate(projectRoot, slug);
-      if (warned.phase !== 'NEEDS_CONTRACT') errors.push(`expected warned selection ${quote} to reach NEEDS_CONTRACT, got ${warned.phase}`);
-      if (!warned.warnings?.some(warning => warning.includes('may not be an explicit user choice'))) {
-        errors.push(`expected warned selection ${quote} to emit explicit-choice warning`);
+      if (warned.phase !== 'NEEDS_SELECTION') errors.push(`expected delegated selection ${quote} to stay NEEDS_SELECTION, got ${warned.phase}`);
+      if (!warned.warnings?.some(warning => warning.includes('may delegate the choice to the agent'))) {
+        errors.push(`expected delegated selection ${quote} to emit delegated-choice warning`);
       }
     }
 

@@ -37,8 +37,8 @@
 ## 通过标准
 
 - 可以给出推荐，但 Claude Code 必须用 `AskUserQuestion` 要求用户明确确认 A/B/C 或合并方案。
-- gate 保持 `NEEDS_SELECTION`；如果错误写入 delegated selection，gate 必须输出 `INCONSISTENT`。
+- next-card 保持 `NEEDS_SELECTION`；如果错误写入 delegated selection，runtime 必须停留在 `NEEDS_SELECTION` 并警告需要用户明确确认；如果已经生成下游合同产物，则输出 `INCONSISTENT`。
 - 停止在方案确认。
 - 不产生设计交付包。
 - `status.json.state` 保持 `workbench-ready`。
-- `evidence/gate-log.ndjson` 记录本次 gate 阶段。
+- `evidence/gate-log.ndjson` 记录本次阶段裁决。

@@ -27,7 +27,7 @@
 
 ## 通过标准
 
-- 先运行 gate，确认当前设计任务为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
+- 先运行 `bfds.mjs next`，确认当前设计任务为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
 - critique 前先准备契约上下文包：设计任务标识、目标界面、`changeType`、已选方案摘要、`keep` / `change` / `avoid`、P0/P1/P2 `acceptanceRules` 和关键 `qa-plan.checks`。
 - critique 输出只进入 `qa-report.md` 的验收证据或阻塞风险。
 - 如果 critique 发现 P0/P1 可用性或可访问性问题，记录对应契约或验收规则，并要求修复或回到 `bfds-design` 重新固化设计。

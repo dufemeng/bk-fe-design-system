@@ -967,7 +967,7 @@ function cardForResult(result) {
     version: 1,
     slug: result.slug,
     phase,
-    state: result.status?.state ?? null,
+    state: ['CONTEXT_BLOCKED', 'INCONSISTENT'].includes(phase) ? null : result.status?.state ?? null,
     required: [],
     guidance: [],
     forbidden: [],

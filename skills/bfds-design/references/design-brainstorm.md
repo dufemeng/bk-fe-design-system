@@ -5,7 +5,7 @@
 1. `docs/design/<slug>/evidence/brainstorm-dialogue.json`
 2. `docs/design/<slug>/evidence/directions.json`
 
-写完每个 evidence 后都重跑 gate。gate 没进入 `NEEDS_WORKBENCH` 前，不生成评审工作台或方案 HTML。
+写完每个 evidence 后都运行 `bfds.mjs next`。next-card 没进入 `NEEDS_WORKBENCH` 前，不生成评审工作台或方案 HTML。
 
 ## 苏格拉底式问答
 
@@ -66,7 +66,7 @@
 
 写入 `directions.json` 前确认：
 
-- 已写入并通过 gate 检查 `brainstorm-dialogue.json`。
+- 已写入并通过 `bfds.mjs next` 检查 `brainstorm-dialogue.json`。
 - 使用了可信 `PRODUCT.md` / `DESIGN.md` 和 `surface.json`。
 - 没有新增未确认产品能力。
 - A/B/C 都包含 keep/change/avoid。

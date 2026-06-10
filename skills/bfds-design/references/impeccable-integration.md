@@ -4,7 +4,7 @@ BFDS 只在上下文缺失或局部微调时复用 Impeccable，不把 Impeccabl
 
 ## 上下文缺失
 
-gate 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续目标界面确认、设计方向、评审工作台或设计交付包。
+next-card 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续目标界面确认、设计方向、评审工作台或设计交付包。
 
 ## 分车道
 

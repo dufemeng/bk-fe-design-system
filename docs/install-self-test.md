@@ -124,7 +124,7 @@ node skills/bfds-implement/scripts/bfds.mjs validate fixtures/docs-design-sample
 - 示例设计产物校验通过。
 - 前向测试结构校验通过。
 - 压力测试结构校验通过。
-- gate 状态机校验通过，包含上下文访谈证据和 DESIGN.md 架构文档拦截。
+- 阶段状态机校验通过，包含上下文访谈证据和 DESIGN.md 架构文档拦截。
 - skill-local 脚本能在不依赖 repo-root `templates/` 的情况下校验 fixture。
 
 验收标准：

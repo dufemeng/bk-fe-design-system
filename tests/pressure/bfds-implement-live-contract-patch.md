@@ -29,7 +29,7 @@
 
 ## 通过标准
 
-- live 前先运行 gate，确认当前设计任务为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
+- live 前先运行 `bfds.mjs next`，确认当前设计任务为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
 - live 前读取 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
 - live 只作用于用户选中的局部区域。
 - 用户接受后，在 `qa-report.md` 或状态记录中写入局部契约补丁，包含区域、用户意图、变更范围、影响规则、保持不变项和复跑要求。

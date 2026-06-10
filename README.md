@@ -167,7 +167,7 @@ node scripts/bfds.mjs validate --pressure-tests
 node scripts/bfds.mjs validate --gate-tests
 ```
 
-脚本只做确定性辅助：扫描状态、从磁盘证据裁决 gate 阶段、校验设计产物结构、校验前向测试和压力测试文件结构。核心设计判断仍由 BFDS skill references 和用户确认完成。
+脚本只做确定性辅助：扫描状态、从磁盘证据裁决 next-card 阶段、校验设计产物结构、校验前向测试和压力测试文件结构。核心设计判断仍由 BFDS skill references 和用户确认完成。
 
 ## Validation
 
@@ -179,5 +179,5 @@ node scripts/bfds.mjs validate --gate-tests
 2. 示例设计产物校验：`node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt`。
 3. 前向测试结构校验：`node scripts/bfds.mjs validate --forward-tests`。
 4. 压力测试结构校验：`node scripts/bfds.mjs validate --pressure-tests`。
-5. gate 状态机校验：`node scripts/bfds.mjs validate --gate-tests`。
+5. 阶段状态机校验：`node scripts/bfds.mjs validate --gate-tests`。
 6. 人工走读 `tests/forward/`，并按 `tests/pressure/RUNBOOK.md` 做新会话 agent 压力测试，确认开始设计、上下文陷阱、拒绝继续追问、用户选择、缺设计产物实现、新会话恢复、多设计任务恢复和负例行为都符合规格。

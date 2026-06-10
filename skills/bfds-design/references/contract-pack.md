@@ -1,6 +1,6 @@
 # 设计交付包
 
-本阶段只在 gate 输出 `NEEDS_CONTRACT` 后执行。输入来自 `evidence/surface.json`、`evidence/directions.json`、`evidence/selection.json` 和评审工作台文件。
+本阶段只在 next-card 输出 `NEEDS_CONTRACT` 后执行。输入来自 `evidence/surface.json`、`evidence/directions.json`、`evidence/selection.json` 和评审工作台文件。
 
 ## 产物
 
@@ -14,7 +14,7 @@
 
 ## selection evidence
 
-如果用户刚刚选择方案，先写 `evidence/selection.json` 并重跑 gate。有效选择必须是用户明确表达，例如：
+如果用户刚刚选择方案，先用 `bfds.mjs select` 提交选择证据并读取返回的 next-card。有效选择必须是用户明确表达，例如：
 
 - `选 A`
 - `用 B`
@@ -33,7 +33,7 @@
 - `selectedOption.summary`
 - `selectedOption.mergedFrom`
 
-Claude Code 用 `AskUserQuestion` 单选“确认无误 / 需要修正”。用户确认回显无误后，才写 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。用户指出不一致时，先修正 `evidence/selection.json` 并重跑 gate。
+Claude Code 用 `AskUserQuestion` 单选“确认无误 / 需要修正”。用户确认回显无误后，才写 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。用户指出不一致时，先修正选择证据并运行 `bfds.mjs next`。
 
 ## design-contract.json
 

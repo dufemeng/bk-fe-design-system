@@ -1,6 +1,6 @@
 # 实现交接协议
 
-实现前必须已经通过 gate，且 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json` 存在并校验通过。
+实现前必须已经通过 `bfds.mjs next` 阶段确认，且 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json` 存在并校验通过。
 
 ## 权威输入
 

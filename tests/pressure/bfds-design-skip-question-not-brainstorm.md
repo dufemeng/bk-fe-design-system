@@ -32,5 +32,5 @@
 - 明确说明不继续追问，但仍进入设计方向探索门禁。
 - 写入 `docs/design/<slug>/evidence/brainstorm-dialogue.json`，`mode` 为 `user-skipped`，包含用户拒绝继续追问的原话和 2-3 个方向取舍确认。
 - 写入 `docs/design/<slug>/evidence/directions.json`，包含 A/B/C 三个字段齐全的三方向设计规格。
-- gate 输出 `NEEDS_WORKBENCH` 后，才进入评审工作台。
+- next-card 输出 `NEEDS_WORKBENCH` 后，才进入评审工作台。
 - `evidence/gate-log.ndjson` 记录 `NEEDS_DIRECTIONS` 到 `NEEDS_WORKBENCH` 的推进。
