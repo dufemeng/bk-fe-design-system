@@ -314,9 +314,10 @@ function phaseRules(phase) {
       '写完后运行 bfds.mjs next。'
     ],
     NEEDS_DIRECTIONS: [
-      '只做设计方向探索；父会话一次只问一个设计表达问题并等待用户回答。',
+      '只做设计方向探索；父会话按 Impeccable shape 的专业维度每轮成组询问 2-3 个高价值设计问题。',
       '先写 evidence/brainstorm-dialogue.json；用户确认 2-3 个方向取舍后，才写 evidence/directions.json。',
       'Claude Code 中方向取舍确认必须用 AskUserQuestion；开放设计表达题可以普通文本。',
+      '问题必须覆盖至少两个专业维度，不重复询问原型里已经可见的布局事实。',
       '用户明确拒绝继续追问时，brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
       '三个方向至少在两个维度上不同，换色、换圆角、换阴影不算差异。',
       '不得新增未确认的产品能力、API、数据库、权限或后端范围。',
@@ -569,6 +570,9 @@ function evaluate(dir) {
     }
     if (brainstormResult.data.mode === 'socratic' && brainstormResult.data.turns.length < 2) {
       errors.push('brainstorm dialogue evidence mode socratic requires at least two user Q/A turns');
+    }
+    if (brainstormResult.data.mode === 'socratic' && new Set(brainstormResult.data.turns.map(turn => turn.dimension)).size < 2) {
+      errors.push('brainstorm dialogue evidence mode socratic requires at least two professional design dimensions');
     }
     if (brainstormResult.data.mode === 'user-skipped' && !brainstormResult.data.skipReasonQuote?.trim()) {
       errors.push('brainstorm dialogue evidence mode user-skipped requires skipReasonQuote');

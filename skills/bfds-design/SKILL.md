@@ -29,7 +29,7 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 
 - `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；按 next-card 每轮成组询问 2-3 个项目级问题，用 `answer --stage init` 记录多轮访谈和用户确认。
 - `NEEDS_SURFACE`：确认目标界面与变更边界；按 next-card 用 `answer --stage surface` 提交扁平字段。
-- `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做设计问答和方向取舍，再用 `directions` 提交 A/B/C 方向规格。
+- `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做专业设计问答和方向取舍，再用 `directions` 提交 A/B/C 方向规格。
 - `NEEDS_WORKBENCH`：用 `workbench --scaffold` 生成脚手架；填入真实三方案后用 `workbench --validate`，含 `BFDS_PLACEHOLDER` 的文件不能进入选择。
 - `NEEDS_SELECTION`：用 `AskUserQuestion` 等待用户明确选择 A/B/C 或合并方案；用 `select` 提交选择证据。
 - `NEEDS_CONTRACT`：用 `pack --add` 提交 contract 判断字段；runtime 回显后用 `AskUserQuestion` 确认，再用 `pack --confirm` 生成设计交付包。
@@ -41,7 +41,7 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 
 - `init-interview.json`：Impeccable 项目级访谈问答、用户确认原话、PRODUCT/DESIGN 路径和生成模式。
 - `surface.json`：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免、用户确认原话。
-- `brainstorm-dialogue.json`：设计表达问答、2-3 个方向取舍、用户确认原话。
+- `brainstorm-dialogue.json`：设计表达问答、专业维度、2-3 个方向取舍、用户确认原话。
 - `directions.json`：A/B/C 三个方向规格和自检结果。
 - `selection.json`：用户选择原话、选中方案、工作台与三个方案路径。
 

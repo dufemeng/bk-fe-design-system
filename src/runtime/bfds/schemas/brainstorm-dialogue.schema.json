@@ -35,8 +35,23 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["question", "answerQuote", "designImplication"],
+        "required": ["dimension", "question", "answerQuote", "designImplication"],
         "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "primary-action",
+              "user-mindset",
+              "content-data-range",
+              "state-edge-cases",
+              "visual-direction",
+              "scene-sentence",
+              "anchor-reference",
+              "scope-fidelity",
+              "constraints-accessibility",
+              "local-preservation"
+            ]
+          },
           "question": { "type": "string", "minLength": 1 },
           "answerQuote": { "type": "string", "minLength": 1 },
           "designImplication": { "type": "string", "minLength": 1 }

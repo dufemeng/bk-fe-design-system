@@ -14,7 +14,7 @@ const bootstrap = `
 - CONTEXT_BLOCKED：父会话先扫描可推断信息，再每轮成组询问 2-3 个项目级 Impeccable init 问题。用 answer --stage init 记录多轮回答和确认；确认前不写 PRODUCT.md 或 DESIGN.md。PRODUCT.md 是战略上下文；DESIGN.md 是 Stitch 视觉设计系统文档，不是架构文档。
 - PRODUCT.md、DESIGN.md 和 docs/design/** 产物必须由父会话分段写入；不要默认交给静默 subagent。预计超过 60 秒时，先用一句话告诉用户正在生成哪个文件或哪一组方案。
 - NEEDS_SURFACE：只确认目标界面与变更边界，用 answer --stage surface 提交扁平字段。
-- NEEDS_DIRECTIONS：父会话做苏格拉底式设计脑暴，一次只问一个设计表达问题。先用 answer --stage brainstorm 记录问答，再用 directions 提交 A/B/C 方向规格。
+- NEEDS_DIRECTIONS：父会话按 Impeccable shape 的专业维度做设计方向探索，每轮成组询问 2-3 个高价值设计问题。先用 answer --stage brainstorm 记录问答和 dimension，再用 directions 提交 A/B/C 方向规格。
 - NEEDS_WORKBENCH：用 workbench --scaffold 生成脚手架；真实方案填完后用 workbench --validate，含 BFDS_PLACEHOLDER 的文件不能进入选择。
 - NEEDS_SELECTION：停止等待用户用 AskUserQuestion 明确选择；推荐方案或“你定”不算选择。
 - NEEDS_CONTRACT：用 pack --add 提交 contract 判断字段；runtime 回显后，用 AskUserQuestion 确认，再用 pack --confirm 生成设计交付包。

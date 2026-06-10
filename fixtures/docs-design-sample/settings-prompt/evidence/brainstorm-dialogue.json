@@ -5,11 +5,13 @@
   "mode": "socratic",
   "turns": [
     {
+      "dimension": "primary-action",
       "question": "这个设置页提示词输入组件最先要被用户看见的信息是什么？",
       "answerQuote": "输入框和保存状态最重要，说明文字可以弱一点，不要压过编辑。",
       "designImplication": "层级要把输入区和保存反馈放到第一优先，说明内容降低视觉权重。"
     },
     {
+      "dimension": "state-edge-cases",
       "question": "错误、保存、加载这些状态需要做到什么精度？",
       "answerQuote": "错误要很清楚，保存成功也要明确，但 loading 不要把整个页面锁住。",
       "designImplication": "方案必须覆盖局部 loading、错误原因、保存成功和恢复动作。"

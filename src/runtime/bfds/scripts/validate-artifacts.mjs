@@ -490,11 +490,13 @@ function baseBrainstormDialogue(slug) {
     mode: 'socratic',
     turns: [
       {
+        dimension: 'primary-action',
         question: '这个目标界面最先要被用户看见的信息是什么？',
         answerQuote: '提示词输入本身必须最先被看见，其他说明都要弱一点。',
         designImplication: '层级以输入区为主，说明和导航降低视觉存在感。'
       },
       {
+        dimension: 'state-edge-cases',
         question: '错误、保存和加载状态需要做到什么精度？',
         answerQuote: '错误和保存要清楚，加载不要占满屏幕，保持局部反馈。',
         designImplication: '方案必须覆盖 default/error/success/loading 的局部状态表达。'
@@ -832,9 +834,9 @@ function validateGateTests() {
     writeText(path.join(draftCleanupRoot, 'PRODUCT.md'), validProductMd());
     writeText(path.join(draftCleanupRoot, 'DESIGN.md'), validDesignMd());
     writeJson(path.join(evidenceDirFor(draftCleanupRoot), 'surface.json'), baseSurface(slug));
-    for (const [question, answer, implication] of [
-      ['最先看什么？', '先看输入区。', '输入区层级最高。'],
-      ['状态要多强？', '错误和保存要清楚。', '覆盖局部状态。']
+    for (const [dimension, question, answer, implication] of [
+      ['primary-action', '最先看什么？', '先看输入区。', '输入区层级最高。'],
+      ['state-edge-cases', '状态要多强？', '错误和保存要清楚。', '覆盖局部状态。']
     ]) {
       writeResult = runBfds(draftCleanupRoot, [
         'answer',
@@ -842,6 +844,8 @@ function validateGateTests() {
         '--stage',
         'brainstorm',
         '--append-round',
+        '--field',
+        `dimension=${dimension}`,
         '--field',
         `question=${question}`,
         '--field',

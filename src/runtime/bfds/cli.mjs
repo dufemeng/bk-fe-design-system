@@ -14,6 +14,7 @@ const PLACEHOLDER = 'BFDS_PLACEHOLDER';
 const OPTION_IDS = ['A', 'B', 'C'];
 const CURRENT_SOURCE_VALUES = ['screenshot', 'figma', 'prototype', 'url', 'browser-capture', 'storybook', 'code-inference', 'user-description'];
 const CHANGE_TYPE_VALUES = ['create', 'extend', 'modify', 'remove', 'replace', 'merge', 'restyle'];
+const BRAINSTORM_DIMENSION_VALUES = ['primary-action', 'user-mindset', 'content-data-range', 'state-edge-cases', 'visual-direction', 'scene-sentence', 'anchor-reference', 'scope-fidelity', 'constraints-accessibility', 'local-preservation'];
 const DIFFERENCE_DIMENSION_VALUES = ['information-architecture', 'hierarchy', 'density', 'state-treatment', 'interaction-model', 'motion-role', 'local-preservation', 'visual-signature'];
 const INVALID_SELECTION_PATTERNS = [
   /你来选/,
@@ -471,11 +472,28 @@ function writeBrainstorm(dir, parsed, global) {
   const finalFile = path.join(dir, 'evidence', 'brainstorm-dialogue.json');
   const draft = readJson(draftFile, { slug, turns: [] });
   if (parsed.flags.has('append-round')) {
-    draft.turns.push({
-      question: fieldRequired(parsed, 'question'),
-      answerQuote: fieldRequired(parsed, 'answer'),
-      designImplication: fieldRequired(parsed, 'designImplication')
-    });
+    const dimensions = fieldAll(parsed, 'dimension');
+    const questions = fieldAll(parsed, 'question');
+    const answers = fieldAll(parsed, 'answer');
+    const implications = fieldAll(parsed, 'designImplication');
+    const count = questions.length;
+    if (count === 0 || answers.length === 0 || implications.length === 0 || dimensions.length === 0) {
+      throwInvalid('brainstorm append-round requires paired dimension/question/answer/designImplication fields', parsed.target, global);
+    }
+    if (answers.length !== count || implications.length !== count || dimensions.length !== count) {
+      throwInvalid(`brainstorm append-round requires paired fields; got ${dimensions.length} dimension, ${questions.length} question, ${answers.length} answer, ${implications.length} designImplication`, parsed.target, global);
+    }
+    for (let index = 0; index < count; index += 1) {
+      if (!BRAINSTORM_DIMENSION_VALUES.includes(dimensions[index])) {
+        throwInvalid(`Invalid brainstorm dimension: ${dimensions[index]}. Expected one of ${formatEnum(BRAINSTORM_DIMENSION_VALUES)}`, parsed.target, global);
+      }
+      draft.turns.push({
+        dimension: dimensions[index],
+        question: questions[index],
+        answerQuote: answers[index],
+        designImplication: implications[index]
+      });
+    }
     writeJson(draftFile, draft);
     return;
   }
@@ -493,6 +511,9 @@ function writeBrainstorm(dir, parsed, global) {
   }
   if (mode === 'socratic' && draft.turns.length < 2) {
     throwInvalid('brainstorm finalize requires at least two design-question rounds before writing evidence/brainstorm-dialogue.json', parsed.target, global);
+  }
+  if (mode === 'socratic' && new Set(draft.turns.map(turn => turn.dimension)).size < 2) {
+    throwInvalid('brainstorm finalize requires at least two professional design dimensions before writing evidence/brainstorm-dialogue.json', parsed.target, global);
   }
   const data = {
     slug,
@@ -1106,16 +1127,18 @@ function cardForResult(result) {
     card.references = ['surface-change-framing.md'];
   } else if (phase === 'NEEDS_DIRECTIONS') {
     card.required = missing.includes('evidence/brainstorm-dialogue.json')
-      ? ['设计表达问答', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
+      ? ['专业设计问答', '至少两个专业维度', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
       : ['A/B/C 三个方向规格', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
     card.guidance = [
-      '一次只问一个设计表达问题。',
+      '先读 design-brainstorm.md；每轮成组询问 2-3 个高价值设计问题。',
+      '问题必须覆盖专业设计判断，不重复询问原型里已经可见的布局事实。',
+      `brainstorm dimension enum: ${formatEnum(BRAINSTORM_DIMENSION_VALUES)}`,
       '不脑暴产品/API/数据库/权限。',
       `differenceDimension enum: ${formatEnum(DIFFERENCE_DIMENSION_VALUES)}`
     ];
     card.forbidden = ['生成评审工作台', '临时扩大产品范围'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
-      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field question="..." --field answer="..." --field designImplication="..."`
+      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field dimension="state-edge-cases" --field question="..." --field answer="..." --field designImplication="..."`
       : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
     card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {
