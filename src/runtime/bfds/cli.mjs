@@ -43,6 +43,10 @@ export function main(argv = process.argv.slice(2)) {
   try {
     const result = dispatch(parsed);
     if (typeof result === 'string') print(result);
+    else if (result && typeof result.text === 'string') {
+      print(result.text);
+      return result.status ?? 0;
+    }
     return 0;
   } catch (error) {
     if (error.nextCard) {
@@ -344,7 +348,10 @@ function commandNext(rest, global) {
   const request = parsed.options.get('request');
   const extra = request ? ['--request', request] : [];
   const result = runGate(parsed.target, extra, global.root);
-  return renderNextCard(result, global.json);
+  return {
+    text: renderNextCard(result, global.json),
+    status: ['CONTEXT_BLOCKED', 'INCONSISTENT'].includes(result.phase) ? 1 : 0
+  };
 }
 
 function commandList(rest, global) {

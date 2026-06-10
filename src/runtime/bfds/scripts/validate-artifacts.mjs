@@ -918,6 +918,11 @@ function validateGateTests() {
     if (!noContext.result.contextTask?.some(task => task.includes('AskUserQuestion') && task.includes('product') && task.includes('brand'))) {
       errors.push('expected CONTEXT_BLOCKED task to require AskUserQuestion product/brand register choice');
     }
+    const blockedNextCard = runBfds(noContextRoot, ['next', slug, '--request', '用 /bfds-design 给首页新增一个内容型页面入口。']);
+    if (blockedNextCard.status === 0) errors.push('expected bfds next to exit non-zero for CONTEXT_BLOCKED');
+    if (!blockedNextCard.stdout.includes('BFDS_NEXT_CARD') || !blockedNextCard.stdout.includes('phase: CONTEXT_BLOCKED')) {
+      errors.push('expected blocked bfds next to still print CONTEXT_BLOCKED next-card');
+    }
     assertGateLogIncludes(noContextRoot, slug, 'CONTEXT_BLOCKED', errors, 'context blocked');
 
     const noInterviewRoot = makeProject(false);
@@ -965,6 +970,11 @@ function validateGateTests() {
     writeWorkbench(skippedRoot);
     const skipped = runGateFailure(skippedRoot, slug);
     if (!skipped.failed || skipped.result.phase !== 'INCONSISTENT') errors.push(`expected skipped workbench to be INCONSISTENT, got ${skipped.result.phase}`);
+    const inconsistentNextCard = runBfds(skippedRoot, ['next', slug]);
+    if (inconsistentNextCard.status === 0) errors.push('expected bfds next to exit non-zero for INCONSISTENT');
+    if (!inconsistentNextCard.stdout.includes('BFDS_NEXT_CARD') || !inconsistentNextCard.stdout.includes('phase: INCONSISTENT')) {
+      errors.push('expected inconsistent bfds next to still print INCONSISTENT next-card');
+    }
     assertGateLogIncludes(skippedRoot, slug, 'INCONSISTENT', errors, 'skipped workbench');
 
     const partialRoot = makeProject();
