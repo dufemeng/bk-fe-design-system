@@ -26,6 +26,18 @@
 - 不把主协议依赖 AGENTS.md；安装后的 skill 必须靠自身 `SKILL.md`、`references/`、`assets/`、`scripts/` 可用。
 - 修改 skill 后同步检查 `agents/openai.yaml`，确保 `short_description` 和 `default_prompt` 与 skill 真实能力一致。
 
+## Skill 减负原则
+
+BFDS 当前首要目标是减轻用户执行 skill 时的大模型负担，而不是仓库瘦身。仓库 LOC 下降不算成功；用户执行 skill 时少读文件、少读长文档、少手写结构化 JSON、少跨文件同步、少重复确认、少因 context 丢失而跳步，才算成功。
+
+- 不为“完整性”做加法。新增文件、长文档、长 reference、额外中间产物、额外状态源和跨文件同步，默认都是负担；只有能明确减少用户执行时的读取、生成、等待或返工，才允许引入。
+- 不删关键交付环节。init 用户问答、`PRODUCT.md` / `DESIGN.md`、目标界面确认、设计脑暴、三方案评审、用户选择、实现验收都属于核心价值链；压缩只能压缩机械层，不能省略会影响设计判断的用户交互。
+- 热路径要短，冷路径要稳。next-card / `SKILL.md` 放当前阶段必须行动和少量质量锚点；详细规范留在 reference，且只有卡片明确要求时读取。
+- 模型只产判断和值，runtime 负责结构、校验和展开。不要让用户执行 skill 的 LLM 手写完整 JSON、status 或重复 schema。
+- 修复 init 问答体验或 brainstorm 专业性时，也必须遵守减负原则：优先把高价值问题压缩到问答 UI 和 next-card，不新增长问卷或多份同步文档。
+- 用户是审查者和方案把关者，不是结构化数据录入员。可用 `AskUserQuestion`、Codex structured user-input 或等价问答工具时优先使用；不要要求用户自己手写字段。
+- 用户只要求定位、审查或脑暴方案时，不要直接改代码。先输出根因、取舍和最小改法，等用户确认再实施。
+
 ## 术语与用户交互
 
 - 用户交互和 agent 可见流程文案优先使用专业中文术语。
