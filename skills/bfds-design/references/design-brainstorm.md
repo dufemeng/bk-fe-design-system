@@ -21,7 +21,7 @@
 
 不要问 API、数据模型、权限、商业模式、后端架构，也不要在本阶段重新确认目标界面。
 
-至少完成两轮有效设计问答后，提出 2-3 个方向及取舍，让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
+至少完成两轮有效设计问答后，提出 2-3 个方向及取舍；Claude Code 用 `AskUserQuestion` 让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
 
 如果用户明确拒绝继续追问，`brainstorm-dialogue.json` 使用 `mode: "user-skipped"`，记录 `skipReasonQuote`，仍要先提出 2-3 个方向取舍并取得用户确认。
 

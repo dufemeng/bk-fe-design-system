@@ -397,12 +397,15 @@ function phaseRules(phase) {
   const rules = {
     CONTEXT_BLOCKED: [
       '停止 BFDS 设计推进：Impeccable 项目级上下文未就绪。',
-      '父会话逐题问用户并等待回答，写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
+      '父会话逐题问用户并等待回答；Claude Code 选择/确认必须用 AskUserQuestion。',
+      'Register 只问单选 product/brand；不要问 register 名称、品牌 ID 或产品 ID。',
+      '写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
       'PRODUCT.md 必须是 Impeccable strategic context，DESIGN.md 必须是 Stitch 视觉系统文档，不是技术架构文档。',
       '可用 fresh subagent 只根据 init-interview evidence 写 PRODUCT.md / DESIGN.md；完成后重新运行 gate。'
     ],
     NEEDS_SURFACE: [
       '只确认目标界面与变更边界，不生成三方向、不写工作台。',
+      'Claude Code 中改动类型、证据来源或确认类选择必须用 AskUserQuestion；开放说明一次只问一个问题。',
       '写 evidence/surface.json：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免。',
       'modify/remove/replace/restyle 必须有视觉证据或用户确认；仅代码推断要标注未视觉验证。',
       '写完后重新运行 gate。'
@@ -410,6 +413,7 @@ function phaseRules(phase) {
     NEEDS_DIRECTIONS: [
       '只做设计方向探索；父会话一次只问一个设计表达问题并等待用户回答。',
       '先写 evidence/brainstorm-dialogue.json；用户确认 2-3 个方向取舍后，才写 evidence/directions.json。',
+      'Claude Code 中方向取舍确认必须用 AskUserQuestion；开放设计表达题可以普通文本。',
       '用户明确拒绝继续追问时，brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
       '三个方向至少在两个维度上不同，换色、换圆角、换阴影不算差异。',
       '不得新增未确认的产品能力、API、数据库、权限或后端范围。',
@@ -421,14 +425,15 @@ function phaseRules(phase) {
       '生成 workbench.html 和 option-a/b/c.html 后重新运行 gate。'
     ],
     NEEDS_SELECTION: [
-      '停止等待用户选择，不写设计交付包。',
-      '用户必须明确选择 A/B/C 或给出合并方案；推荐方案不算选择。',
+      '停止等待用户用 AskUserQuestion 选择，不写设计交付包。',
+      'Claude Code 必须用 AskUserQuestion 单选 A/B/C/合并或调整；推荐方案不算选择。',
+      '用户必须明确选择 A/B/C 或给出合并方案。',
       '有明确选择后写 evidence/selection.json，再重新运行 gate。'
     ],
     NEEDS_CONTRACT: [
       '只生成设计交付包：design-contract.json、implementation-handoff.md、qa-plan.json。',
       '交付包必须使用 selection evidence 和前置证据，不凭聊天记忆补写。',
-      '生成前先向用户回显 selection evidence 的用户选择原话和选中方案摘要；用户确认回显无误后才写设计交付包。',
+      '生成前先回显 selection evidence 的用户选择原话和选中方案摘要；Claude Code 用 AskUserQuestion 单选确认无误/需要修正。',
       '生成后运行 validate-artifacts，再重新运行 gate。'
     ],
     CONTRACT_READY: [
@@ -531,7 +536,8 @@ function writePendingRequest(dir, slug, request) {
 function contextBlockedTask(missing, errors) {
   if (missing.includes(INIT_INTERVIEW_FILE)) {
     return [
-      '逐题询问用户项目级上下文：默认 register、用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
+      'Claude Code 用 AskUserQuestion 单选 register: product / brand；不要问 register 名称、品牌 ID 或产品 ID。',
+      '逐题询问项目级上下文：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
       `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
       '用户确认后，再用 fresh subagent 或同等隔离流程写 PRODUCT.md / DESIGN.md。'
     ];

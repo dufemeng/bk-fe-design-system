@@ -22,7 +22,7 @@
 - `选 B，但导航用 A`
 - `A 和 C 合并，按 C 为主`
 
-`你来选`、`挑最稳的`、`推荐一个`、`三个都行你定`、`三个都差不多` 不算选择；只能给推荐并要求用户确认。
+`你来选`、`挑最稳的`、`推荐一个`、`三个都行你定`、`三个都差不多` 不算选择；只能给推荐，并在 Claude Code 中用 `AskUserQuestion` 要求用户确认 A/B/C/合并或调整。
 
 ## 回显确认
 
@@ -33,7 +33,7 @@
 - `selectedOption.summary`
 - `selectedOption.mergedFrom`
 
-用户确认回显无误后，才写 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。用户指出不一致时，先修正 `evidence/selection.json` 并重跑 gate。
+Claude Code 用 `AskUserQuestion` 单选“确认无误 / 需要修正”。用户确认回显无误后，才写 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。用户指出不一致时，先修正 `evidence/selection.json` 并重跑 gate。
 
 ## design-contract.json
 

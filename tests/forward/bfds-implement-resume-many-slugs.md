@@ -23,13 +23,14 @@
 ## 期望行为
 
 - 扫描 status。
-- 只列最近 2-5 个候选，包含 title、state、lastUpdated、selectedOption、currentSurface。
+- 只列最近 2-4 个候选，包含 title、state、lastUpdated、selectedOption、currentSurface。
+- Claude Code 用 `AskUserQuestion` 单选设计任务；候选超过 4 个时先要求用户提供更具体的 `<slug>`、页面或关键词。
 - 不默认选择最近一个。
 - 用户选择设计任务后，再运行 gate 恢复该设计任务阶段。
 
 ## 停止/继续
 
-停止等待用户选择设计任务。
+停止等待用户结构化选择设计任务。
 
 ## 期望产物
 

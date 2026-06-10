@@ -722,8 +722,8 @@ function validateGateTests() {
     try {
       const sessionStartOutput = JSON.parse(sessionStart.stdout || '{}');
       const context = sessionStartOutput.hookSpecificOutput?.additionalContext ?? '';
-      if (!context.includes('bfds-gate.mjs') || !context.includes('brainstorm-dialogue.json')) {
-        errors.push('expected SessionStart hook context to mention bfds-gate.mjs and brainstorm-dialogue.json');
+      if (!context.includes('bfds-gate.mjs') || !context.includes('brainstorm-dialogue.json') || !context.includes('AskUserQuestion')) {
+        errors.push('expected SessionStart hook context to mention bfds-gate.mjs, brainstorm-dialogue.json, and AskUserQuestion');
       }
     } catch {
       errors.push('expected SessionStart hook to emit JSON');
@@ -743,6 +743,9 @@ function validateGateTests() {
     const noContext = runGateFailure(noContextRoot, slug, ['--request', '用 /bfds-design 给首页新增一个内容型页面入口。']);
     if (!noContext.failed || noContext.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected CONTEXT_BLOCKED, got ${noContext.result.phase}`);
     if (!fs.existsSync(path.join(evidenceDirFor(noContextRoot), 'pending-request.json'))) errors.push('expected pending-request.json for blocked request');
+    if (!noContext.result.contextTask?.some(task => task.includes('AskUserQuestion') && task.includes('product') && task.includes('brand'))) {
+      errors.push('expected CONTEXT_BLOCKED task to require AskUserQuestion product/brand register choice');
+    }
     assertGateLogIncludes(noContextRoot, slug, 'CONTEXT_BLOCKED', errors, 'context blocked');
 
     const noInterviewRoot = makeProject(false);
@@ -845,6 +848,9 @@ function validateGateTests() {
     result = runGate(projectRoot, slug);
     if (result.phase !== 'NEEDS_SELECTION') errors.push(`expected NEEDS_SELECTION, got ${result.phase}`);
     if (!result.warnings?.some(warning => warning.includes('stale workbench'))) errors.push('expected stale workbench warning');
+    if (!result.rules?.some(rule => rule.includes('AskUserQuestion') && rule.includes('A/B/C'))) {
+      errors.push('expected NEEDS_SELECTION rules to require AskUserQuestion A/B/C selection');
+    }
 
     for (const quote of ['你来选一个最稳的。', '推荐一个。', '你帮我推荐一个吧。', '三个都行你定。']) {
       writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug, quote));

@@ -31,12 +31,12 @@
 - 运行或人工执行 `bfds-status` 恢复。
 - 对唯一设计任务运行 gate，确认阶段为 `CONTRACT_READY` 或 `IMPLEMENT_READY`。
 - 回放设计任务标识、title、selectedOption、currentSurface、lastUpdated 摘要。
-- 要求用户确认使用该设计契约。
+- Claude Code 用 `AskUserQuestion` 要求用户确认使用该设计契约。
 - 用户确认后读取三个设计产物，再扫描代码实现。
 
 ## 停止/继续
 
-先停止等待确认；确认后继续实现。
+先停止等待结构化确认；确认后继续实现。
 
 ## 期望产物
 

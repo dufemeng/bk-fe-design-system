@@ -36,5 +36,5 @@
 ## 期望产物
 
 - 本轮最多生成 `status.json` 和 `evidence/gate-log.ndjson`。
-- 用户确认目标界面与边界后，允许生成 `evidence/surface.json`。
+- 用户结构化确认目标界面与边界后，允许生成 `evidence/surface.json`。
 - 只有完成 `surface.json`、`brainstorm-dialogue.json` 和 `directions.json` 后，才允许创建 `docs/design/<slug>/workbench.html` 和三个方案。

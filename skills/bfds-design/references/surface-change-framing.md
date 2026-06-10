@@ -2,6 +2,8 @@
 
 本阶段只确认设计范围，并写 `docs/design/<slug>/evidence/surface.json`。不要生成三方向或评审工作台。
 
+Claude Code 中，改动类型、证据来源和确认类选择必须用 `AskUserQuestion`；开放说明一次只问一个问题。
+
 ## 必填内容
 
 - 目标界面：页面、路由、组件、局部区域、弹窗、流程或空状态。

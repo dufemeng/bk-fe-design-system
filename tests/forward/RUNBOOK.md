@@ -33,7 +33,7 @@ Review this skill and confirm it runs bfds-gate.mjs first.
 1. `bfds-design-start.md`：应触发 `bfds-design`，并停在目标界面与变更边界确认。
 2. `bfds-design-selection.md`：只有已有评审工作台/status.json 时，才生成设计交付包。
 3. `bfds-implement-no-artifacts.md`：缺设计交付包时，应拒绝写代码。
-4. `bfds-implement-resume-many-slugs.md`：应列出候选设计任务，并等待用户选择。
+4. `bfds-implement-resume-many-slugs.md`：应列出候选设计任务，并等待用户结构化选择。
 5. `bfds-negative-api-database-bug.md`：普通 API、数据库、debug 工作不应进入 BFDS。
 
 ## 压力测试

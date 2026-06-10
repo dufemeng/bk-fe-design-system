@@ -6,9 +6,9 @@
 
 1. 通过 gate 恢复当前设计任务。
 2. 读取 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
-3. 确认用户选择的区域、页面 URL 或组件位置。
+3. 确认用户选择的区域、页面 URL 或组件位置；Claude Code 中有多个候选时用 `AskUserQuestion` 单选。
 4. 按 [impeccable-integration.md](impeccable-integration.md) 进入 Impeccable live，前提是入口、dev server 或静态 HTML 可验证。
-5. 用户接受结果后，在 `qa-report.md` 写局部契约补丁。
+5. 用户接受结果后，在 `qa-report.md` 写局部契约补丁；Claude Code 中接受/继续调整用 `AskUserQuestion` 确认。
 
 ## 局部契约补丁
 

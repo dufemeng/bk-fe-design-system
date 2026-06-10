@@ -21,6 +21,8 @@ gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT
 
 模型只写 `docs/design/<slug>/evidence/*.json` 和设计产物；`status.json` 由 gate 同步。
 
+Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuestion`；开放式设计表达问题可以普通文本，但一次只问一个。
+
 如果本轮可能进入 `CONTEXT_BLOCKED`，可加 `--request "<用户原始请求摘要>"`，gate 会把挂起请求写入 `evidence/pending-request.json`。
 
 ## 阶段入口
@@ -29,8 +31,8 @@ gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT
 - `NEEDS_SURFACE`：读 [surface-change-framing.md](references/surface-change-framing.md)，写 `evidence/surface.json` 后重跑 gate。
 - `NEEDS_DIRECTIONS`：读 [design-brainstorm.md](references/design-brainstorm.md)，先写 `evidence/brainstorm-dialogue.json`，再写 `evidence/directions.json`，每步后重跑 gate。
 - `NEEDS_WORKBENCH`：读 [workbench-authoring.md](references/workbench-authoring.md)，生成 `workbench.html` 和 `option-a/b/c.html` 后重跑 gate。
-- `NEEDS_SELECTION`：等待用户明确选择 A/B/C 或合并方案；写 `evidence/selection.json` 后重跑 gate。
-- `NEEDS_CONTRACT`：读 [contract-pack.md](references/contract-pack.md)，生成设计交付包并校验。
+- `NEEDS_SELECTION`：用 `AskUserQuestion` 等待用户明确选择 A/B/C 或合并方案；写 `evidence/selection.json` 后重跑 gate。
+- `NEEDS_CONTRACT`：读 [contract-pack.md](references/contract-pack.md)，用 `AskUserQuestion` 做回显确认后生成设计交付包并校验。
 - `CONTRACT_READY` / `IMPLEMENT_READY`：设计交付包已就绪，等待实现或验收请求。
 
 ## 证据文件

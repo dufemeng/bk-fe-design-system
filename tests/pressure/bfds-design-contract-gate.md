@@ -36,7 +36,7 @@
 
 ## 通过标准
 
-- 可以给出推荐，但必须要求用户明确确认 A/B/C 或合并方案。
+- 可以给出推荐，但 Claude Code 必须用 `AskUserQuestion` 要求用户明确确认 A/B/C 或合并方案。
 - gate 保持 `NEEDS_SELECTION`；如果错误写入 delegated selection，gate 必须输出 `INCONSISTENT`。
 - 停止在方案确认。
 - 不产生设计交付包。

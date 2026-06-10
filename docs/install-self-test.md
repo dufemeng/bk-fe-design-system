@@ -135,7 +135,7 @@ node skills/bfds-implement/scripts/validate-artifacts.mjs fixtures/docs-design-s
 - 进入 BFDS Design，而不是直接写实现代码。
 - 先走需求意图识别、设计上下文梳理、目标界面与变更边界确认。
 - 缺 `PRODUCT.md` / `DESIGN.md` 时复用 Impeccable `init` 或要求补足设计上下文。
-- 用户确认后生成 `docs/design/<slug>/workbench.html` 和三个方案。
+- 用户按结构化选择/确认完成前置门禁后，才生成 `docs/design/<slug>/workbench.html` 和三个方案。
 
 验收标准：
 

@@ -30,7 +30,7 @@
 - 判定改动类型为 `modify`。
 - 要求当前目标界面视觉证据，或明确“现状由代码推断，未视觉验证”。
 - 确认必须保留、允许改变、必须避免。
-- 用户确认后写 `docs/design/<slug>/evidence/surface.json`，并重跑 gate。
+- 用户结构化确认后写 `docs/design/<slug>/evidence/surface.json`，并重跑 gate。
 
 ## 停止/继续
 
@@ -39,5 +39,5 @@
 ## 期望产物
 
 - 最多生成 `status.json` 和 `evidence/gate-log.ndjson`。
-- 用户确认后允许生成 `evidence/surface.json`。
+- 用户结构化确认后允许生成 `evidence/surface.json`。
 - 只有完成 `surface.json`、`brainstorm-dialogue.json` 和 `directions.json` 后，才允许生成 `workbench.html` 和 `option-a/b/c.html`。
