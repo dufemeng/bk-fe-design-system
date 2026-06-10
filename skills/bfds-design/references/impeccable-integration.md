@@ -9,7 +9,8 @@ next-card 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续
 ## 分车道
 
 - 父会话：先扫描可推断信息，再每轮成组询问 2-3 个项目级问题并等待回答；Claude Code 的选择/确认必须用 `AskUserQuestion`；写 `docs/design/<slug>/evidence/init-interview.json`。
-- 隔离写作：优先用 fresh subagent 根据 `init-interview.json`、代码扫描和 Impeccable 规范摘要写 `PRODUCT.md` / `DESIGN.md`。
+- 分段写作：`PRODUCT.md` / `DESIGN.md` 由父会话按已确认访谈、代码扫描摘要和 Impeccable 规范分段写入；不要默认交给静默 subagent。预计超过 60 秒时，先向用户说明正在生成哪个文件。
+- 隔离调研：subagent 只可用于只读调研或摘要，不能写 `PRODUCT.md`、`DESIGN.md` 或 `docs/design/**` 设计产物。
 - gate：验证访谈证据、`PRODUCT.md` 形状、`DESIGN.md` 形状。gate 未解除 `CONTEXT_BLOCKED` 前，不进入 BFDS 后续阶段。
 
 ## 必问主题

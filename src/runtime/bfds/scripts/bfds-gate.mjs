@@ -304,7 +304,7 @@ function phaseRules(phase) {
       'Register 只问单选 product/brand；不要问 register 名称、品牌 ID 或产品 ID。',
       '写 evidence/init-interview.json；禁止代答、禁止从当前设计任务反推项目上下文。',
       'PRODUCT.md 必须是 Impeccable strategic context，DESIGN.md 必须是 Stitch 视觉系统文档，不是技术架构文档。',
-      '可用 fresh subagent 只根据 init-interview evidence 写 PRODUCT.md / DESIGN.md；完成后运行 bfds.mjs next。'
+      '父会话分段写 PRODUCT.md / DESIGN.md；不要默认交给静默 subagent。预计超过 60 秒时先提示当前进度。'
     ],
     NEEDS_SURFACE: [
       '只确认目标界面与变更边界，不生成三方向、不写工作台。',
@@ -325,6 +325,7 @@ function phaseRules(phase) {
     NEEDS_WORKBENCH: [
       '只生成评审工作台和三个方案 HTML。',
       '必须使用 directions evidence 的 A/B/C 方向，不临时改方向。',
+      '逐个方案或逐个文件生成；预计超过 60 秒时先向用户说明当前进度。',
       '生成 workbench.html 和 option-a/b/c.html 后重新运行 bfds.mjs next。'
     ],
     NEEDS_SELECTION: [
@@ -443,7 +444,7 @@ function contextBlockedTask(missing, errors) {
       '先扫描可推断信息，再每轮成组询问 2-3 个项目级上下文问题：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
       '把扫描推断作为选项或假设让用户确认，不缩减 Impeccable init 的问题覆盖面。',
       `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
-      '用户确认后，再用 fresh subagent 或同等隔离流程写 PRODUCT.md / DESIGN.md。'
+      '用户确认后，由父会话分段写 PRODUCT.md / DESIGN.md；不要默认交给静默 subagent。'
     ];
   }
   if (errors.some(error => error.includes('DESIGN.md'))) {

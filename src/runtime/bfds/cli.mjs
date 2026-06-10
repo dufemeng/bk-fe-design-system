@@ -1089,7 +1089,7 @@ function cardForResult(result) {
   };
   if (phase === 'CONTEXT_BLOCKED') {
     card.required = ['项目级 PRODUCT.md / DESIGN.md', 'init 多轮用户问答', '用户确认原话'];
-    card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
+    card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', 'PRODUCT.md / DESIGN.md 由父会话分段写；不要默认交给静默 subagent。', '预计超过 60 秒时，先告诉用户正在生成哪个文件。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
     card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..." --field question="..." --field answerQuote="..."`;
     card.references = ['impeccable-integration.md'];
@@ -1120,7 +1120,7 @@ function cardForResult(result) {
     card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {
     card.required = ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html', '无 BFDS_PLACEHOLDER'];
-    card.guidance = ['方案必须忠于 directions.json。', '方案自带目标产品 UI 样式，不依赖 workbench.css。', '不用假资产、emoji、文本符号或 CSS art 冒充真实资产。', '文本不溢出，移动和桌面模拟器不互相挤压。'];
+    card.guidance = ['方案必须忠于 directions.json。', '方案自带目标产品 UI 样式，不依赖 workbench.css。', '不用假资产、emoji、文本符号或 CSS art 冒充真实资产。', '文本不溢出，移动和桌面模拟器不互相挤压。', '逐个方案或逐个文件生成；预计超过 60 秒时先向用户说明当前进度。'];
     card.forbidden = ['临时改方向', '用占位文件推进到用户选择'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs workbench ${result.slug} --scaffold`;
     card.references = ['workbench-authoring.md'];

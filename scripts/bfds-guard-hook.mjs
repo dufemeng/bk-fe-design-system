@@ -19,6 +19,11 @@ const DESIGN_ARCHITECTURE_HEADINGS = [
   /^#{1,3}\s*.*运行环境.*$/m
 ];
 const WRITE_COMMAND_RE = /(cat\s+>|tee\s+|cp\s+|mv\s+|sed\s+-i|perl\s+-pi|fs\.writeFileSync|writeFileSync|python\d?\s+-c|node\s+-e)/;
+const DELEGATED_TOOL_RE = /^(task|agent|subagent)$/i;
+const DELEGATED_WRITE_INTENT_RE = /(写|创建|生成|产出|更新|修改|编辑|固化|落盘|write|create|generate|update|edit|produce|author|save)/i;
+const DELEGATED_PROTECTED_TARGET_RE = /(PRODUCT\.md|DESIGN\.md|docs\/design\/|design-contract\.json|implementation-handoff\.md|qa-plan\.json|workbench\.html|option-[abc]\.html|BFDS\s*(产物|artifact))/i;
+const DELEGATED_READ_ONLY_INTENT_RE = /(只读|只读取|读取|总结|分析|read-only|read only|summarize|analyze)/i;
+const DELEGATED_NEGATED_WRITE_RE = /((不要|不得|禁止|无需|不需要|不能).{0,8}(写|创建|生成|产出|更新|修改|编辑|固化|落盘))|((do not|don't|without).{0,8}(write|create|generate|update|edit|save))/i;
 
 function readStdin() {
   try {
@@ -153,9 +158,30 @@ function likelyProtectedBashWrite(command) {
   return /(?:^|\s)(PRODUCT\.md|DESIGN\.md|docs\/design\/[^\s'"`]+|\.\.?\/docs\/design\/[^\s'"`]+)/.test(command);
 }
 
+function delegatedBfdsWriteRequest(toolInput) {
+  const text = [
+    toolInput.prompt,
+    toolInput.description,
+    toolInput.instructions,
+    toolInput.task,
+    toolInput.message,
+    toolInput.subagent_type
+  ].filter(Boolean).join('\n');
+  if (!DELEGATED_PROTECTED_TARGET_RE.test(text)) return false;
+  if (!DELEGATED_WRITE_INTENT_RE.test(text)) return false;
+  return !(DELEGATED_READ_ONLY_INTENT_RE.test(text) && DELEGATED_NEGATED_WRITE_RE.test(text));
+}
+
 const input = parseHookInput();
 const toolName = input.tool_name ?? input.toolName ?? input.tool ?? '';
 const toolInput = input.tool_input ?? input.toolInput ?? input.input ?? {};
+
+if (DELEGATED_TOOL_RE.test(toolName)) {
+  if (delegatedBfdsWriteRequest(toolInput)) {
+    deny('delegating BFDS artifact writing to a Task/Agent is blocked. Keep PRODUCT.md, DESIGN.md, and docs/design/** writes in the parent session with visible progress; subagents may only do read-only research.');
+  }
+  allow();
+}
 
 if (/^bash$/i.test(toolName)) {
   const command = toolInput.command ?? '';

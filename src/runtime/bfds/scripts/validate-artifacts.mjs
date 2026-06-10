@@ -974,6 +974,24 @@ function validateGateTests() {
     });
     if (hook.status === 0) errors.push('expected hook to block directions.json before brainstorm-dialogue.json');
 
+    hook = runHook(hookRoot, {
+      tool_name: 'Task',
+      tool_input: {
+        description: '写 BFDS 上下文产物',
+        prompt: '请根据 init-interview.json 生成 PRODUCT.md 和 DESIGN.md。'
+      }
+    });
+    if (hook.status === 0) errors.push('expected hook to block delegated PRODUCT.md / DESIGN.md writing');
+
+    hook = runHook(hookRoot, {
+      tool_name: 'Task',
+      tool_input: {
+        description: '只读调研',
+        prompt: '请读取 PRODUCT.md 并总结已有项目级上下文，不要写入任何文件。'
+      }
+    });
+    if (hook.status !== 0) errors.push(`expected hook to allow read-only delegated PRODUCT.md research, got ${hook.status}: ${hook.stderr || hook.stdout}`);
+
     const skippedRoot = makeProject();
     writeWorkbench(skippedRoot);
     const skipped = runGateFailure(skippedRoot, slug);
