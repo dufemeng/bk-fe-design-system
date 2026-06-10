@@ -24,7 +24,7 @@
 
 ## 期望行为
 
-- 先运行 `bfds-gate.mjs <slug> --sync-status`，只接受 gate 从目标项目可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
+- 先运行 `bfds-gate.mjs <slug>`，只接受 gate 从目标项目可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
 - 如果 gate 输出 `CONTEXT_BLOCKED`，进入 Impeccable `init` / `document`，或停止要求补齐可信上下文。
 - 只有 gate 输出 `NEEDS_SURFACE` 后，才进入目标界面与变更边界确认。
 - 只确认前端目标界面和改动范围，不问 API、数据库或权限。

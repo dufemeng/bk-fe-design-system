@@ -206,6 +206,7 @@ function validateArtifactDir(dir) {
     contract.sourceArtifacts?.options?.A,
     contract.sourceArtifacts?.options?.B,
     contract.sourceArtifacts?.options?.C,
+    status.artifacts?.pendingRequest,
     status.artifacts?.workbench,
     status.artifacts?.optionA,
     status.artifacts?.optionB,
@@ -273,9 +274,9 @@ function writeText(file, text) {
   fs.writeFileSync(file, text);
 }
 
-function runGate(projectRoot, slug) {
+function runGate(projectRoot, slug, extraArgs = []) {
   const gateScript = path.join(scriptDir, 'bfds-gate.mjs');
-  const output = execFileSync(process.execPath, [gateScript, slug, '--json', '--sync-status'], {
+  const output = execFileSync(process.execPath, [gateScript, slug, '--json', ...extraArgs], {
     cwd: projectRoot,
     encoding: 'utf8'
   });
@@ -283,12 +284,29 @@ function runGate(projectRoot, slug) {
 }
 
 function runGateWithArgs(projectRoot, slug, extraArgs) {
-  const gateScript = path.join(scriptDir, 'bfds-gate.mjs');
-  const output = execFileSync(process.execPath, [gateScript, slug, '--json', '--sync-status', ...extraArgs], {
-    cwd: projectRoot,
-    encoding: 'utf8'
-  });
-  return JSON.parse(output);
+  return runGate(projectRoot, slug, extraArgs);
+}
+
+function runGateFailure(projectRoot, slug, extraArgs = []) {
+  try {
+    return { failed: false, result: runGate(projectRoot, slug, extraArgs) };
+  } catch (error) {
+    return { failed: true, result: JSON.parse(error.stdout.toString()) };
+  }
+}
+
+function assertGateLogIncludes(projectRoot, slug, phase, errors, label) {
+  const gateLog = path.join(projectRoot, 'docs', 'design', slug, 'evidence', 'gate-log.ndjson');
+  if (!fs.existsSync(gateLog)) {
+    errors.push(`${label}: expected gate-log.ndjson to exist`);
+    return;
+  }
+  const phases = fs.readFileSync(gateLog, 'utf8')
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map(line => JSON.parse(line).phase);
+  if (!phases.includes(phase)) errors.push(`${label}: expected gate log to include ${phase}, got ${phases.join(', ')}`);
 }
 
 function baseSurface(slug) {
@@ -446,66 +464,119 @@ function baseQaPlan(slug) {
 
 function validateGateTests() {
   const errors = [];
-  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bfds-gate-'));
   const slug = 'settings-prompt';
-  const designDir = path.join(projectRoot, 'docs', 'design', slug);
-  const evidenceDir = path.join(designDir, 'evidence');
+  const projectRoots = [];
+  const makeProject = (withContext = true) => {
+    const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bfds-gate-'));
+    projectRoots.push(projectRoot);
+    if (withContext) {
+      writeText(path.join(projectRoot, 'PRODUCT.md'), '# Product\n');
+      writeText(path.join(projectRoot, 'DESIGN.md'), '# Design\n');
+    }
+    return projectRoot;
+  };
+  const designDirFor = projectRoot => path.join(projectRoot, 'docs', 'design', slug);
+  const evidenceDirFor = projectRoot => path.join(designDirFor(projectRoot), 'evidence');
+  const writeWorkbench = (projectRoot, files = ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html']) => {
+    for (const file of files) writeText(path.join(designDirFor(projectRoot), file), '<!doctype html><title>BFDS gate test</title>');
+  };
 
-  writeText(path.join(projectRoot, 'PRODUCT.md'), '# Product\n');
-  writeText(path.join(projectRoot, 'DESIGN.md'), '# Design\n');
-
-  let result = runGate(projectRoot, slug);
-  if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected NEEDS_SURFACE, got ${result.phase}`);
-
-  writeJson(path.join(evidenceDir, 'surface.json'), baseSurface(slug));
-  result = runGate(projectRoot, slug);
-  if (result.phase !== 'NEEDS_DIRECTIONS') errors.push(`expected NEEDS_DIRECTIONS, got ${result.phase}`);
-
-  writeJson(path.join(evidenceDir, 'directions.json'), baseDirections(slug));
-  result = runGate(projectRoot, slug);
-  if (result.phase !== 'NEEDS_WORKBENCH') errors.push(`expected NEEDS_WORKBENCH, got ${result.phase}`);
-
-  for (const file of ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html']) {
-    writeText(path.join(designDir, file), '<!doctype html><title>BFDS gate test</title>');
-  }
-  result = runGate(projectRoot, slug);
-  if (result.phase !== 'NEEDS_SELECTION') errors.push(`expected NEEDS_SELECTION, got ${result.phase}`);
-
-  writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug, '你来选一个最稳的。'));
   try {
+    const checkOnlyRoot = makeProject();
+    let result = runGate(checkOnlyRoot, slug, ['--check-only']);
+    if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected check-only NEEDS_SURFACE, got ${result.phase}`);
+    if (fs.existsSync(path.join(designDirFor(checkOnlyRoot), 'status.json'))) errors.push('check-only must not write status.json');
+    if (fs.existsSync(path.join(evidenceDirFor(checkOnlyRoot), 'gate-log.ndjson'))) errors.push('check-only must not write gate-log.ndjson');
+    result = runGate(checkOnlyRoot, slug);
+    if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected default NEEDS_SURFACE, got ${result.phase}`);
+    if (!fs.existsSync(path.join(designDirFor(checkOnlyRoot), 'status.json'))) errors.push('default gate must write status.json');
+    assertGateLogIncludes(checkOnlyRoot, slug, 'NEEDS_SURFACE', errors, 'default gate');
+
+    const noContextRoot = makeProject(false);
+    const noContext = runGateFailure(noContextRoot, slug, ['--request', '用 /bfds-design 给首页新增一个内容型页面入口。']);
+    if (!noContext.failed || noContext.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected CONTEXT_BLOCKED, got ${noContext.result.phase}`);
+    if (!fs.existsSync(path.join(evidenceDirFor(noContextRoot), 'pending-request.json'))) errors.push('expected pending-request.json for blocked request');
+    assertGateLogIncludes(noContextRoot, slug, 'CONTEXT_BLOCKED', errors, 'context blocked');
+
+    const skippedRoot = makeProject();
+    writeWorkbench(skippedRoot);
+    const skipped = runGateFailure(skippedRoot, slug);
+    if (!skipped.failed || skipped.result.phase !== 'INCONSISTENT') errors.push(`expected skipped workbench to be INCONSISTENT, got ${skipped.result.phase}`);
+    assertGateLogIncludes(skippedRoot, slug, 'INCONSISTENT', errors, 'skipped workbench');
+
+    const partialRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(partialRoot), 'surface.json'), baseSurface(slug));
+    writeJson(path.join(evidenceDirFor(partialRoot), 'directions.json'), baseDirections(slug));
+    writeWorkbench(partialRoot, ['workbench.html', 'option-a.html', 'option-b.html']);
+    const partial = runGateFailure(partialRoot, slug);
+    if (!partial.failed || partial.result.phase !== 'INCONSISTENT') errors.push(`expected partial workbench to be INCONSISTENT, got ${partial.result.phase}`);
+    assertGateLogIncludes(partialRoot, slug, 'INCONSISTENT', errors, 'partial workbench');
+
+    const lowConfidenceRoot = makeProject();
+    const lowConfidenceSurface = baseSurface(slug);
+    lowConfidenceSurface.surface.confidence = 'low';
+    writeJson(path.join(evidenceDirFor(lowConfidenceRoot), 'surface.json'), lowConfidenceSurface);
+    const lowConfidence = runGateFailure(lowConfidenceRoot, slug);
+    if (!lowConfidence.failed || lowConfidence.result.phase !== 'INCONSISTENT') errors.push(`expected low confidence surface to be INCONSISTENT, got ${lowConfidence.result.phase}`);
+
+    const markRoot = makeProject();
+    const earlyMark = runGateFailure(markRoot, slug, ['--mark', 'implementing']);
+    if (!earlyMark.failed || earlyMark.result.phase !== 'INCONSISTENT') errors.push(`expected early mark to be INCONSISTENT, got ${earlyMark.result.phase}`);
+
+    const projectRoot = makeProject();
+    const designDir = designDirFor(projectRoot);
+    const evidenceDir = evidenceDirFor(projectRoot);
+
     result = runGate(projectRoot, slug);
-    if (result.phase !== 'INCONSISTENT') errors.push(`expected invalid selection to be INCONSISTENT, got ${result.phase}`);
-  } catch (error) {
-    const parsed = JSON.parse(error.stdout.toString());
-    if (parsed.phase !== 'INCONSISTENT') errors.push(`expected invalid selection to be INCONSISTENT, got ${parsed.phase}`);
+    if (result.phase !== 'NEEDS_SURFACE') errors.push(`expected NEEDS_SURFACE, got ${result.phase}`);
+
+    writeJson(path.join(evidenceDir, 'surface.json'), baseSurface(slug));
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_DIRECTIONS') errors.push(`expected NEEDS_DIRECTIONS, got ${result.phase}`);
+
+    writeJson(path.join(evidenceDir, 'directions.json'), baseDirections(slug));
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_WORKBENCH') errors.push(`expected NEEDS_WORKBENCH, got ${result.phase}`);
+
+    writeWorkbench(projectRoot);
+    const future = new Date(Date.now() + 5000);
+    fs.utimesSync(path.join(evidenceDir, 'directions.json'), future, future);
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_SELECTION') errors.push(`expected NEEDS_SELECTION, got ${result.phase}`);
+    if (!result.warnings?.some(warning => warning.includes('stale workbench'))) errors.push('expected stale workbench warning');
+
+    for (const quote of ['你来选一个最稳的。', '推荐一个。', '你帮我推荐一个吧。', '三个都行你定。']) {
+      writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug, quote));
+      const invalid = runGateFailure(projectRoot, slug);
+      if (!invalid.failed || invalid.result.phase !== 'INCONSISTENT') errors.push(`expected invalid selection ${quote} to be INCONSISTENT, got ${invalid.result.phase}`);
+    }
+
+    writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug));
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_CONTRACT') errors.push(`expected NEEDS_CONTRACT, got ${result.phase}`);
+
+    writeJson(path.join(designDir, 'design-contract.json'), baseContract(slug));
+    writeJson(path.join(designDir, 'qa-plan.json'), baseQaPlan(slug));
+    writeText(path.join(designDir, 'implementation-handoff.md'), '# Implementation Handoff\n');
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'CONTRACT_READY') errors.push(`expected CONTRACT_READY, got ${result.phase}`);
+
+    const qaWithoutReport = runGateFailure(projectRoot, slug, ['--mark', 'qa-passed']);
+    if (!qaWithoutReport.failed || qaWithoutReport.result.phase !== 'INCONSISTENT') errors.push(`expected qa-passed without report to be INCONSISTENT, got ${qaWithoutReport.result.phase}`);
+
+    writeText(path.join(designDir, 'qa-report.md'), '# QA Report\n');
+    result = runGateWithArgs(projectRoot, slug, ['--mark', 'qa-passed']);
+    if (result.status?.state !== 'qa-passed') errors.push(`expected status.state qa-passed, got ${result.status?.state}`);
+
+    const gateLog = path.join(evidenceDir, 'gate-log.ndjson');
+    if (!fs.existsSync(gateLog)) errors.push('expected gate-log.ndjson to be written');
+    const logLines = fs.existsSync(gateLog) ? fs.readFileSync(gateLog, 'utf8').trim().split('\n').filter(Boolean) : [];
+    if (logLines.length < 10) errors.push(`expected at least 10 gate log entries, got ${logLines.length}`);
+  } finally {
+    for (const projectRoot of projectRoots) {
+      fs.rmSync(projectRoot, { recursive: true, force: true });
+    }
   }
-
-  writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug));
-  result = runGate(projectRoot, slug);
-  if (result.phase !== 'NEEDS_CONTRACT') errors.push(`expected NEEDS_CONTRACT, got ${result.phase}`);
-
-  writeJson(path.join(designDir, 'design-contract.json'), baseContract(slug));
-  writeJson(path.join(designDir, 'qa-plan.json'), baseQaPlan(slug));
-  writeText(path.join(designDir, 'implementation-handoff.md'), '# Implementation Handoff\n');
-  result = runGate(projectRoot, slug);
-  if (result.phase !== 'CONTRACT_READY') errors.push(`expected CONTRACT_READY, got ${result.phase}`);
-
-  try {
-    runGateWithArgs(projectRoot, slug, ['--mark', 'qa-passed']);
-    errors.push('expected qa-passed mark without qa-report.md to fail');
-  } catch (error) {
-    const parsed = JSON.parse(error.stdout.toString());
-    if (parsed.phase !== 'INCONSISTENT') errors.push(`expected qa-passed without report to be INCONSISTENT, got ${parsed.phase}`);
-  }
-
-  writeText(path.join(designDir, 'qa-report.md'), '# QA Report\n');
-  result = runGateWithArgs(projectRoot, slug, ['--mark', 'qa-passed']);
-  if (result.status?.state !== 'qa-passed') errors.push(`expected status.state qa-passed, got ${result.status?.state}`);
-
-  const gateLog = path.join(evidenceDir, 'gate-log.ndjson');
-  if (!fs.existsSync(gateLog)) errors.push('expected gate-log.ndjson to be written');
-  const logLines = fs.existsSync(gateLog) ? fs.readFileSync(gateLog, 'utf8').trim().split('\n').filter(Boolean) : [];
-  if (logLines.length < 6) errors.push(`expected at least 6 gate log entries, got ${logLines.length}`);
 
   return errors;
 }

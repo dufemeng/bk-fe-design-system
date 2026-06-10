@@ -121,7 +121,8 @@ fixtures/docs-design-sample/settings-prompt/
 ```bash
 node scripts/install-bfds-skills.mjs codex --dry-run
 node scripts/install-bfds-skills.mjs claude --dry-run
-node scripts/bfds-gate.mjs settings-prompt --sync-status
+node scripts/bfds-gate.mjs settings-prompt
+node scripts/bfds-gate.mjs settings-prompt --check-only
 node scripts/bfds-status.mjs
 node scripts/bfds-status.mjs --json --root fixtures/docs-design-sample
 node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt

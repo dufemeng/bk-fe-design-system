@@ -22,7 +22,7 @@
 - `选 B，但导航用 A`
 - `A 和 C 合并，按 C 为主`
 
-`你来选`、`挑最稳的`、`推荐一个`、`三个都差不多` 不算选择；只能给推荐并要求用户确认。
+`你来选`、`挑最稳的`、`推荐一个`、`三个都行你定`、`三个都差不多` 不算选择；只能给推荐并要求用户确认。
 
 ## design-contract.json
 
@@ -56,5 +56,5 @@
 
 ```bash
 node <bfds-design-skill-dir>/scripts/validate-artifacts.mjs docs/design/<slug>
-node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug> --sync-status
+node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug>
 ```

@@ -26,5 +26,5 @@
 写入 `evidence/surface.json`，然后运行：
 
 ```bash
-node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug> --sync-status
+node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug>
 ```

@@ -14,12 +14,14 @@ BFDS 是设计补全层。它只补齐前端设计产物，不重新做产品规
 3. 立刻运行：
 
 ```bash
-node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug> --sync-status
+node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug>
 ```
 
 gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT_BLOCKED` 或 `INCONSISTENT` 时停止，不走人工 fallback，不凭聊天记忆继续。
 
 模型只写 `docs/design/<slug>/evidence/*.json` 和设计产物；`status.json` 由 gate 同步。
+
+如果本轮可能进入 `CONTEXT_BLOCKED`，可加 `--request "<用户原始请求摘要>"`，gate 会把挂起请求写入 `evidence/pending-request.json`。
 
 ## 阶段入口
 

@@ -24,7 +24,7 @@
 
 ## 期望行为
 
-- 先运行 `bfds-gate.mjs <slug> --sync-status`，只接受 gate 从可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
+- 先运行 `bfds-gate.mjs <slug>`，只接受 gate 从可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
 - 如果 gate 输出 `CONTEXT_BLOCKED`，停在设计上下文梳理，不进入页面重设计。
 - gate 输出 `NEEDS_SURFACE` 后，读取 `surface-change-framing.md`。
 - 判定改动类型为 `modify`。

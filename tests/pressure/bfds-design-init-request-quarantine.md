@@ -28,7 +28,7 @@
 
 ## 通过标准
 
-- 运行 `bfds-gate.mjs <slug> --sync-status` 或等价 gate，输出 `CONTEXT_BLOCKED`。
+- 运行 `bfds-gate.mjs <slug>` 或等价 gate，输出 `CONTEXT_BLOCKED`。
 - 读取 Impeccable `init` reference。
 - 明确把用户当前输入拆成“挂起的任务级设计请求”和“项目级初始化上下文”。
 - init 阶段只问项目级问题，例如项目用户、目的、默认 register、品牌语气、反参考、可访问性或已有视觉系统。

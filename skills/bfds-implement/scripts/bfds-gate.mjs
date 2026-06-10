@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const args = parseArgs(process.argv.slice(2));
-const { help, json, syncStatus, root, titleArg, markArg, targetArg, argErrors } = args;
+const { help, json, checkOnly, root, titleArg, markArg, requestArg, targetArg, argErrors } = args;
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const cwd = process.cwd();
 
@@ -18,10 +18,16 @@ const MARKABLE_STATUS = new Set(['implementing', 'implemented', 'qa-failed', 'qa
 const INVALID_SELECTION_PATTERNS = [
   /你来选/,
   /挑.*稳/,
-  /推荐.*生成/,
+  /帮我.*推荐/,
+  /你.*推荐/,
+  /推荐\s*(一个|个|下|一下|一版|方案|最|吧)/,
   /你觉得.*用/,
   /都差不多/,
-  /随便/,
+  /三个都行/,
+  /都行.*(你|帮我)?.*(定|选|决定)?/,
+  /都可以.*(你|帮我)?.*(定|选|决定)?/,
+  /你.*(定|决定|选)/,
+  /随便(选|挑|定|一个|哪个|你|吧)/,
   /agent.*选/i,
   /choose.*for me/i,
   /you pick/i
@@ -29,11 +35,12 @@ const INVALID_SELECTION_PATTERNS = [
 
 function usage() {
   return [
-    'Usage: node bfds-gate.mjs <slug|docs/design/slug> [--json] [--sync-status] [--root docs/design] [--title "..."] [--mark <state>]',
+    'Usage: node bfds-gate.mjs <slug|docs/design/slug> [--json] [--check-only] [--root docs/design] [--title "..."] [--mark <state>] [--request "..."]',
     '',
     'Examples:',
-    '  node skills/bfds-design/scripts/bfds-gate.mjs settings-prompt --sync-status',
-    '  node scripts/bfds-gate.mjs docs/design/settings-prompt --json'
+    '  node skills/bfds-design/scripts/bfds-gate.mjs settings-prompt',
+    '  node scripts/bfds-gate.mjs docs/design/settings-prompt --json',
+    '  node scripts/bfds-gate.mjs settings-prompt --check-only'
   ].join('\n');
 }
 
@@ -41,10 +48,11 @@ function parseArgs(argv) {
   const parsed = {
     json: false,
     help: false,
-    syncStatus: false,
+    checkOnly: false,
     root: 'docs/design',
     titleArg: null,
     markArg: null,
+    requestArg: null,
     targetArg: null,
     argErrors: []
   };
@@ -55,9 +63,11 @@ function parseArgs(argv) {
       parsed.help = true;
     } else if (arg === '--json') {
       parsed.json = true;
+    } else if (arg === '--check-only') {
+      parsed.checkOnly = true;
     } else if (arg === '--sync-status') {
-      parsed.syncStatus = true;
-    } else if (['--root', '--title', '--mark'].includes(arg)) {
+      // Backward-compatible no-op. Gate writes status by default.
+    } else if (['--root', '--title', '--mark', '--request'].includes(arg)) {
       const value = argv[index + 1];
       if (!value || value.startsWith('--')) {
         parsed.argErrors.push(`${arg} requires a value`);
@@ -65,6 +75,7 @@ function parseArgs(argv) {
         if (arg === '--root') parsed.root = value;
         if (arg === '--title') parsed.titleArg = value;
         if (arg === '--mark') parsed.markArg = value;
+        if (arg === '--request') parsed.requestArg = value;
         index += 1;
       }
     } else if (arg.startsWith('--')) {
@@ -74,6 +85,10 @@ function parseArgs(argv) {
     } else {
       parsed.argErrors.push(`unexpected positional argument ${arg}`);
     }
+  }
+
+  if (parsed.checkOnly && parsed.markArg) {
+    parsed.argErrors.push('--check-only cannot be combined with --mark');
   }
 
   return parsed;
@@ -326,6 +341,7 @@ function collectArtifacts(dir) {
   const artifact = name => fileExists(dir, name) ? toProjectPath(path.join(dir, name)) : null;
   const evidenceDirExists = fs.existsSync(path.join(dir, 'evidence'));
   return {
+    pendingRequest: artifact('evidence/pending-request.json'),
     surfaceEvidence: artifact('evidence/surface.json'),
     directionsEvidence: artifact('evidence/directions.json'),
     selectionEvidence: artifact('evidence/selection.json'),
@@ -365,9 +381,39 @@ function writeStatusAndLog(dir, status, result) {
     phase: result.phase,
     status: status.state,
     missing: result.missing,
+    warnings: result.warnings,
     errors: result.errors
   };
   fs.appendFileSync(path.join(dir, 'evidence', 'gate-log.ndjson'), `${JSON.stringify(logLine)}\n`);
+}
+
+function writePendingRequest(dir, slug, request) {
+  if (!request?.trim()) return;
+  ensureDir(path.join(dir, 'evidence'));
+  const file = path.join(dir, 'evidence', 'pending-request.json');
+  if (fs.existsSync(file)) return;
+  const data = {
+    slug,
+    createdAt: new Date().toISOString(),
+    request: request.trim()
+  };
+  fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+function mtimeMs(file) {
+  return fs.statSync(file).mtimeMs;
+}
+
+function warnIfOlder(warnings, dir, upstreamName, downstreamNames, label) {
+  const upstream = path.join(dir, upstreamName);
+  if (!fs.existsSync(upstream)) return;
+  const upstreamTime = mtimeMs(upstream);
+  for (const downstreamName of downstreamNames) {
+    const downstream = path.join(dir, downstreamName);
+    if (fs.existsSync(downstream) && mtimeMs(downstream) < upstreamTime) {
+      warnings.push(`${label}: ${downstreamName} is older than ${upstreamName}`);
+    }
+  }
 }
 
 function evaluate(dir) {
@@ -455,6 +501,11 @@ function evaluate(dir) {
   if (hasPartialWorkbench) errors.push(`incomplete workbench files: found ${workbenchFiles.join(', ')}`);
   if (hasPartialContractPack) errors.push(`incomplete contract pack: found ${contractFiles.join(', ')}`);
 
+  warnIfOlder(warnings, dir, 'evidence/surface.json', ['evidence/directions.json'], 'stale evidence');
+  warnIfOlder(warnings, dir, 'evidence/directions.json', ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'], 'stale workbench');
+  warnIfOlder(warnings, dir, 'workbench.html', ['evidence/selection.json'], 'stale selection');
+  warnIfOlder(warnings, dir, 'evidence/selection.json', ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'], 'stale contract pack');
+
   if (errors.length > 0) {
     return { phase: 'INCONSISTENT', slug, dir: toProjectPath(dir), context, missing: [], errors, warnings };
   }
@@ -505,7 +556,7 @@ if (markArg && !MARKABLE_STATUS.has(markArg)) {
 }
 
 const dir = resolveDesignDir(targetArg);
-if (syncStatus) ensureDir(path.join(dir, 'evidence'));
+if (!checkOnly) ensureDir(path.join(dir, 'evidence'));
 const result = evaluate(dir);
 const statusPath = path.join(dir, 'status.json');
 const existingStatusErrors = [];
@@ -524,7 +575,8 @@ if (markArg) {
   }
 }
 
-if (syncStatus) {
+if (!checkOnly) {
+  if (result.phase === 'CONTEXT_BLOCKED') writePendingRequest(dir, result.slug, requestArg);
   const status = buildStatus(dir, result.slug, titleArg, result.phase, existingStatus, result.surface, result.selection, markState);
   writeStatusAndLog(dir, status, result);
   result.status = status;
