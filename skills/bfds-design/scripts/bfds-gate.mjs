@@ -146,6 +146,7 @@ function firstExisting(...candidates) {
 function schemaPath(file) {
   return firstExisting(
     path.join('templates/artifacts', file),
+    path.join(scriptDir, '..', 'schemas', file),
     path.join(scriptDir, '..', 'templates', 'artifacts', file),
     path.join(scriptDir, '..', 'assets', 'templates', 'artifacts', file),
     path.join(scriptDir, '..', '..', 'templates', 'artifacts', file)
@@ -393,6 +394,12 @@ function fileExists(dir, name) {
   return fs.existsSync(path.join(dir, name));
 }
 
+function fileContains(dir, name, text) {
+  const file = path.join(dir, name);
+  if (!fs.existsSync(file)) return false;
+  return fs.readFileSync(file, 'utf8').includes(text);
+}
+
 function phaseRules(phase) {
   const rules = {
     CONTEXT_BLOCKED: [
@@ -499,7 +506,7 @@ function buildStatus(dir, slug, title, phase, existingStatus, surface, selection
     lastUpdated: new Date().toISOString(),
     selectedOption: selection?.selectedOption?.summary ?? existingStatus?.selectedOption ?? null,
     artifacts,
-    sourceSummary: surface?.sourceSummary ?? existingStatus?.sourceSummary ?? null,
+    sourceSummary: surface?.sourceSummary || existingStatus?.sourceSummary || null,
     currentSurface: surface?.surface?.name ?? existingStatus?.currentSurface ?? null,
     changeType: surface?.changeType ?? existingStatus?.changeType ?? null,
     notes: existingStatus?.notes ?? 'Managed by bfds-gate.mjs.'
@@ -597,9 +604,12 @@ function evaluate(dir) {
   const brainstormExists = brainstormResult.exists;
   const directionsExists = directionsResult.exists;
   const selectionExists = selectionResult.exists;
-  const workbenchFiles = ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'].filter(name => fileExists(dir, name));
-  const hasWorkbench = workbenchFiles.length === 4;
-  const hasPartialWorkbench = workbenchFiles.length > 0 && workbenchFiles.length < 4;
+  const expectedWorkbenchFiles = ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html'];
+  const existingWorkbenchFiles = expectedWorkbenchFiles.filter(name => fileExists(dir, name));
+  const placeholderWorkbenchFiles = expectedWorkbenchFiles.filter(name => fileContains(dir, name, 'BFDS_PLACEHOLDER'));
+  const validWorkbenchFiles = expectedWorkbenchFiles.filter(name => fileExists(dir, name) && !fileContains(dir, name, 'BFDS_PLACEHOLDER'));
+  const hasWorkbench = validWorkbenchFiles.length === expectedWorkbenchFiles.length;
+  const hasPartialWorkbench = existingWorkbenchFiles.length > 0 && !hasWorkbench && placeholderWorkbenchFiles.length === 0;
   const contractFiles = ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'].filter(name => fileExists(dir, name));
   const hasContractPack = contractFiles.length === 3;
   const hasPartialContractPack = contractFiles.length > 0 && contractFiles.length < 3;
@@ -684,7 +694,7 @@ function evaluate(dir) {
 
   if (selectionResult.ok) {
     if (invalidSelectionQuote(selectionResult.data.selectionQuote)) {
-      errors.push('selection evidence quote is not an explicit user choice');
+      warnings.push('selection evidence quote may not be an explicit user choice; confirm A/B/C or merge selection with the user');
     }
     for (const file of [
       selectionResult.data.workbench,
@@ -710,16 +720,16 @@ function evaluate(dir) {
   if (brainstormExists && !surfaceExists) errors.push('brainstorm dialogue evidence exists before surface evidence');
   if (directionsExists && !surfaceExists) errors.push('directions evidence exists before surface evidence');
   if (directionsExists && !brainstormExists) errors.push('directions evidence exists before brainstorm dialogue evidence');
-  if ((hasWorkbench || hasPartialWorkbench) && !directionsExists) errors.push('workbench files exist before directions evidence');
+  if ((existingWorkbenchFiles.length > 0) && !directionsExists) errors.push('workbench files exist before directions evidence');
   if (selectionExists && !hasWorkbench) errors.push('selection evidence exists before complete workbench files');
   if ((hasContractPack || hasPartialContractPack) && !selectionExists) errors.push('contract files exist before selection evidence');
-  if (hasPartialWorkbench) errors.push(`incomplete workbench files: found ${workbenchFiles.join(', ')}`);
+  if (hasPartialWorkbench) errors.push(`incomplete workbench files: found ${existingWorkbenchFiles.join(', ')}`);
   if (hasPartialContractPack) errors.push(`incomplete contract pack: found ${contractFiles.join(', ')}`);
 
   warnIfOlder(warnings, dir, 'evidence/surface.json', ['evidence/directions.json'], 'stale evidence');
   warnIfOlder(warnings, dir, 'evidence/surface.json', [BRAINSTORM_DIALOGUE_FILE], 'stale brainstorm');
   warnIfOlder(warnings, dir, BRAINSTORM_DIALOGUE_FILE, ['evidence/directions.json'], 'stale directions');
-  warnIfOlder(warnings, dir, 'evidence/directions.json', ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'], 'stale workbench');
+  warnIfOlder(warnings, dir, 'evidence/directions.json', ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html'], 'stale workbench');
   warnIfOlder(warnings, dir, 'workbench.html', ['evidence/selection.json'], 'stale selection');
   warnIfOlder(warnings, dir, 'evidence/selection.json', ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'], 'stale contract pack');
 
@@ -729,7 +739,7 @@ function evaluate(dir) {
   if (!surfaceExists) return { phase: 'NEEDS_SURFACE', slug, dir: toProjectPath(dir), context, missing: ['evidence/surface.json'], errors, warnings };
   if (!brainstormExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: [BRAINSTORM_DIALOGUE_FILE], errors, warnings, surface: surfaceResult.data };
   if (!directionsExists) return { phase: 'NEEDS_DIRECTIONS', slug, dir: toProjectPath(dir), context, missing: ['evidence/directions.json'], errors, warnings, surface: surfaceResult.data, brainstorm: brainstormResult.data };
-  if (!hasWorkbench) return { phase: 'NEEDS_WORKBENCH', slug, dir: toProjectPath(dir), context, missing: ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html'].filter(name => !fileExists(dir, name)), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
+  if (!hasWorkbench) return { phase: 'NEEDS_WORKBENCH', slug, dir: toProjectPath(dir), context, missing: expectedWorkbenchFiles.filter(name => !fileExists(dir, name) || fileContains(dir, name, 'BFDS_PLACEHOLDER')), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
   if (!selectionExists) return { phase: 'NEEDS_SELECTION', slug, dir: toProjectPath(dir), context, missing: ['evidence/selection.json'], errors, warnings, surface: surfaceResult.data, directions: directionsResult.data };
   if (!hasContractPack) return { phase: 'NEEDS_CONTRACT', slug, dir: toProjectPath(dir), context, missing: ['design-contract.json', 'implementation-handoff.md', 'qa-plan.json'].filter(name => !fileExists(dir, name)), errors, warnings, surface: surfaceResult.data, directions: directionsResult.data, selection: selectionResult.data };
   return { phase: IMPLEMENTABLE_STATUS.has(existingStatus?.state) ? 'IMPLEMENT_READY' : 'CONTRACT_READY', slug, dir: toProjectPath(dir), context, missing: [], errors, warnings, surface: surfaceResult.data, directions: directionsResult.data, selection: selectionResult.data };

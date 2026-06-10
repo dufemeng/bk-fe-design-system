@@ -61,6 +61,10 @@ node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs codex
 ```bash
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/SKILL.md"
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/SKILL.md"
+test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/scripts/bfds.mjs"
+test -d "${CODEX_HOME:-$HOME/.codex}/skills/bfds-design/runtime/bfds"
+test -f "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/scripts/bfds.mjs"
+test -d "${CODEX_HOME:-$HOME/.codex}/skills/bfds-implement/runtime/bfds"
 test -f .agents/skills/impeccable/SKILL.md
 test -f .agents/skills/impeccable/scripts/context.mjs
 ```
@@ -85,6 +89,10 @@ node /path/to/bk-fe-design-system/scripts/install-bfds-skills.mjs claude
 ```bash
 test -f .claude/skills/bfds-design/SKILL.md
 test -f .claude/skills/bfds-implement/SKILL.md
+test -f .claude/skills/bfds-design/scripts/bfds.mjs
+test -d .claude/skills/bfds-design/runtime/bfds
+test -f .claude/skills/bfds-implement/scripts/bfds.mjs
+test -d .claude/skills/bfds-implement/runtime/bfds
 test -f .claude/skills/impeccable/SKILL.md
 test -f .claude/skills/impeccable/scripts/context.mjs
 test -f .claude/agents/impeccable-manual-edit-applier.md
@@ -101,6 +109,7 @@ node scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node scripts/validate-artifacts.mjs --forward-tests
 node scripts/validate-artifacts.mjs --pressure-tests
 node scripts/validate-artifacts.mjs --gate-tests
+node scripts/bfds.mjs validate fixtures/docs-design-sample/settings-prompt
 node skills/bfds-design/scripts/validate-artifacts.mjs fixtures/docs-design-sample/settings-prompt
 node skills/bfds-design/scripts/validate-artifacts.mjs --pressure-tests
 node skills/bfds-design/scripts/validate-artifacts.mjs --gate-tests

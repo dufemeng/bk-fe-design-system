@@ -20,6 +20,7 @@ function firstExisting(...candidates) {
 function schemaPath(file) {
   return firstExisting(
     path.join('templates/artifacts', file),
+    path.join(scriptDir, '..', 'schemas', file),
     path.join(scriptDir, '..', 'assets', 'templates', 'artifacts', file),
     path.join(scriptDir, '..', '..', 'templates', 'artifacts', file)
   );
@@ -167,11 +168,17 @@ function validateArtifactDir(dir) {
 
   assertFile(path.join(dir, 'implementation-handoff.md'), errors);
   assertFile(path.join(dir, 'workbench.html'), errors);
+  assertFile(path.join(dir, 'workbench.css'), errors);
   assertFile(path.join(dir, 'option-a.html'), errors);
   assertFile(path.join(dir, 'option-b.html'), errors);
   assertFile(path.join(dir, 'option-c.html'), errors);
 
   if (errors.length > 0) return errors;
+
+  for (const file of ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html']) {
+    const text = fs.readFileSync(path.join(dir, file), 'utf8');
+    if (text.includes('BFDS_PLACEHOLDER')) errors.push(`${file} still contains BFDS_PLACEHOLDER`);
+  }
 
   for (const [artifactFile, schemaFile] of Object.entries(schemaFiles)) {
     const schema = readJson(schemaFile);
@@ -334,12 +341,45 @@ function assertSameFile(left, right, errors) {
   if (!leftBytes.equals(rightBytes)) errors.push(`bundled copy drift: ${right} differs from ${left}`);
 }
 
+function listFilesRecursive(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...listFilesRecursive(fullPath));
+    else if (entry.isFile()) files.push(fullPath);
+  }
+  return files;
+}
+
+function assertSameDirectory(leftDir, rightDir, errors) {
+  assertFile(leftDir, errors);
+  assertFile(rightDir, errors);
+  if (!fs.existsSync(leftDir) || !fs.existsSync(rightDir)) return;
+  const leftFiles = listFilesRecursive(leftDir).map(file => path.relative(leftDir, file)).sort();
+  const rightFiles = listFilesRecursive(rightDir).map(file => path.relative(rightDir, file)).sort();
+  const allFiles = new Set([...leftFiles, ...rightFiles]);
+  for (const relativeFile of allFiles) {
+    assertSameFile(path.join(leftDir, relativeFile), path.join(rightDir, relativeFile), errors);
+  }
+}
+
 function validateBundledCopyParity() {
   const errors = [];
   const repoRoot = findRepoRoot();
   if (!repoRoot) return errors;
 
   for (const skill of ['bfds-design', 'bfds-implement']) {
+    assertSameFile(
+      path.join(repoRoot, 'scripts', 'bfds.mjs'),
+      path.join(repoRoot, 'skills', skill, 'scripts', 'bfds.mjs'),
+      errors
+    );
+    assertSameDirectory(
+      path.join(repoRoot, 'src', 'runtime', 'bfds'),
+      path.join(repoRoot, 'skills', skill, 'runtime', 'bfds'),
+      errors
+    );
     assertSameFile(
       path.join(repoRoot, 'scripts', 'bfds-gate.mjs'),
       path.join(repoRoot, 'skills', skill, 'scripts', 'bfds-gate.mjs'),
@@ -712,8 +752,21 @@ function validateGateTests() {
   };
   const designDirFor = projectRoot => path.join(projectRoot, 'docs', 'design', slug);
   const evidenceDirFor = projectRoot => path.join(designDirFor(projectRoot), 'evidence');
-  const writeWorkbench = (projectRoot, files = ['workbench.html', 'option-a.html', 'option-b.html', 'option-c.html']) => {
+  const writeWorkbench = (projectRoot, files = ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html']) => {
     for (const file of files) writeText(path.join(designDirFor(projectRoot), file), '<!doctype html><title>BFDS gate test</title>');
+  };
+  const writePlaceholderWorkbench = projectRoot => {
+    for (const file of ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html']) {
+      writeText(path.join(designDirFor(projectRoot), file), `<!-- BFDS_PLACEHOLDER -->\n<!doctype html><title>${file}</title>`);
+    }
+  };
+  const runBfds = (projectRoot, args) => {
+    const repoRoot = findRepoRoot();
+    const bfdsScript = path.join(repoRoot, 'scripts', 'bfds.mjs');
+    return spawnSync(process.execPath, [bfdsScript, ...args], {
+      cwd: projectRoot,
+      encoding: 'utf8'
+    });
   };
 
   try {
@@ -722,8 +775,8 @@ function validateGateTests() {
     try {
       const sessionStartOutput = JSON.parse(sessionStart.stdout || '{}');
       const context = sessionStartOutput.hookSpecificOutput?.additionalContext ?? '';
-      if (!context.includes('bfds-gate.mjs') || !context.includes('brainstorm-dialogue.json') || !context.includes('AskUserQuestion')) {
-        errors.push('expected SessionStart hook context to mention bfds-gate.mjs, brainstorm-dialogue.json, and AskUserQuestion');
+      if (!context.includes('bfds.mjs next') || !context.includes('next-card') || !context.includes('AskUserQuestion')) {
+        errors.push('expected SessionStart hook context to mention bfds.mjs next, next-card, and AskUserQuestion');
       }
     } catch {
       errors.push('expected SessionStart hook to emit JSON');
@@ -842,6 +895,13 @@ function validateGateTests() {
     result = runGate(projectRoot, slug);
     if (result.phase !== 'NEEDS_WORKBENCH') errors.push(`expected NEEDS_WORKBENCH, got ${result.phase}`);
 
+    writePlaceholderWorkbench(projectRoot);
+    result = runGate(projectRoot, slug);
+    if (result.phase !== 'NEEDS_WORKBENCH') errors.push(`expected placeholder workbench to stay NEEDS_WORKBENCH, got ${result.phase}`);
+    if (!result.missing?.includes('workbench.html') || !result.missing?.includes('workbench.css')) {
+      errors.push(`expected placeholder workbench files to be reported missing, got ${result.missing?.join(', ')}`);
+    }
+
     writeWorkbench(projectRoot);
     const future = new Date(Date.now() + 5000);
     fs.utimesSync(path.join(evidenceDir, 'directions.json'), future, future);
@@ -854,8 +914,11 @@ function validateGateTests() {
 
     for (const quote of ['你来选一个最稳的。', '推荐一个。', '你帮我推荐一个吧。', '三个都行你定。']) {
       writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug, quote));
-      const invalid = runGateFailure(projectRoot, slug);
-      if (!invalid.failed || invalid.result.phase !== 'INCONSISTENT') errors.push(`expected invalid selection ${quote} to be INCONSISTENT, got ${invalid.result.phase}`);
+      const warned = runGate(projectRoot, slug);
+      if (warned.phase !== 'NEEDS_CONTRACT') errors.push(`expected warned selection ${quote} to reach NEEDS_CONTRACT, got ${warned.phase}`);
+      if (!warned.warnings?.some(warning => warning.includes('may not be an explicit user choice'))) {
+        errors.push(`expected warned selection ${quote} to emit explicit-choice warning`);
+      }
     }
 
     writeJson(path.join(evidenceDir, 'selection.json'), baseSelection(slug));
@@ -877,6 +940,20 @@ function validateGateTests() {
     writeText(path.join(designDir, 'qa-report.md'), '# QA Report\n');
     result = runGateWithArgs(projectRoot, slug, ['--mark', 'qa-passed']);
     if (result.status?.state !== 'qa-passed') errors.push(`expected status.state qa-passed, got ${result.status?.state}`);
+
+    const nextCard = runBfds(projectRoot, ['next', slug]);
+    if (nextCard.status !== 0) errors.push(`expected bfds next to exit 0, got ${nextCard.status}`);
+    if (!nextCard.stdout.includes('BFDS_NEXT_CARD')) errors.push('expected bfds next output to include BFDS_NEXT_CARD');
+    const nextCardLines = nextCard.stdout.trim().split('\n').length;
+    if (nextCardLines > 80) errors.push(`expected next-card <= 80 lines, got ${nextCardLines}`);
+
+    const repoRoot = findRepoRoot();
+    const skillLocal = spawnSync(process.execPath, [path.join(repoRoot, 'skills', 'bfds-design', 'scripts', 'bfds.mjs'), 'list', '--json', '--limit', '4'], {
+      cwd: projectRoot,
+      encoding: 'utf8'
+    });
+    if (skillLocal.status !== 0) errors.push(`expected skill-local bfds.mjs to exit 0, got ${skillLocal.status}: ${skillLocal.stderr}`);
+    if (!skillLocal.stdout.includes(slug)) errors.push('expected skill-local bfds.mjs list to include test slug');
 
     const gateLog = path.join(evidenceDir, 'gate-log.ndjson');
     if (!fs.existsSync(gateLog)) errors.push('expected gate-log.ndjson to be written');

@@ -98,7 +98,7 @@ cp "$BFDS/scripts/bfds-guard-hook.mjs" "$TARGET/.claude/hooks/"
 cp "$BFDS/scripts/bfds-session-start.mjs" "$TARGET/.claude/hooks/"
 ```
 
-两个 BFDS skill 自带 BFDS 模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
+两个 BFDS skill 自带 BFDS runtime、模板和辅助脚本，安装后不要求保留本仓库的 `templates/` 或 `scripts/`。Impeccable 由本仓库 `vendor/impeccable/` 提供安装源；如果目标项目缺少对应宿主路径，BFDS 会在需要 `init`、`detect` 或 `live` 时停止并要求安装，不会伪造结果。
 
 ## 设计产物目录
 
@@ -114,6 +114,7 @@ docs/design/<slug>/
     selection.json
     gate-log.ndjson
   workbench.html
+  workbench.css
   option-a.html
   option-b.html
   option-c.html
@@ -152,6 +153,7 @@ fixtures/docs-design-sample/settings-prompt/
 ```bash
 node scripts/install-bfds-skills.mjs codex --dry-run
 node scripts/install-bfds-skills.mjs claude --dry-run
+node scripts/bfds.mjs next settings-prompt
 node scripts/bfds-gate.mjs settings-prompt
 node scripts/bfds-gate.mjs settings-prompt --check-only
 node scripts/bfds-status.mjs

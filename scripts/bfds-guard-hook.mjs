@@ -115,6 +115,7 @@ function allowedPhaseForWrite(relFile) {
   if (relFile.endsWith('/evidence/brainstorm-dialogue.json')) return ['NEEDS_DIRECTIONS'];
   if (relFile.endsWith('/evidence/directions.json')) return ['NEEDS_DIRECTIONS'];
   if (relFile.endsWith('/workbench.html')) return ['NEEDS_WORKBENCH'];
+  if (relFile.endsWith('/workbench.css')) return ['NEEDS_WORKBENCH'];
   if (relFile.endsWith('/option-a.html')) return ['NEEDS_WORKBENCH'];
   if (relFile.endsWith('/option-b.html')) return ['NEEDS_WORKBENCH'];
   if (relFile.endsWith('/option-c.html')) return ['NEEDS_WORKBENCH'];
@@ -144,7 +145,7 @@ function assertDesignArtifactWriteAllowed(file) {
 
   const gate = runGate(slug);
   if (!allowed.includes(gate.phase)) {
-    deny(`writing ${relFile} is only allowed during ${allowed.join(' or ')}, current gate phase is ${gate.phase}. Run bfds-gate and follow its next step.`);
+    deny(`writing ${relFile} is only allowed during ${allowed.join(' or ')}, current gate phase is ${gate.phase}. Run bfds.mjs next and follow its next-card.`);
   }
 }
 
@@ -159,9 +160,9 @@ const toolInput = input.tool_input ?? input.toolInput ?? input.input ?? {};
 
 if (/^bash$/i.test(toolName)) {
   const command = toolInput.command ?? '';
-  if (/\bbfds-gate\.mjs\b/.test(command) || /\bvalidate-artifacts\.mjs\b/.test(command)) allow();
+  if (/\bbfds\.mjs\b/.test(command) || /\bbfds-gate\.mjs\b/.test(command) || /\bvalidate-artifacts\.mjs\b/.test(command)) allow();
   if (likelyProtectedBashWrite(command)) {
-    deny('write-like Bash commands targeting PRODUCT.md, DESIGN.md, or docs/design/** are blocked. Use Write/Edit in the correct BFDS gate phase, or run bfds-gate/validate-artifacts.');
+    deny('write-like Bash commands targeting PRODUCT.md, DESIGN.md, or docs/design/** are blocked. Use BFDS runtime commands, Write/Edit in the correct BFDS phase, or run validate-artifacts.');
   }
   allow();
 }

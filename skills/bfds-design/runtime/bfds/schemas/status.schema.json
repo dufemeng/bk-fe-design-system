@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bfds.local/schemas/status.schema.json",
+  "title": "BFDS Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "title",
+    "state",
+    "lastUpdated",
+    "selectedOption",
+    "artifacts",
+    "sourceSummary",
+    "currentSurface",
+    "changeType"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "workbench-ready",
+        "selected",
+        "contract-ready",
+        "implementing",
+        "implemented",
+        "qa-failed",
+        "qa-passed",
+        "live-iterating",
+        "done"
+      ]
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "selectedOption": {
+      "type": ["string", "null"]
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pendingRequest": { "type": ["string", "null"] },
+        "initInterviewEvidence": { "type": ["string", "null"] },
+        "surfaceEvidence": { "type": ["string", "null"] },
+        "brainstormDialogueEvidence": { "type": ["string", "null"] },
+        "directionsEvidence": { "type": ["string", "null"] },
+        "selectionEvidence": { "type": ["string", "null"] },
+        "gateLog": { "type": ["string", "null"] },
+        "workbench": { "type": ["string", "null"], "minLength": 1 },
+        "optionA": { "type": ["string", "null"], "minLength": 1 },
+        "optionB": { "type": ["string", "null"], "minLength": 1 },
+        "optionC": { "type": ["string", "null"], "minLength": 1 },
+        "designContract": { "type": ["string", "null"] },
+        "implementationHandoff": { "type": ["string", "null"] },
+        "qaPlan": { "type": ["string", "null"] },
+        "qaReport": { "type": ["string", "null"] }
+      }
+    },
+    "sourceSummary": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "currentSurface": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "changeType": {
+      "type": ["string", "null"],
+      "enum": ["create", "extend", "modify", "remove", "replace", "merge", "restyle", null]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

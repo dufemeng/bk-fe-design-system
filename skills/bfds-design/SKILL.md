@@ -14,25 +14,25 @@ BFDS 是设计补全层。它只补齐前端设计产物，不重新做产品规
 3. 立刻运行：
 
 ```bash
-node <bfds-design-skill-dir>/scripts/bfds-gate.mjs <slug>
+node <bfds-design-skill-dir>/scripts/bfds.mjs next <slug> --request "<用户原始请求摘要>"
 ```
 
-gate 是阶段裁判。只按 gate 输出的 `BFDS_GATE` 阶段继续；`CONTEXT_BLOCKED` 或 `INCONSISTENT` 时停止，不走人工 fallback，不凭聊天记忆继续。
+next-card 是阶段指令卡。只按卡片里的 `phase`、`本阶段必须获得`、`禁止` 和 `完成后运行` 行动；`CONTEXT_BLOCKED` 或 `INCONSISTENT` 时停止，不走人工 fallback，不凭聊天记忆继续。
 
-模型只写 `docs/design/<slug>/evidence/*.json` 和设计产物；`status.json` 由 gate 同步。
+模型只提交当前阶段的用户回答、设计判断和确认原话；证据 JSON、`status.json`、设计交付包结构由 BFDS runtime 生成或校验。
 
 Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuestion`；开放式设计表达问题可以普通文本，但一次只问一个。
 
-如果本轮可能进入 `CONTEXT_BLOCKED`，可加 `--request "<用户原始请求摘要>"`，gate 会把挂起请求写入 `evidence/pending-request.json`。
+写命令成功、阻塞或字段非法时都会返回下一张 next-card；读取返回卡片继续，不要额外加载 reference，除非卡片明确要求。
 
 ## 阶段入口
 
-- `CONTEXT_BLOCKED`：读 [impeccable-integration.md](references/impeccable-integration.md)，只补项目级 `PRODUCT.md` / `DESIGN.md`。
-- `NEEDS_SURFACE`：读 [surface-change-framing.md](references/surface-change-framing.md)，写 `evidence/surface.json` 后重跑 gate。
-- `NEEDS_DIRECTIONS`：读 [design-brainstorm.md](references/design-brainstorm.md)，先写 `evidence/brainstorm-dialogue.json`，再写 `evidence/directions.json`，每步后重跑 gate。
-- `NEEDS_WORKBENCH`：读 [workbench-authoring.md](references/workbench-authoring.md)，生成 `workbench.html` 和 `option-a/b/c.html` 后重跑 gate。
-- `NEEDS_SELECTION`：用 `AskUserQuestion` 等待用户明确选择 A/B/C 或合并方案；写 `evidence/selection.json` 后重跑 gate。
-- `NEEDS_CONTRACT`：读 [contract-pack.md](references/contract-pack.md)，用 `AskUserQuestion` 做回显确认后生成设计交付包并校验。
+- `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；按 next-card 用 `answer --stage init` 记录多轮访谈和用户确认。
+- `NEEDS_SURFACE`：确认目标界面与变更边界；按 next-card 用 `answer --stage surface` 提交扁平字段。
+- `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做设计问答和方向取舍，再用 `directions` 提交 A/B/C 方向规格。
+- `NEEDS_WORKBENCH`：用 `workbench --scaffold` 生成脚手架；填入真实三方案后用 `workbench --validate`，含 `BFDS_PLACEHOLDER` 的文件不能进入选择。
+- `NEEDS_SELECTION`：用 `AskUserQuestion` 等待用户明确选择 A/B/C 或合并方案；用 `select` 提交选择证据。
+- `NEEDS_CONTRACT`：用 `pack --add` 提交 contract 判断字段；runtime 回显后用 `AskUserQuestion` 确认，再用 `pack --confirm` 生成设计交付包。
 - `CONTRACT_READY` / `IMPLEMENT_READY`：设计交付包已就绪，等待实现或验收请求。
 
 ## 证据文件
@@ -45,7 +45,7 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 - `directions.json`：A/B/C 三个方向规格和自检结果。
 - `selection.json`：用户选择原话、选中方案、工作台与三个方案路径。
 
-schema 在 `assets/templates/artifacts/`。写完任何 evidence 或产物后都重跑 gate。
+schema 和模板由本 skill 内置 runtime 管理。写完任何阶段输入后都读取命令返回的 next-card。
 
 ## 不触发
 

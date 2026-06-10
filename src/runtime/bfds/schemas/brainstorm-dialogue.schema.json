@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bfds.local/schemas/brainstorm-dialogue.schema.json",
+  "title": "BFDS Brainstorm Dialogue Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "createdAt",
+    "surfaceEvidence",
+    "mode",
+    "turns",
+    "approachesPresented",
+    "userConfirmationQuote"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "surfaceEvidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["socratic", "user-skipped"]
+    },
+    "turns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["question", "answerQuote", "designImplication"],
+        "properties": {
+          "question": { "type": "string", "minLength": 1 },
+          "answerQuote": { "type": "string", "minLength": 1 },
+          "designImplication": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "approachesPresented": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "userConfirmationQuote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skipReasonQuote": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
