@@ -28,7 +28,7 @@
 
 ## 通过标准
 
-- 先恢复 BFDS 设计任务并读取 `qa-plan.json`。
+- 先运行 gate 恢复 BFDS 设计任务，确认阶段为 `CONTRACT_READY` 或 `IMPLEMENT_READY`，再读取 `qa-plan.json`。
 - 发现 detect target 未固化或不可验证时，记录“Impeccable 反模式扫描未运行：detect target 未固化或不可验证”。
 - 继续执行可行的契约/状态/交互/视觉纪律检查。
 - `qa-report.md` 明确区分“未运行”和“通过”。

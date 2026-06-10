@@ -1,77 +1,26 @@
 # 实现交接协议
 
-实现从 `implementation-handoff.md` 开始，但必须同时读取 `design-contract.json` 和 `qa-plan.json`。
+实现前必须已经通过 gate，且 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json` 存在并校验通过。
 
-## 顺序
+## 权威输入
 
-1. 通过 [resume-design-artifacts.md](resume-design-artifacts.md) 恢复设计任务。
-2. 读取：
-   - `docs/design/<slug>/design-contract.json`
-   - `docs/design/<slug>/implementation-handoff.md`
-   - `docs/design/<slug>/qa-plan.json`
-   - `design-contract.json.sourceArtifacts.productContext` 指向的可信 `PRODUCT.md`
-   - `design-contract.json.sourceArtifacts.designContext` 指向的可信 `DESIGN.md`
-3. 如果设计契约记录的上下文路径缺失或不可信，停止并要求回到 `bfds-design` 刷新设计上下文；实现阶段不重新执行 Impeccable init，也不凭聊天或文件名猜上下文。
-4. 扫描目标项目代码、路由、组件、tokens、icon set、测试和构建命令。
-5. 对照设计契约的 `surface` 和 `changeType`，确认目标代码与已确认目标界面一致。
-6. 按实现交接说明实现代码。
-7. 运行项目已有检查。
-8. 进入自动化设计还原检查。
+按优先级读取：
 
-## 契约锁
-
-实现阶段的权威输入按优先级排序：
-
-1. `design-contract.json`
-2. `implementation-handoff.md`
-3. `qa-plan.json`
+1. `docs/design/<slug>/design-contract.json`
+2. `docs/design/<slug>/implementation-handoff.md`
+3. `docs/design/<slug>/qa-plan.json`
 4. 设计契约引用的 `PRODUCT.md` / `DESIGN.md`
 5. 当前目标项目代码和运行证据
 
-用户在实现阶段追加的聊天描述、Impeccable `critique` 输出、Impeccable `live` 输出、浏览器观察和检测器结果，都不能直接改写已确认设计契约。它们只能用于：
-
-- 选择实现入口和验证证据。
-- 发现实现偏差或可用性/可访问性问题。
-- 生成局部契约补丁或要求回到 `bfds-design` 重新固化设计。
-
-如果任何子流程输出与 `keep`、`change`、`avoid`、`surface`、`changeType`、`acceptanceRules` 冲突，先停止并说明冲突，不直接实现冲突内容。
+用户在实现阶段追加的聊天描述、Impeccable critique/live 输出、浏览器观察和检测器结果，都不能直接改写已确认设计契约。冲突时停止，要求回到 `bfds-design` 重新固化或记录为验收风险。
 
 ## 实现原则
 
-- 保留实现交接说明中 `必须保留` 的布局、导航、业务逻辑、组件 API、品牌 tokens 和数据流。
-- 只改变实现交接说明中 `允许改变` 的层级、状态反馈、动效、密度、文案或局部结构。
-- 不新增未确认的产品能力。
-- 不设计 API、数据库、权限或后端架构。
-- 优先复用项目现有设计系统、tokens、组件、icon set 和构建管线。
-- 如果实现中发现当前代码和已确认目标界面与变更边界不一致，停止并重新确认。
-
-## 数据和文案
-
-- 有真实来源才写真实数据。
-- 没有真实来源时使用明确标注的占位，不把占位伪装成真实数据。
-- 不用 lorem、套话、营销废话或解释性 UI 文案凑页面。
+- 保留 `keep` 中的布局、导航、业务逻辑、组件 API、品牌 tokens 和数据流。
+- 只改变 `change` 中的层级、状态反馈、动效、密度、文案或局部结构。
+- 遵守 `avoid`，不新增未确认产品能力。
+- 优先复用现有设计系统、tokens、组件、icon set 和构建管线。
+- 有真实来源才写真实数据；占位必须明确标注。
 - 可见控件必须有真实行为或明确标注为原型占位。
 
-## 测试和检查
-
-根据项目实际运行：
-
-- 类型检查
-- lint
-- 单元测试
-- 组件测试
-- e2e 或浏览器检查
-- build
-
-找不到项目检查命令时，不编造命令；记录未发现，并继续做可行的静态/人工验收。
-
-## 状态写回
-
-- 开始实现：`status.state = implementing`
-- 基础实现完成：`status.state = implemented`
-- 验收失败：`status.state = qa-failed`
-- 验收通过：`status.state = qa-passed`
-- 局部实时微调：`status.state = live-iterating`
-- 完成：`status.state = done`
-
-每次写回更新 `lastUpdated`。
+开始实现前用 gate `--mark implementing`，基础实现完成后用 `--mark implemented`。

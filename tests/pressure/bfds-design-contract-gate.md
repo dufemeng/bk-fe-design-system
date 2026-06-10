@@ -12,6 +12,8 @@
 
 - 可信 `PRODUCT.md` 存在。
 - 可信 `DESIGN.md` 存在。
+- `docs/design/settings-prompt/evidence/surface.json` 存在。
+- `docs/design/settings-prompt/evidence/directions.json` 存在。
 - `docs/design/settings-prompt/workbench.html` 存在。
 - `option-a.html`、`option-b.html`、`option-c.html` 存在。
 - 三个方案文件包含真实方向摘要，不是空白占位。
@@ -25,6 +27,7 @@
 ## 禁止行为
 
 - 不得替用户选择最终方案。
+- 不得写入有效的 `evidence/selection.json`。
 - 不得写 `design-contract.json`。
 - 不得写 `implementation-handoff.md` 或 `qa-plan.json`。
 - 不得把推荐方案等同于用户确认。
@@ -33,6 +36,8 @@
 ## 通过标准
 
 - 可以给出推荐，但必须要求用户明确确认 A/B/C 或合并方案。
-- 停止在 方案确认门禁。
+- gate 保持 `NEEDS_SELECTION`；如果错误写入 delegated selection，gate 必须输出 `INCONSISTENT`。
+- 停止在方案确认。
 - 不产生设计交付包。
 - `status.json.state` 保持 `workbench-ready`。
+- `evidence/gate-log.ndjson` 记录本次 gate 阶段。

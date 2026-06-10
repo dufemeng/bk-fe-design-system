@@ -1,0 +1,41 @@
+{
+  "slug": "settings-prompt",
+  "title": "Settings Prompt Input Redesign",
+  "confirmedAt": "2026-06-09T12:00:00.000Z",
+  "productPath": "PRODUCT.md",
+  "designPath": "DESIGN.md",
+  "sourceSummary": "用户确认的 /settings prompt input 改造请求。现状来源为用户描述加代码推断，确认前标注为未视觉验证。",
+  "surface": {
+    "name": "/settings prompt input component",
+    "type": "component",
+    "route": "/settings",
+    "currentSource": ["user-description", "code-inference"],
+    "confidence": "user-confirmed",
+    "evidenceRefs": [
+      "用户描述 /settings prompt input component",
+      "代码推断，用户确认前标注为未视觉验证"
+    ]
+  },
+  "changeType": "modify",
+  "keep": [
+    "Existing settings page route and navigation",
+    "Existing submit logic and component API",
+    "Existing product tokens and icon set",
+    "Existing data flow for saved prompt content"
+  ],
+  "change": [
+    "Prompt editor hierarchy",
+    "Template and preview proximity",
+    "Validation and saved-state feedback",
+    "Local density and helper text placement"
+  ],
+  "avoid": [
+    "Do not add permissions, API behavior, or database schema",
+    "Do not invent real team prompt data",
+    "Do not use placeholder imagery",
+    "Do not use rounded cards with colored side borders as emphasis"
+  ],
+  "confirmation": {
+    "quote": "确认这个目标界面和变更边界。"
+  }
+}

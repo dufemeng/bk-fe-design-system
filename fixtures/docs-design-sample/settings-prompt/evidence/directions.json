@@ -1,0 +1,71 @@
+{
+  "slug": "settings-prompt",
+  "createdAt": "2026-06-09T12:05:00.000Z",
+  "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
+  "options": {
+    "A": {
+      "optionId": "A",
+      "name": "Quiet Navigation",
+      "designThesis": "保留安静导航和低干扰节奏，让提示词输入成为稳定主区域。",
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
+      "hierarchy": "输入区第一优先，导航和说明降低存在感。",
+      "density": "snug",
+      "motion": "低存在感 focus 和保存反馈。",
+      "stateTreatment": "错误、保存、加载状态靠近输入区呈现。",
+      "layoutStrategy": "保留周边布局，只重排输入和帮助信息。",
+      "interactionModel": "输入、保存、重置和错误解释在同一局部完成。",
+      "visualSignature": "安静顶部导航、稳定基线、细分隔。",
+      "differenceDimensions": ["hierarchy", "local-preservation"],
+      "keep": ["Existing settings navigation", "Existing submit logic"],
+      "change": ["Input hierarchy", "Helper placement"],
+      "avoid": ["No backend or permission scope"],
+      "risks": ["视觉记忆点偏少"],
+      "bestFor": "高频设置和需要降低认知负担的产品 UI"
+    },
+    "B": {
+      "optionId": "B",
+      "name": "Operational Workbench",
+      "designThesis": "把输入、模板、预览和操作状态组织成更高效的工作台。",
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
+      "hierarchy": "输入区和状态预览并列，模板作为辅助轨道。",
+      "density": "compact",
+      "motion": "状态切换使用即时反馈，不做大面积动效。",
+      "stateTreatment": "default/error/success 通过预览和局部状态条表达。",
+      "layoutStrategy": "桌面三列，窄屏折叠为输入优先的单列。",
+      "interactionModel": "输入、验证、保存、模板选择在同一工作面完成。",
+      "visualSignature": "操作型面板、局部状态、紧凑节奏。",
+      "differenceDimensions": ["interaction-model", "density"],
+      "keep": ["Existing settings route", "Existing component API"],
+      "change": ["Template proximity", "Preview/status placement"],
+      "avoid": ["No fake controls or invented data"],
+      "risks": ["小屏需要严格防溢出"],
+      "bestFor": "需要高频编辑和即时确认的设置任务"
+    },
+    "C": {
+      "optionId": "C",
+      "name": "Explicit Recovery",
+      "designThesis": "突出错误恢复和保存反馈，降低配置失败时的操作成本。",
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
+      "hierarchy": "错误解释和恢复动作靠近输入区，说明内容延后。",
+      "density": "comfortable",
+      "motion": "错误和成功状态使用轻量状态过渡。",
+      "stateTreatment": "错误态有明确原因、恢复动作和可访问状态文本。",
+      "layoutStrategy": "输入区和状态说明形成双栏，小屏堆叠。",
+      "interactionModel": "验证失败后引导用户回到具体编辑位置。",
+      "visualSignature": "显性错误状态、明确恢复路径、清晰状态文字。",
+      "differenceDimensions": ["state-treatment", "motion-role"],
+      "keep": ["Existing data flow", "Existing tokens"],
+      "change": ["Error visibility", "Recovery guidance"],
+      "avoid": ["No new product capability"],
+      "risks": ["错误态过强可能增加平时界面噪音"],
+      "bestFor": "错误成本较高、需要强状态反馈的设置任务"
+    }
+  },
+  "selfCheck": {
+    "usesTrustedContext": true,
+    "noProductScopeAdded": true,
+    "differencesAreSubstantial": true,
+    "criticalStateOrInteractionCovered": true,
+    "notes": "三个方案在层级、密度、交互模型、状态表达上存在实质差异。"
+  }
+}

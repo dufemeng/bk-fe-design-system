@@ -29,5 +29,6 @@
 ## 通过标准
 
 - 明确说明不再提问，但仍进入设计方向探索门禁。
-- 产出 A/B/C 三个字段齐全的三方向设计规格。
-- 只有三方向设计规格通过自检后才进入评审工作台。
+- 写入 `docs/design/<slug>/evidence/directions.json`，包含 A/B/C 三个字段齐全的三方向设计规格。
+- gate 输出 `NEEDS_WORKBENCH` 后，才进入评审工作台。
+- `evidence/gate-log.ndjson` 记录 `NEEDS_DIRECTIONS` 到 `NEEDS_WORKBENCH` 的推进。

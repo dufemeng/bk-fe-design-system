@@ -16,8 +16,7 @@
 ## 预期读取文件
 
 - `skills/bfds-design/SKILL.md`
-- `skills/bfds-design/scripts/bfds-context.mjs`
-- `skills/bfds-design/references/intent-router.md`
+- `skills/bfds-design/scripts/bfds-gate.mjs`
 - `skills/bfds-design/references/impeccable-integration.md`
 - `skills/bfds-design/references/surface-change-framing.md`
 - `fixtures/current-surface-description.md`
@@ -25,18 +24,20 @@
 
 ## 期望行为
 
-- 先运行 `bfds-context.mjs --json`，确认可信 context。
-- 如果 context 缺失，停在 设计上下文门禁，不进入页面重设计。
-- 设计上下文门禁完成后，读取 `surface-change-framing.md`。
+- 先运行 `bfds-gate.mjs <slug> --sync-status`，只接受 gate 从可信位置识别出的 `PRODUCT.md`、`DESIGN.md`。
+- 如果 gate 输出 `CONTEXT_BLOCKED`，停在设计上下文梳理，不进入页面重设计。
+- gate 输出 `NEEDS_SURFACE` 后，读取 `surface-change-framing.md`。
 - 判定改动类型为 `modify`。
 - 要求当前目标界面视觉证据，或明确“现状由代码推断，未视觉验证”。
 - 确认必须保留、允许改变、必须避免。
+- 用户确认后写 `docs/design/<slug>/evidence/surface.json`，并重跑 gate。
 
 ## 停止/继续
 
-如果缺可信 context，停在 设计上下文门禁；否则停止在目标界面证据和变更边界确认。不生成评审工作台。
+如果缺可信 context，停在 设计上下文梳理；否则停止在目标界面证据和变更边界确认。不生成评审工作台。
 
 ## 期望产物
 
-- 无设计产物。
+- 最多生成 `status.json` 和 `evidence/gate-log.ndjson`。
+- 用户确认后允许生成 `evidence/surface.json`。
 - 用户确认后才允许生成 `workbench.html` 和 `option-a/b/c.html`。

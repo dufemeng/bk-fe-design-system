@@ -1,0 +1,17 @@
+{
+  "slug": "settings-prompt",
+  "selectedAt": "2026-06-09T12:10:00.000Z",
+  "selectionQuote": "选 B，但导航用 A 的，错误态用 C 的。",
+  "selectedOption": {
+    "id": "B+A+C",
+    "summary": "以方案 B 的操作型工作台为基础，合并方案 A 的安静顶部导航和方案 C 的显性错误状态处理。",
+    "mergedFrom": ["A", "B", "C"],
+    "decisionNotes": "用户选择 B 的效率结构、A 的低干扰周边节奏，以及 C 的清晰错误恢复。"
+  },
+  "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
+  "options": {
+    "A": "fixtures/docs-design-sample/settings-prompt/option-a.html",
+    "B": "fixtures/docs-design-sample/settings-prompt/option-b.html",
+    "C": "fixtures/docs-design-sample/settings-prompt/option-c.html"
+  }
+}

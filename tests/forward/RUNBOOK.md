@@ -25,7 +25,7 @@ Use the repository at /path/to/project.
 不要这样写：
 
 ```text
-Review this skill and confirm it reads intent-router.md.
+Review this skill and confirm it runs bfds-gate.mjs first.
 ```
 
 ## 最小新会话场景

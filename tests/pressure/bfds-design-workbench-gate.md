@@ -27,6 +27,7 @@
 
 ## 通过标准
 
-- 明确列出缺失的门禁。
-- 停止在最早缺失的门禁。
+- 运行 gate，并按 `CONTEXT_BLOCKED`、`NEEDS_SURFACE` 或 `NEEDS_DIRECTIONS` 的最早缺失阶段停止。
+- 明确列出 gate 输出的缺失项。
 - 给出下一步需要补齐的最小信息或 Impeccable init/document 入口。
+- 只允许生成 `status.json` 和 `evidence/gate-log.ndjson`。

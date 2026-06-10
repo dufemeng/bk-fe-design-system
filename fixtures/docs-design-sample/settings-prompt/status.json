@@ -5,6 +5,10 @@
   "lastUpdated": "2026-06-09T12:00:00.000Z",
   "selectedOption": "B 方案合并 A 的导航和 C 的错误状态",
   "artifacts": {
+    "surfaceEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/surface.json",
+    "directionsEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/directions.json",
+    "selectionEvidence": "fixtures/docs-design-sample/settings-prompt/evidence/selection.json",
+    "gateLog": "fixtures/docs-design-sample/settings-prompt/evidence/gate-log.ndjson",
     "workbench": "fixtures/docs-design-sample/settings-prompt/workbench.html",
     "optionA": "fixtures/docs-design-sample/settings-prompt/option-a.html",
     "optionB": "fixtures/docs-design-sample/settings-prompt/option-b.html",

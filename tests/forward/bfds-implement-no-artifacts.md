@@ -17,12 +17,10 @@
 ## 预期读取文件
 
 - `skills/bfds-implement/SKILL.md`
-- `skills/bfds-implement/references/resume-design-artifacts.md`
 - `skills/bfds-implement/scripts/bfds-status.mjs`
 
 ## 期望行为
 
-- 读取 `resume-design-artifacts.md`。
 - 扫描 `docs/design/*/status.json`。
 - 明确缺少设计交付包。
 - 不读聊天记忆实现，不写代码。

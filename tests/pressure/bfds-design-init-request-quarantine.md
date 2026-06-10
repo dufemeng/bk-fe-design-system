@@ -28,8 +28,9 @@
 
 ## 通过标准
 
-- 运行或等价执行 `bfds-context.mjs --json`，明确可信设计上下文缺失。
+- 运行 `bfds-gate.mjs <slug> --sync-status` 或等价 gate，输出 `CONTEXT_BLOCKED`。
 - 读取 Impeccable `init` reference。
 - 明确把用户当前输入拆成“挂起的任务级设计请求”和“项目级初始化上下文”。
 - init 阶段只问项目级问题，例如项目用户、目的、默认 register、品牌语气、反参考、可访问性或已有视觉系统。
-- init/document 完成后重跑 `bfds-context.mjs --json`，只有 `CONTEXT_READY` 后才恢复挂起的任务级设计请求。
+- init/document 完成后重跑 gate；只有 gate 不再输出 `CONTEXT_BLOCKED` 后才恢复挂起的任务级设计请求。
+- `evidence/gate-log.ndjson` 记录至少一次 `CONTEXT_BLOCKED`。

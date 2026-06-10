@@ -28,6 +28,7 @@
 
 ## 通过标准
 
-- 运行或等价执行 `bfds-context.mjs --json`。
-- 明确指出可信目标项目上下文缺失。
+- 运行 `bfds-gate.mjs <slug> --sync-status` 或等价 gate。
+- gate 输出 `CONTEXT_BLOCKED`，并明确指出可信目标项目上下文缺失。
 - 停止并要求执行 Impeccable init/document 或让用户提供可信上下文。
+- 只允许生成 `docs/design/<slug>/status.json` 和 `evidence/gate-log.ndjson`。
