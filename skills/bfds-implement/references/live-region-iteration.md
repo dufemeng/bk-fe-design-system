@@ -6,9 +6,10 @@
 
 1. 通过 `bfds.mjs next` 恢复当前设计任务。
 2. 读取 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`。
-3. 确认用户选择的区域、页面 URL 或组件位置；Claude Code 中有多个候选时用 `AskUserQuestion` 单选。
-4. 按 [impeccable-integration.md](impeccable-integration.md) 进入 Impeccable live，前提是入口、dev server 或静态 HTML 可验证。
-5. 用户接受结果后，在 `qa-report.md` 写局部契约补丁；Claude Code 中接受/继续调整用 `AskUserQuestion` 确认。
+3. 读取 `DESIGN.md` 和 `design-contract.json.implementationConstraints`，确认本次微调仍在允许变更边界内。
+4. 确认用户选择的区域、页面 URL 或组件位置；Claude Code 中有多个候选时用 `AskUserQuestion` 单选。
+5. 按 [impeccable-integration.md](impeccable-integration.md) 进入 Impeccable live，前提是入口、dev server 或静态 HTML 可验证。
+6. 用户接受结果后，在 `qa-report.md` 写局部契约补丁；Claude Code 中接受/继续调整用 `AskUserQuestion` 确认。
 
 ## 局部契约补丁
 
@@ -16,9 +17,10 @@
 局部契约补丁:
 区域: <目标界面中的局部区域>
 用户意图: <用户原话或等价摘要>
-变更范围: <只影响哪些局部结构/状态/密度/动效/文案>
+变更范围: <只影响哪些局部结构/状态/密度/动效/文案；必须落在 allowedChangeBoundary 内>
 影响规则: <acceptanceRules/checks/states/interactions/responsive/motion>
 保持不变: <仍然遵守的 keep/avoid/全局设计方向>
+DESIGN.md 对齐: <使用或保持的 token、组件规则、状态语义>
 复跑要求: <需要复跑的 P0/P1/P2 检查，或说明仅 P3 polish>
 ```
 

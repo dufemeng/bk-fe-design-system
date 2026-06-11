@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Settings Prompt Input Redesign · BFDS 设计评审工作台</title>
+    <title>Settings Prompt Input Redesign · BFDS 方案评审工作台</title>
     <link rel="stylesheet" href="workbench.css">
   </head>
   <body>
     <main class="page">
       <header class="hero">
-        <p class="kicker">BFDS 设计评审工作台</p>
+        <p class="kicker">BFDS 方案评审工作台</p>
         <h1>Settings Prompt Input Redesign</h1>
         <p class="lede">重新设计设置页里的团队默认提示词输入组件，让高频编辑、状态反馈和错误恢复更清晰。</p>
         <dl class="meta-grid" aria-label="设计上下文">
@@ -27,53 +27,53 @@
         </div>
         <div>
           <h2>选择方式</h2>
-          <p>这是静态 MVP 工作台，不记录点击事件。请在对话中回复“选 A / B / C”，也可以说“选 B，但导航用 A，错误态用 C”。</p>
+          <p>这是生码方向校准物，不是最终高保真设计稿。请在对话中回复“选 A / B / C”，也可以说“选 B，但局部状态用 A，错误恢复用 C”。</p>
         </div>
       </section>
 
       <section class="option-block" aria-labelledby="option-a-title">
         <div class="option-copy">
           <p class="option-label">方案 A</p>
-          <h2 id="option-a-title">Quiet Precision</h2>
-          <p>保留现有页面节奏，把输入、帮助和状态收拢成一个安静的编辑区。</p>
+          <h2 id="option-a-title">Quiet Navigation</h2>
+          <p>保留安静导航和低干扰节奏，让提示词输入成为稳定主区域。</p>
           <dl>
-            <div><dt>强调</dt><dd>输入内容和保存状态</dd></div>
-            <div><dt>弱化</dt><dd>帮助说明和模板入口</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>沿用 restrained 产品 UI、输入控件、按钮和语义状态 token</dd></div>
+            <div><dt>实现边界</dt><dd>只改输入区层级、帮助信息位置和局部保存反馈</dd></div>
             <div><dt>风险</dt><dd>视觉记忆点较少</dd></div>
-            <div><dt>适用</dt><dd>高频设置、低干扰编辑</dd></div>
+            <div><dt>自审重点</dt><dd>不得改变设置导航、提交逻辑和组件 API</dd></div>
           </dl>
         </div>
-        <iframe title="方案 A 交互设计" src="option-a.html"></iframe>
+        <iframe title="方案 A 局部方案预览" src="option-a.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-b-title">
         <div class="option-copy">
           <p class="option-label">方案 B</p>
-          <h2 id="option-b-title">Operational Console</h2>
-          <p>以效率为主，把模板、预览和状态放到同一操作上下文里，减少来回切换。</p>
+          <h2 id="option-b-title">Operational Workbench</h2>
+          <p>把输入、模板、预览和操作状态组织成更高效的工作台。</p>
           <dl>
-            <div><dt>强调</dt><dd>编辑效率、预览和保存反馈</dd></div>
-            <div><dt>弱化</dt><dd>长说明和装饰</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>沿用面板、分隔、按钮和状态表达规则</dd></div>
+            <div><dt>实现边界</dt><dd>允许调整输入、模板、预览和状态的相对位置</dd></div>
             <div><dt>风险</dt><dd>首次使用信息量更高</dd></div>
-            <div><dt>适用</dt><dd>经常调整提示词的团队管理员</dd></div>
+            <div><dt>自审重点</dt><dd>小屏折叠后输入区仍是第一优先且无文字溢出</dd></div>
           </dl>
         </div>
-        <iframe title="方案 B 交互设计" src="option-b.html"></iframe>
+        <iframe title="方案 B 局部方案预览" src="option-b.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-c-title">
         <div class="option-copy">
           <p class="option-label">方案 C</p>
-          <h2 id="option-c-title">Guided States</h2>
-          <p>把错误、空态和成功反馈做得更显性，适合首次配置和多人协作风险较高的场景。</p>
+          <h2 id="option-c-title">Explicit Recovery</h2>
+          <p>突出错误恢复和保存反馈，降低配置失败时的操作成本。</p>
           <dl>
-            <div><dt>强调</dt><dd>状态解释、错误恢复、提交信心</dd></div>
-            <div><dt>弱化</dt><dd>次要模板入口</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>错误、成功、加载和恢复动作使用语义状态规则</dd></div>
+            <div><dt>实现边界</dt><dd>增强输入区错误说明、恢复动作和保存反馈</dd></div>
             <div><dt>风险</dt><dd>视觉存在感更强，需要控制密度</dd></div>
-            <div><dt>适用</dt><dd>新团队启用和配置风险较高的环境</dd></div>
+            <div><dt>自审重点</dt><dd>恢复动作不新增后端、权限或未确认配置能力</dd></div>
           </dl>
         </div>
-        <iframe title="方案 C 交互设计" src="option-c.html"></iframe>
+        <iframe title="方案 C 局部方案预览" src="option-c.html"></iframe>
       </section>
     </main>
   </body>

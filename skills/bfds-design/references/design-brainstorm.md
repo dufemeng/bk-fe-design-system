@@ -1,6 +1,8 @@
 # 设计方向探索
 
-本阶段只处理设计表达，不扩展产品能力。输出顺序固定：
+本阶段是 BFDS 的核心设计判断层：把 `DESIGN.md`、`PRODUCT.md`、目标界面证据和当前代码/页面现状，蒸馏成可被用户选择、可被代码实现、可被实现后自审验证的设计方向。本阶段只处理设计表达和实现方向，不扩展产品能力。
+
+输出顺序固定：
 
 1. `docs/design/<slug>/evidence/brainstorm-dialogue.json`
 2. `docs/design/<slug>/evidence/directions.json`
@@ -15,9 +17,17 @@
 
 不要问 API、数据模型、权限、商业模式、后端架构，也不要在本阶段重新确认目标界面。不要把原型里已经能看见的布局事实再问一遍，例如“按钮放左边还是右边”这类肉眼可见问题。
 
+上下文清楚时也不能静默跳过脑暴。可以压缩为判断式确认，例如：“我判断本次应采用低干扰状态提示，沿用 `DESIGN.md` 的 Tag/Badge 规则并只改列表行内标签区域。确认吗？”确认后仍要写入 `brainstorm-dialogue.json`。
+
 ## 专业维度
 
-每条问答必须标注一个 `dimension`，并写清 `designImplication`。至少覆盖两个不同维度，优先从以下维度动态选择：
+每条问答必须标注一个 `dimension`，并写清三个影响字段：
+
+- `designImplication`：这条回答如何影响信息层级、密度、状态、动效或局部结构。
+- `designSystemImplication`：这条回答如何约束 `DESIGN.md` 里的 token、组件规则、状态语义、字体、间距、动效或禁用项。
+- `implementationImplication`：这条回答如何影响现有组件复用、允许变更边界、实现风险或后续自审检查。
+
+至少覆盖两个不同维度，优先从以下维度动态选择：
 
 - `primary-action`：用户到达目标界面后最先要理解或完成的动作；决定主视觉层级。
 - `user-mindset`：用户当时是赶时间、焦虑、探索、复核还是高频操作；决定界面安静程度和反馈强度。
@@ -32,14 +42,14 @@
 
 示例问法：
 
-- “这个目标区域看起来是高频设置流，我判断用户更需要快速复核而不是探索。确认吗？如果不是，他们当时的心智状态是什么？”
-- “真实内容范围我还缺一项：典型情况下有多少条、最长文案多长、空状态是否常见？这会决定密度和折叠策略。”
+- “这个目标区域看起来是高频设置流，我判断用户更需要快速复核而不是探索。确认吗？这会让实现优先复用现有表单密度，而不是新增展示型卡片。”
+- “真实内容范围我还缺一项：典型情况下有多少条、最长文案多长、空状态是否常见？这会决定密度、溢出处理和自审时必须覆盖的长文案检查。”
 - “从 `DESIGN.md` 看默认应保持 restrained 产品 UI；这次是否允许单个状态使用更强提示色，还是必须完全沿用现有 token？”
 - “请给 1-2 个具名参考或反参考，并说明具体借鉴点，例如状态反馈、表单密度、列表节奏，而不是只说现代或清爽。”
 
 至少完成两轮有效设计问答后，提出 2-3 个方向及取舍；Claude Code 用 `AskUserQuestion` 让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
 
-如果用户明确拒绝继续追问，`brainstorm-dialogue.json` 使用 `mode: "user-skipped"`，记录 `skipReasonQuote`，仍要先提出 2-3 个方向取舍并取得用户确认。
+如果用户明确拒绝继续追问，仍要做一轮压缩设计判断确认：记录用户拒绝追问的原话、当前判断的 `designImplication`、`designSystemImplication` 和 `implementationImplication`。随后 `brainstorm-dialogue.json` 使用 `mode: "user-skipped"`，记录 `skipReasonQuote`，并先提出 2-3 个方向取舍取得用户确认。
 
 ## 方向规格
 
@@ -60,6 +70,9 @@
   "name": "Quiet Precision",
   "designThesis": "用更安静的层级和明确状态减少输入焦虑。",
   "sourceConstraints": ["PRODUCT.md", "DESIGN.md"],
+  "designSystemRules": ["沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件和状态 token。"],
+  "codeReuseHypothesis": ["优先复用现有设置页输入组件、按钮组件和状态提示组件。"],
+  "allowedChangeBoundary": "只改提示词输入区、帮助信息和局部状态反馈，不改页面导航和保存数据流。",
   "hierarchy": "主输入区第一优先。",
   "density": "snug",
   "motion": "低存在感 focus 和验证反馈。",
@@ -68,6 +81,12 @@
   "interactionModel": "输入、保存、重置和错误解释在同一局部完成。",
   "visualSignature": "细分隔、稳定基线、单一强调动作。",
   "differenceDimensions": ["hierarchy", "density"],
+  "implementationRisk": "low",
+  "selfReviewChecks": [
+    "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
+    "未改变页面导航、保存逻辑和组件 API。",
+    "长文本、错误、加载和成功状态不破坏输入区层级。"
+  ],
   "keep": ["页面导航"],
   "change": ["输入区层级"],
   "avoid": ["新增无关设置项"],
@@ -78,12 +97,16 @@
 
 三个方案至少在两个维度上不同：信息架构、层级、密度、状态表达、交互模型、动效角色、局部保留范围、视觉签名。换色、换圆角、换阴影不算差异。
 
+每个方向都必须能回答“实现阶段怎么做”和“实现后怎么自审”。只写审美方向、不写 `designSystemRules`、`codeReuseHypothesis`、`allowedChangeBoundary`、`implementationRisk` 或 `selfReviewChecks` 的方向不能进入评审工作台。
+
 ## 自检
 
 写入 `directions.json` 前确认：
 
 - 已写入并通过 `bfds.mjs next` 检查 `brainstorm-dialogue.json`。
 - 使用了可信 `PRODUCT.md` / `DESIGN.md` 和 `surface.json`。
+- 每轮问答都写清 `designSystemImplication` 和 `implementationImplication`。
 - 没有新增未确认产品能力。
 - A/B/C 都包含 keep/change/avoid。
+- A/B/C 都包含 `DESIGN.md` 规则引用、代码复用假设、允许变更边界、实现风险和自审检查点。
 - 至少一个方案覆盖关键状态或关键交互。

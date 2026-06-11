@@ -118,6 +118,36 @@
       "category": "ai-shortcut",
       "description": "No rounded-card plus colored-left-border emphasis, decorative blobs, placeholder imagery, or repeated icon card grid.",
       "blockingLevel": "P2"
+    },
+    {
+      "id": "design-system-1",
+      "category": "contract",
+      "description": "实现沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件、按钮、面板、分隔、语义状态 token、焦点和可访问性规则。",
+      "blockingLevel": "P1"
+    },
+    {
+      "id": "self-review-1",
+      "category": "contract",
+      "description": "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "self-review-2",
+      "category": "contract",
+      "description": "未改变设置导航、提交逻辑和组件 API。",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "self-review-3",
+      "category": "contract",
+      "description": "小屏折叠后输入区仍是第一优先且无文字溢出。",
+      "blockingLevel": "P2"
+    },
+    {
+      "id": "self-review-4",
+      "category": "contract",
+      "description": "错误、成功、加载状态均有可访问文本和焦点反馈。",
+      "blockingLevel": "P2"
     }
   ],
   "blockers": [

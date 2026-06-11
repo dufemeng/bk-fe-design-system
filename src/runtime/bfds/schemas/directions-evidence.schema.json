@@ -66,6 +66,9 @@
         "name",
         "designThesis",
         "sourceConstraints",
+        "designSystemRules",
+        "codeReuseHypothesis",
+        "allowedChangeBoundary",
         "hierarchy",
         "density",
         "motion",
@@ -74,6 +77,8 @@
         "interactionModel",
         "visualSignature",
         "differenceDimensions",
+        "implementationRisk",
+        "selfReviewChecks",
         "keep",
         "change",
         "avoid",
@@ -92,6 +97,17 @@
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
         },
+        "designSystemRules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "codeReuseHypothesis": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "allowedChangeBoundary": { "type": "string", "minLength": 1 },
         "hierarchy": { "type": "string", "minLength": 1 },
         "density": { "type": "string", "minLength": 1 },
         "motion": { "type": "string", "minLength": 1 },
@@ -107,6 +123,15 @@
             "enum": ["information-architecture", "hierarchy", "density", "state-treatment", "interaction-model", "motion-role", "local-preservation", "visual-signature"]
           },
           "uniqueItems": true
+        },
+        "implementationRisk": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "selfReviewChecks": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 }
         },
         "keep": {
           "type": "array",

@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{TITLE}} · BFDS 设计评审工作台</title>
+    <title>{{TITLE}} · BFDS 方案评审工作台</title>
     <link rel="stylesheet" href="workbench.css">
   </head>
   <body>
     <main class="page">
       <header class="hero">
-        <p class="kicker">BFDS 设计评审工作台</p>
+        <p class="kicker">BFDS 方案评审工作台</p>
         <h1>{{TITLE}}</h1>
         <p class="lede">{{REQUEST_SUMMARY}}</p>
         <dl class="meta-grid" aria-label="设计上下文">
@@ -39,7 +39,7 @@
         </div>
         <div>
           <h2>选择方式</h2>
-          <p>这是静态 MVP 工作台，不记录点击事件。请在对话中回复“选 A / B / C”，也可以说“选 B，但导航用 A，错误态用 C”。</p>
+          <p>这是生码方向校准物，不是最终高保真设计稿。请在对话中回复“选 A / B / C”，也可以说“选 B，但局部状态用 A，错误恢复用 C”。</p>
         </div>
       </section>
 
@@ -49,13 +49,13 @@
           <h2 id="option-a-title">{{OPTION_A_NAME}}</h2>
           <p>{{OPTION_A_THESIS}}</p>
           <dl>
-            <div><dt>强调</dt><dd>{{OPTION_A_EMPHASIS}}</dd></div>
-            <div><dt>弱化</dt><dd>{{OPTION_A_DEEMPHASIS}}</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>{{OPTION_A_DESIGN_RULES}}</dd></div>
+            <div><dt>实现边界</dt><dd>{{OPTION_A_BOUNDARY}}</dd></div>
             <div><dt>风险</dt><dd>{{OPTION_A_RISK}}</dd></div>
-            <div><dt>适用</dt><dd>{{OPTION_A_BEST_FOR}}</dd></div>
+            <div><dt>自审重点</dt><dd>{{OPTION_A_SELF_REVIEW}}</dd></div>
           </dl>
         </div>
-        <iframe title="方案 A 交互设计" src="option-a.html"></iframe>
+        <iframe title="方案 A 局部方案预览" src="option-a.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-b-title">
@@ -64,13 +64,13 @@
           <h2 id="option-b-title">{{OPTION_B_NAME}}</h2>
           <p>{{OPTION_B_THESIS}}</p>
           <dl>
-            <div><dt>强调</dt><dd>{{OPTION_B_EMPHASIS}}</dd></div>
-            <div><dt>弱化</dt><dd>{{OPTION_B_DEEMPHASIS}}</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>{{OPTION_B_DESIGN_RULES}}</dd></div>
+            <div><dt>实现边界</dt><dd>{{OPTION_B_BOUNDARY}}</dd></div>
             <div><dt>风险</dt><dd>{{OPTION_B_RISK}}</dd></div>
-            <div><dt>适用</dt><dd>{{OPTION_B_BEST_FOR}}</dd></div>
+            <div><dt>自审重点</dt><dd>{{OPTION_B_SELF_REVIEW}}</dd></div>
           </dl>
         </div>
-        <iframe title="方案 B 交互设计" src="option-b.html"></iframe>
+        <iframe title="方案 B 局部方案预览" src="option-b.html"></iframe>
       </section>
 
       <section class="option-block" aria-labelledby="option-c-title">
@@ -79,13 +79,13 @@
           <h2 id="option-c-title">{{OPTION_C_NAME}}</h2>
           <p>{{OPTION_C_THESIS}}</p>
           <dl>
-            <div><dt>强调</dt><dd>{{OPTION_C_EMPHASIS}}</dd></div>
-            <div><dt>弱化</dt><dd>{{OPTION_C_DEEMPHASIS}}</dd></div>
+            <div><dt>DESIGN.md 规则</dt><dd>{{OPTION_C_DESIGN_RULES}}</dd></div>
+            <div><dt>实现边界</dt><dd>{{OPTION_C_BOUNDARY}}</dd></div>
             <div><dt>风险</dt><dd>{{OPTION_C_RISK}}</dd></div>
-            <div><dt>适用</dt><dd>{{OPTION_C_BEST_FOR}}</dd></div>
+            <div><dt>自审重点</dt><dd>{{OPTION_C_SELF_REVIEW}}</dd></div>
           </dl>
         </div>
-        <iframe title="方案 C 交互设计" src="option-c.html"></iframe>
+        <iframe title="方案 C 局部方案预览" src="option-c.html"></iframe>
       </section>
     </main>
   </body>

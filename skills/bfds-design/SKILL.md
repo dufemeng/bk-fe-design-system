@@ -1,11 +1,13 @@
 ---
 name: bfds-design
-description: 当用户明确要求从 PRD、产品方案、原型、截图、Figma、URL、现有页面或组件开始 BFDS 前端设计时使用；也用于继续已有 BFDS 设计、在已有评审工作台/status.json 上选择 A/B/C 或合并方案、固化 docs/design/<slug> 设计交付包、以及对当前 BFDS 设计做局部实时微调。不要用于后端、数据库、普通 bug 修复、纯代码重构、算法实现、接口实现、没有设计意图的请求，或未关联 BFDS 评审工作台/status.json 的泛泛前端工作。
+description: 当用户明确要求从 PRD、产品方案、原型、截图、Figma、URL、现有页面或组件开始 BFDS 前端设计时使用；也用于继续已有 BFDS 设计、在已有评审工作台/status.json 上选择 A/B/C 或合并方案、固化 docs/design/<slug> 设计交付包、以及对当前 BFDS 设计做局部实时微调。该技能以 DESIGN.md 为唯一设计规范事实源，产出设计决策和实现约束，而不是生产独立高成本设计稿。不要用于后端、数据库、普通 bug 修复、纯代码重构、算法实现、接口实现、没有设计意图的请求，或未关联 BFDS 评审工作台/status.json 的泛泛前端工作。
 ---
 
 # BFDS Design
 
-BFDS 是设计补全层。它只补齐前端设计产物，不重新做产品规划、后端架构、API、数据库、权限或通用工程实现。
+BFDS Design 是设计决策与实现约束生成层。它以 `DESIGN.md` 为唯一设计规范事实源，结合需求和当前目标界面现状，生成可被 `bfds-implement` 高保真生码的设计方向、用户选择和设计交付包。它不重新做产品规划、后端架构、API、数据库、权限或通用工程实现。
+
+设计稿是中间校准物，只负责让用户理解后续生码方向；最终高保真由真实代码、运行态检查、自审和局部实时微调闭环。
 
 ## 开场习惯
 
@@ -27,12 +29,12 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 
 ## 阶段入口
 
-- `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；按 next-card 每轮成组询问 2-3 个项目级问题，用 `answer --stage init` 记录多轮访谈和用户确认。
+- `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；`DESIGN.md` 是后续方案和实现的设计规范事实源。按 next-card 每轮成组询问 2-3 个项目级问题，用 `answer --stage init` 记录多轮访谈和用户确认。
 - `NEEDS_SURFACE`：确认目标界面与变更边界；按 next-card 用 `answer --stage surface` 提交扁平字段。
-- `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做专业设计问答和方向取舍，再用 `directions` 提交 A/B/C 方向规格。
-- `NEEDS_WORKBENCH`：用 `workbench --scaffold` 生成脚手架；填入真实三方案后用 `workbench --validate`，含 `BFDS_PLACEHOLDER` 的文件不能进入选择。
+- `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做专业设计问答和方向取舍，再用 `directions` 提交 A/B/C 可实现方向规格；不能跳过脑暴直接出方向。
+- `NEEDS_WORKBENCH`：用 `workbench --scaffold` 生成脚手架；填入方案卡、局部示意和实现约束摘要后用 `workbench --validate`，含 `BFDS_PLACEHOLDER` 的文件不能进入选择。
 - `NEEDS_SELECTION`：用 `AskUserQuestion` 等待用户明确选择 A/B/C 或合并方案；用 `select` 提交选择证据。
-- `NEEDS_CONTRACT`：用 `pack --add` 提交 contract 判断字段；runtime 回显后用 `AskUserQuestion` 确认，再用 `pack --confirm` 生成设计交付包。
+- `NEEDS_CONTRACT`：用 `pack --add` 提交实现约束、自审检查和 contract 判断字段；runtime 回显后用 `AskUserQuestion` 确认，再用 `pack --confirm` 生成设计交付包。
 - `CONTRACT_READY` / `IMPLEMENT_READY`：设计交付包已就绪，等待实现或验收请求。
 
 ## 证据文件
@@ -41,8 +43,8 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 
 - `init-interview.json`：Impeccable 项目级访谈问答、用户确认原话、PRODUCT/DESIGN 路径和生成模式。
 - `surface.json`：目标界面、现状来源、改动类型、必须保留、允许改变、必须避免、用户确认原话。
-- `brainstorm-dialogue.json`：设计表达问答、专业维度、2-3 个方向取舍、用户确认原话。
-- `directions.json`：A/B/C 三个方向规格和自检结果。
+- `brainstorm-dialogue.json`：设计表达问答、专业维度、设计系统影响、实现影响、2-3 个方向取舍、用户确认原话。
+- `directions.json`：A/B/C 三个可实现方向规格、`DESIGN.md` 规则引用、代码复用假设、实现风险、自审检查和自检结果。
 - `selection.json`：用户选择原话、选中方案、工作台与三个方案路径。
 
 schema 和模板由本 skill 内置 runtime 管理。写完任何阶段输入后都读取命令返回的 next-card。

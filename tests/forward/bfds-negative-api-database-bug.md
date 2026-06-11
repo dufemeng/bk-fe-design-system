@@ -20,7 +20,7 @@
 
 ## 期望行为
 
-- 说明 API、数据库、普通 bug/debug 不属于 BFDS 设计补全层范围。
+- 说明 API、数据库、普通 bug/debug 不属于 BFDS 设计规范执行层范围。
 - 不生成评审工作台。
 - 不生成设计交付包。
 - 不以 BFDS implement 写代码。

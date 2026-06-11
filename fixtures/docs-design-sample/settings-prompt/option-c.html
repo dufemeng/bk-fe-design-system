@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>方案 C · Guided States</title>
+    <title>方案 C · Explicit Recovery</title>
     <style>
       :root {
         --bg: #f6f7fb;
@@ -12,96 +12,112 @@
         --muted: #667085;
         --accent: #5b4fd6;
         --border: #d8dced;
-        --warning: #9a4d00;
-        --success: #1f7a5f;
         --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
       * { box-sizing: border-box; }
       html, body { margin: 0; min-height: 100%; }
-      body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.5; letter-spacing: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 14px;
+        line-height: 1.5;
+        letter-spacing: 0;
+      }
+
       .surface { min-height: 100vh; padding: clamp(18px, 4vw, 40px); }
-      .shell { max-width: 1040px; margin: 0 auto; display: grid; gap: 16px; }
-      .topbar, .workspace, .status-tray { background: var(--surface); border: 1px solid var(--border); }
-      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; }
-      .brand { font-weight: 760; }
-      .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 500px; }
-      .editor { padding: clamp(18px, 3vw, 32px); display: grid; gap: 16px; align-content: start; }
-      h1 { margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1.08; letter-spacing: 0; text-wrap: balance; }
-      p { margin: 0; color: var(--muted); }
-      textarea { width: 100%; min-height: 170px; resize: vertical; border: 1px solid var(--border); border-radius: 8px; background: #fbfcff; color: var(--ink); padding: 14px; font: inherit; }
-      .notice { display: grid; gap: 6px; padding: 12px; background: color-mix(in srgb, var(--accent) 8%, white); border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border)); }
-      .notice strong { color: var(--accent); }
-      .side { border-left: 1px solid var(--border); padding: clamp(18px, 3vw, 28px); display: grid; align-content: start; gap: 16px; }
-      .step { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; }
-      .dot { width: 24px; height: 24px; border-radius: 999px; display: grid; place-items: center; background: var(--accent); color: white; font-size: 12px; font-weight: 700; }
-      .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-      button { min-height: 36px; border: 1px solid var(--border); background: white; color: var(--ink); padding: 0 12px; border-radius: 6px; font: inherit; cursor: pointer; }
-      button.primary { background: var(--accent); border-color: var(--accent); color: white; }
-      button:focus-visible, textarea:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
-      .status-tray { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; }
-      body[data-state="warning"] .notice strong, body[data-state="warning"] #status { color: var(--warning); }
-      body[data-state="success"] .notice strong, body[data-state="success"] #status { color: var(--success); }
+      .shell { max-width: 1080px; margin: 0 auto; display: grid; gap: 16px; }
+      .context, .preview, .constraints { background: var(--surface); border: 1px solid var(--border); }
+      .context { display: grid; gap: 8px; padding: 16px 18px; }
+      .eyebrow { margin: 0; color: var(--accent); font-size: 12px; font-weight: 700; }
+      h1, h2, p { margin-top: 0; }
+      h1 { margin-bottom: 0; font-size: clamp(24px, 4vw, 40px); line-height: 1.1; letter-spacing: 0; text-wrap: balance; }
+      h2 { margin-bottom: 8px; font-size: 17px; line-height: 1.25; letter-spacing: 0; }
+      .summary { max-width: 76ch; margin-bottom: 0; color: var(--muted); }
+      .preview { display: grid; grid-template-columns: minmax(240px, 0.82fr) minmax(0, 1.18fr); min-height: 440px; }
+      .before, .after { padding: clamp(18px, 3vw, 30px); }
+      .before { border-right: 1px solid var(--border); color: var(--muted); }
+      .region-box { display: grid; gap: 12px; min-height: 280px; padding: 16px; border: 1px dashed var(--border); background: color-mix(in srgb, var(--surface) 90%, var(--bg)); }
+      .target-delta { display: grid; gap: 12px; padding: 18px; border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border)); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+      .delta-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; border-bottom: 1px solid var(--border); }
+      .delta-row:last-child { border-bottom: 0; }
+      .tag { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--accent); font-weight: 650; }
+      .constraints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--border); }
+      .constraints section { min-width: 0; padding: 16px; background: var(--surface); }
+      ul { margin: 0; padding-left: 18px; color: var(--muted); }
+      li + li { margin-top: 6px; }
+      button { min-height: 34px; border: 1px solid var(--border); background: white; color: var(--ink); padding: 0 10px; font: inherit; cursor: pointer; }
+      button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+      button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
 
       @media (max-width: 760px) {
-        .workspace { grid-template-columns: 1fr; }
-        .side { border-left: 0; border-top: 1px solid var(--border); }
-        .topbar, .status-tray { align-items: stretch; flex-direction: column; }
+        .preview, .constraints { grid-template-columns: 1fr; }
+        .before { border-right: 0; border-bottom: 1px solid var(--border); }
       }
     </style>
   </head>
-  <body data-state="default">
+  <body>
     <main class="surface">
       <div class="shell">
-        <header class="topbar">
-          <div class="brand">Team Settings</div>
-          <div class="actions">
-            <button type="button" data-state="default">First run</button>
-            <button type="button" data-state="warning">Error</button>
-            <button type="button" data-state="success">Saved</button>
-          </div>
+        <header class="context">
+          <p class="eyebrow">方案 C · 局部生码方向</p>
+          <h1>Explicit Recovery</h1>
+          <p class="summary">突出错误恢复和保存反馈，降低配置失败时的操作成本。</p>
         </header>
-        <section class="workspace" aria-label="Guided prompt states">
-          <div class="editor">
-            <h1>设置团队默认提示词</h1>
-            <p>引导式状态让首次配置和错误恢复更明确。示例内容是占位，真实内容必须来自用户或项目配置。</p>
-            <div class="notice">
-              <strong id="notice-title">First-run guidance</strong>
-              <p id="notice-copy">Start with a short instruction, then add boundaries your team already agreed on.</p>
-            </div>
-            <textarea aria-label="团队默认提示词">[占位] 输入团队确认过的默认提示词。</textarea>
-            <div class="actions">
-              <button class="primary" type="button">Save prompt</button>
-              <button type="button">Use starter</button>
+
+        <section class="preview" aria-label="Explicit Recovery">
+          <div class="before">
+            <h2>当前区域基底</h2>
+            <div class="region-box">
+              <p>现有错误提示、按钮和表单验证入口继续作为基底。</p>
+              <p>保持不变：数据流、导航、已有 tokens 和配置项范围。</p>
             </div>
           </div>
-          <aside class="side">
-            <div class="step"><span class="dot">1</span><p>先写用户任务，不写后端规则。</p></div>
-            <div class="step"><span class="dot">2</span><p>补充团队已有边界，不编造新策略。</p></div>
-            <div class="step"><span class="dot">3</span><p>保存前检查空态、错误态和长文本。</p></div>
-          </aside>
+          <div class="after">
+            <h2>目标区域变化</h2>
+            <div class="target-delta">
+              <div class="delta-row">
+                <span>错误恢复</span>
+                <span class="tag">原因 + 动作</span>
+              </div>
+              <div class="delta-row">
+                <span>主行动</span>
+                <button class="primary" type="button">修正并保存</button>
+              </div>
+              <div class="delta-row">
+                <span>辅助动作</span>
+                <button type="button">回到编辑位置</button>
+              </div>
+              <p>增强输入区错误说明、恢复动作和保存反馈，不新增后端、权限或未确认配置能力。</p>
+            </div>
+          </div>
         </section>
-        <footer class="status-tray">
-          <span id="status">First-run guidance shown.</span>
-          <button type="button">View state checklist</button>
-        </footer>
+
+        <section class="constraints" aria-label="实现约束摘要">
+          <section>
+            <h2>DESIGN.md 规则</h2>
+            <ul>
+              <li>错误、成功、加载和恢复动作使用语义状态规则。</li>
+              <li>状态变化保留可访问文本和焦点反馈。</li>
+            </ul>
+          </section>
+          <section>
+            <h2>实现边界</h2>
+            <ul>
+              <li>允许增强输入区错误说明、恢复动作和保存反馈。</li>
+              <li>不改数据流、导航或新增配置项。</li>
+            </ul>
+          </section>
+          <section>
+            <h2>自审检查</h2>
+            <ul>
+              <li>错误态强度不覆盖正常编辑状态的主层级。</li>
+              <li>恢复动作不新增后端、权限或未确认配置能力。</li>
+            </ul>
+          </section>
+        </section>
       </div>
     </main>
-    <script>
-      const copy = {
-        default: ["First-run guidance", "Start with a short instruction, then add boundaries your team already agreed on.", "First-run guidance shown."],
-        warning: ["Prompt needs attention", "The prompt is too short. Add the expected user task before saving.", "Error state shown."],
-        success: ["Prompt saved", "New projects will use this default prompt. Review again if team policy changes.", "Saved state shown."]
-      };
-      document.querySelectorAll("[data-state]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const state = button.dataset.state;
-          document.body.dataset.state = state;
-          document.querySelector("#notice-title").textContent = copy[state][0];
-          document.querySelector("#notice-copy").textContent = copy[state][1];
-          document.querySelector("#status").textContent = copy[state][2];
-        });
-      });
-    </script>
   </body>
 </html>

@@ -2,7 +2,7 @@
 
 ## 目标
 
-验证“用户拒绝继续追问”只允许进入 `user-skipped` 脑暴证据，不允许跳过方向取舍和三方向设计规格。
+验证“用户拒绝继续追问”只允许进入 `user-skipped` 脑暴证据，不允许跳过方向取舍、设计系统影响、实现影响和三方向设计规格。
 
 ## 用户输入
 
@@ -30,7 +30,7 @@
 ## 通过标准
 
 - 明确说明不继续追问，但仍进入设计方向探索门禁。
-- 写入 `docs/design/<slug>/evidence/brainstorm-dialogue.json`，`mode` 为 `user-skipped`，包含用户拒绝继续追问的原话和 2-3 个方向取舍确认。
-- 写入 `docs/design/<slug>/evidence/directions.json`，包含 A/B/C 三个字段齐全的三方向设计规格。
+- 写入 `docs/design/<slug>/evidence/brainstorm-dialogue.json`，`mode` 为 `user-skipped`，包含用户拒绝继续追问的原话、方向取舍确认、`designSystemImplication` 和 `implementationImplication`。
+- 写入 `docs/design/<slug>/evidence/directions.json`，包含 A/B/C 三个字段齐全的可实现方向规格，每个方向都有 `designSystemRules`、`codeReuseHypothesis`、`allowedChangeBoundary`、`implementationRisk` 和 `selfReviewChecks`。
 - next-card 输出 `NEEDS_WORKBENCH` 后，才进入评审工作台。
 - `evidence/gate-log.ndjson` 记录 `NEEDS_DIRECTIONS` 到 `NEEDS_WORKBENCH` 的推进。

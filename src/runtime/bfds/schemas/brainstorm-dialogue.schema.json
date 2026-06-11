@@ -32,10 +32,18 @@
     },
     "turns": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["dimension", "question", "answerQuote", "designImplication"],
+        "required": [
+          "dimension",
+          "question",
+          "answerQuote",
+          "designImplication",
+          "designSystemImplication",
+          "implementationImplication"
+        ],
         "properties": {
           "dimension": {
             "type": "string",
@@ -54,7 +62,9 @@
           },
           "question": { "type": "string", "minLength": 1 },
           "answerQuote": { "type": "string", "minLength": 1 },
-          "designImplication": { "type": "string", "minLength": 1 }
+          "designImplication": { "type": "string", "minLength": 1 },
+          "designSystemImplication": { "type": "string", "minLength": 1 },
+          "implementationImplication": { "type": "string", "minLength": 1 }
         }
       }
     },

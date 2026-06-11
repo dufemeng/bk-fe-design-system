@@ -9,8 +9,9 @@
 3. 按 `qa-plan.viewports` 捕获实现截图。
 4. 按 `qa-plan.states` 和 `qa-plan.interactions` 覆盖关键状态/交互。
 5. 运行可验证的 Impeccable detect；目标只能来自 `qa-plan.impeccable.detect.targets`、`qa-plan.targetRoutes` 或本轮实现源码文件。
-6. 对照 `design-contract.json` 做契约、状态、交互、响应式、可访问性和视觉纪律检查。
-7. 写 `qa-report.md`。
+6. 对照 `DESIGN.md` 和 `design-contract.json` 做契约、状态、交互、响应式、可访问性和视觉纪律检查。
+7. 对照 `design-contract.json.implementationConstraints.selfReviewChecks` 做代码层设计自审，并记录结果。
+8. 写 `qa-report.md`。
 
 不得把聊天描述、评审工作台、选项 HTML、`<...>` 占位目标当作 detect target。未运行要写“未运行”，不能写成通过。
 

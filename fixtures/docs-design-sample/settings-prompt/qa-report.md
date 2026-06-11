@@ -38,6 +38,18 @@ runId: `fixture-not-run`
 - 可访问性: not run for fixture
 - 响应式: not run for fixture
 - AI 捷径痕迹: not run for fixture
+- QA-001: not run for fixture
+- QA-002: not run for fixture
+- QA-003: not run for fixture
+- QA-004: not run for fixture
+- QA-005: not run for fixture
+- QA-006: not run for fixture
+- QA-007: not run for fixture
+- design-system-1: not run for fixture
+- self-review-1: not run for fixture
+- self-review-2: not run for fixture
+- self-review-3: not run for fixture
+- self-review-4: not run for fixture
 
 ## 按严重程度记录问题
 

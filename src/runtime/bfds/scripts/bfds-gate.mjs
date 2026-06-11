@@ -315,17 +315,21 @@ function phaseRules(phase) {
     ],
     NEEDS_DIRECTIONS: [
       '只做设计方向探索；父会话按 Impeccable shape 的专业维度每轮成组询问 2-3 个高价值设计问题。',
-      '先写 evidence/brainstorm-dialogue.json；用户确认 2-3 个方向取舍后，才写 evidence/directions.json。',
+      '先写 evidence/brainstorm-dialogue.json；每轮问答必须记录设计判断、DESIGN.md 影响和实现影响。',
+      '用户确认 2-3 个方向取舍后，才写 evidence/directions.json。',
       'Claude Code 中方向取舍确认必须用 AskUserQuestion；开放设计表达题可以普通文本。',
       '问题必须覆盖至少两个专业维度，不重复询问原型里已经可见的布局事实。',
-      '用户明确拒绝继续追问时，brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
+      '用户明确拒绝继续追问时，仍要写一轮压缩设计判断；brainstorm-dialogue mode=user-skipped，并记录 skipReasonQuote。',
+      '三个方向必须引用 DESIGN.md 规则、代码复用假设、允许变更边界、实现风险和自审检查点。',
       '三个方向至少在两个维度上不同，换色、换圆角、换阴影不算差异。',
       '不得新增未确认的产品能力、API、数据库、权限或后端范围。',
       '写每个 evidence 后都重新运行 bfds.mjs next。'
     ],
     NEEDS_WORKBENCH: [
-      '只生成评审工作台和三个方案 HTML。',
+      '只生成轻量方案评审工作台和三个局部方案预览。',
       '必须使用 directions evidence 的 A/B/C 方向，不临时改方向。',
+      '每个方案必须展示方案卡、局部示意、DESIGN.md 规则引用、实现边界、实现风险和自审检查点。',
+      '局部改造时未改区域只能作为基底、上下文或锁定说明，不要重画整页。',
       '逐个方案或逐个文件生成；预计超过 60 秒时先向用户说明当前进度。',
       '生成 workbench.html 和 option-a/b/c.html 后重新运行 bfds.mjs next。'
     ],
@@ -343,11 +347,13 @@ function phaseRules(phase) {
     ],
     CONTRACT_READY: [
       '设计交付包完整；等待用户发起实现或验收。',
-      '实现阶段必须读取 design-contract.json、implementation-handoff.md、qa-plan.json。'
+      '实现阶段必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。',
+      '实现后必须按 implementationConstraints.selfReviewChecks 做代码层设计自审。'
     ],
     IMPLEMENT_READY: [
       '可以按 BFDS 设计契约实现或验收。',
-      '不得凭聊天记忆改写设计契约；实现偏差写入 qa-report.md。'
+      '不得凭聊天记忆改写设计契约；不得绕过 DESIGN.md 发明新视觉系统。',
+      '实现偏差、自审结果和无法验证项写入 qa-report.md。'
     ],
     INCONSISTENT: [
       '停止：发现下游产物存在但上游证据缺失或证据无效。',

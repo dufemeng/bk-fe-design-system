@@ -476,12 +476,14 @@ function writeBrainstorm(dir, parsed, global) {
     const questions = fieldAll(parsed, 'question');
     const answers = fieldAll(parsed, 'answer');
     const implications = fieldAll(parsed, 'designImplication');
+    const designSystemImplications = fieldAll(parsed, 'designSystemImplication');
+    const implementationImplications = fieldAll(parsed, 'implementationImplication');
     const count = questions.length;
-    if (count === 0 || answers.length === 0 || implications.length === 0 || dimensions.length === 0) {
-      throwInvalid('brainstorm append-round requires paired dimension/question/answer/designImplication fields', parsed.target, global);
+    if (count === 0 || answers.length === 0 || implications.length === 0 || designSystemImplications.length === 0 || implementationImplications.length === 0 || dimensions.length === 0) {
+      throwInvalid('brainstorm append-round requires paired dimension/question/answer/designImplication/designSystemImplication/implementationImplication fields', parsed.target, global);
     }
-    if (answers.length !== count || implications.length !== count || dimensions.length !== count) {
-      throwInvalid(`brainstorm append-round requires paired fields; got ${dimensions.length} dimension, ${questions.length} question, ${answers.length} answer, ${implications.length} designImplication`, parsed.target, global);
+    if (answers.length !== count || implications.length !== count || designSystemImplications.length !== count || implementationImplications.length !== count || dimensions.length !== count) {
+      throwInvalid(`brainstorm append-round requires paired fields; got ${dimensions.length} dimension, ${questions.length} question, ${answers.length} answer, ${implications.length} designImplication, ${designSystemImplications.length} designSystemImplication, ${implementationImplications.length} implementationImplication`, parsed.target, global);
     }
     for (let index = 0; index < count; index += 1) {
       if (!BRAINSTORM_DIMENSION_VALUES.includes(dimensions[index])) {
@@ -491,7 +493,9 @@ function writeBrainstorm(dir, parsed, global) {
         dimension: dimensions[index],
         question: questions[index],
         answerQuote: answers[index],
-        designImplication: implications[index]
+        designImplication: implications[index],
+        designSystemImplication: designSystemImplications[index],
+        implementationImplication: implementationImplications[index]
       });
     }
     writeJson(draftFile, draft);
@@ -514,6 +518,9 @@ function writeBrainstorm(dir, parsed, global) {
   }
   if (mode === 'socratic' && new Set(draft.turns.map(turn => turn.dimension)).size < 2) {
     throwInvalid('brainstorm finalize requires at least two professional design dimensions before writing evidence/brainstorm-dialogue.json', parsed.target, global);
+  }
+  if (mode === 'user-skipped' && draft.turns.length < 1) {
+    throwInvalid('brainstorm user-skipped requires one compressed design-judgment round before writing evidence/brainstorm-dialogue.json', parsed.target, global);
   }
   const data = {
     slug,
@@ -592,6 +599,9 @@ function directionOption(optionId, parsed) {
     name: fieldRequired(parsed, 'name'),
     designThesis: fieldRequired(parsed, 'designThesis'),
     sourceConstraints: fieldAll(parsed, 'sourceConstraint').length ? fieldAll(parsed, 'sourceConstraint') : ['PRODUCT.md', 'DESIGN.md'],
+    designSystemRules: nonEmpty(fieldAll(parsed, 'designSystemRule'), 'designSystemRule'),
+    codeReuseHypothesis: nonEmpty(fieldAll(parsed, 'codeReuseHypothesis'), 'codeReuseHypothesis'),
+    allowedChangeBoundary: fieldRequired(parsed, 'allowedChangeBoundary'),
     hierarchy: fieldRequired(parsed, 'hierarchy'),
     density: fieldRequired(parsed, 'density'),
     motion: fieldRequired(parsed, 'motion'),
@@ -600,6 +610,8 @@ function directionOption(optionId, parsed) {
     interactionModel: fieldRequired(parsed, 'interactionModel'),
     visualSignature: fieldRequired(parsed, 'visualSignature'),
     differenceDimensions: nonEmpty(fieldAll(parsed, 'differenceDimension'), 'differenceDimension'),
+    implementationRisk: fieldRequired(parsed, 'implementationRisk'),
+    selfReviewChecks: nonEmpty(fieldAll(parsed, 'selfReviewCheck'), 'selfReviewCheck'),
     keep: nonEmpty(fieldAll(parsed, 'keep'), 'keep'),
     change: nonEmpty(fieldAll(parsed, 'change'), 'change'),
     avoid: nonEmpty(fieldAll(parsed, 'avoid'), 'avoid'),
@@ -666,6 +678,15 @@ function validateWorkbench(dir) {
   const workbench = readText(path.join(dir, 'workbench.html'));
   for (const option of ['option-a.html', 'option-b.html', 'option-c.html']) {
     if (!workbench.includes(option)) throw new Error(`workbench.html must reference ${option}`);
+  }
+  const directions = readJson(path.join(dir, 'evidence', 'directions.json'));
+  if (!directions?.options) throw new Error('workbench validation requires evidence/directions.json');
+  for (const [optionId, file] of Object.entries({ A: 'option-a.html', B: 'option-b.html', C: 'option-c.html' })) {
+    const name = directions.options?.[optionId]?.name;
+    if (!name) throw new Error(`directions.json missing option ${optionId} name`);
+    if (!workbench.includes(name)) throw new Error(`workbench.html must include directions option ${optionId} name: ${name}`);
+    const optionText = readText(path.join(dir, file));
+    if (!optionText.includes(name)) throw new Error(`${file} must include directions option ${optionId} name: ${name}`);
   }
 }
 
@@ -852,8 +873,10 @@ function contractJudgmentMissing(judgment) {
 function writeContractPack(dir, judgment, target, global) {
   const slug = path.basename(dir);
   const surface = readJson(path.join(dir, 'evidence', 'surface.json'));
+  const directions = readJson(path.join(dir, 'evidence', 'directions.json'));
   const selection = readJson(path.join(dir, 'evidence', 'selection.json'));
   const title = surface.title ?? titleFromSlug(slug);
+  const implementationConstraints = implementationConstraintsFromDirections(selection, directions);
   const contract = {
     slug,
     title,
@@ -867,6 +890,7 @@ function writeContractPack(dir, judgment, target, global) {
       },
       productContext: surface.productPath,
       designContext: surface.designPath,
+      directionsEvidence: `docs/design/${slug}/evidence/directions.json`,
       surfaceEvidence: [`docs/design/${slug}/evidence/surface.json`]
     },
     surface: surface.surface,
@@ -878,6 +902,7 @@ function writeContractPack(dir, judgment, target, global) {
     states: cleanObjects(judgment.states),
     interactions: cleanObjects(judgment.interactions),
     tokens: judgment.tokens,
+    implementationConstraints,
     responsive: judgment.responsive ?? [],
     motion: judgment.motion ?? [],
     assets: judgment.assets ?? [],
@@ -889,6 +914,38 @@ function writeContractPack(dir, judgment, target, global) {
   writeJson(path.join(dir, 'design-contract.json'), contract);
   writeText(path.join(dir, 'implementation-handoff.md'), renderHandoff(contract, judgment));
   writeJson(path.join(dir, 'qa-plan.json'), qaPlan);
+}
+
+function implementationConstraintsFromDirections(selection, directions) {
+  const optionIds = normalizeMergedFrom(selection.selectedOption?.mergedFrom ?? [], selection.selectedOption?.id ?? '');
+  const options = optionIds.map(id => directions.options?.[id]).filter(Boolean);
+  if (options.length === 0) {
+    throw new Error('Cannot derive implementation constraints from directions.json; selected options are missing');
+  }
+  return {
+    sourceOptions: optionIds.filter(id => directions.options?.[id]),
+    designSystemRules: uniqueFlat(options, 'designSystemRules'),
+    codeReuseHypothesis: uniqueFlat(options, 'codeReuseHypothesis'),
+    allowedChangeBoundary: uniqueFlat(options, 'allowedChangeBoundary'),
+    implementationRisk: highestImplementationRisk(options.map(option => option.implementationRisk)),
+    selfReviewChecks: uniqueFlat(options, 'selfReviewChecks')
+  };
+}
+
+function uniqueFlat(items, key) {
+  const values = [];
+  for (const item of items) {
+    const value = item?.[key];
+    if (Array.isArray(value)) values.push(...value);
+    else if (value) values.push(value);
+  }
+  return Array.from(new Set(values));
+}
+
+function highestImplementationRisk(values) {
+  if (values.includes('high')) return 'high';
+  if (values.includes('medium')) return 'medium';
+  return 'low';
 }
 
 function cleanObjects(items) {
@@ -937,10 +994,18 @@ ${list(contract.avoid)}
 
 ## 7. 视觉还原纪律
 
+- DESIGN.md 是唯一设计规范事实源，不得引入合同外的新颜色、字体、圆角、阴影、动效或组件语气。
+- 设计系统规则：${contract.implementationConstraints.designSystemRules.join('；')}
+- 代码复用假设：${contract.implementationConstraints.codeReuseHypothesis.join('；')}
+- 允许变更边界：${contract.implementationConstraints.allowedChangeBoundary.join('；')}
+- 实现风险：${contract.implementationConstraints.implementationRisk}
 - 不编数据。有真实来源才写；没有就用明确标注的占位符。
 - 不用占位图、emoji、文本符号、CSS art、手写 SVG 或近似图形替代真实资产。
 - 必须检查字体、间距、颜色、资产、状态、交互、响应式和可访问性。
-- 选中的评审工作台方案是 composition、hierarchy、density、atmosphere、signature motifs 的设计契约。
+- 选中的方案卡和局部示意只用于方向校准；实现必须以 design-contract.json、implementation-handoff.md 和 DESIGN.md 为准。
+
+自审检查：
+${list(contract.implementationConstraints.selfReviewChecks)}
 
 ## 8. 数据与文案来源
 
@@ -980,6 +1045,18 @@ ${list([
 
 function renderQaPlan(contract) {
   const route = contract.surface.route || contract.surface.name;
+  const selfReviewChecks = contract.implementationConstraints.selfReviewChecks.map((rule, index) => ({
+    id: `self-review-${index + 1}`,
+    category: 'contract',
+    description: rule,
+    blockingLevel: contract.implementationConstraints.implementationRisk === 'high' ? 'P1' : 'P2'
+  }));
+  const designSystemChecks = contract.implementationConstraints.designSystemRules.map((rule, index) => ({
+    id: `design-system-${index + 1}`,
+    category: 'contract',
+    description: rule,
+    blockingLevel: 'P1'
+  }));
   return {
     slug: contract.slug,
     targetRoutes: [{ route, purpose: contract.surface.name }],
@@ -1001,17 +1078,25 @@ function renderQaPlan(contract) {
       blockingLevel: 'P2'
     })),
     referenceScreenshots: [
-      { artifact: contract.sourceArtifacts.options.A, description: '方案 A' },
-      { artifact: contract.sourceArtifacts.options.B, description: '方案 B' },
-      { artifact: contract.sourceArtifacts.options.C, description: '方案 C' }
+      { artifact: contract.sourceArtifacts.options.A, description: '方案 A 局部方案预览' },
+      { artifact: contract.sourceArtifacts.options.B, description: '方案 B 局部方案预览' },
+      { artifact: contract.sourceArtifacts.options.C, description: '方案 C 局部方案预览' }
     ],
-    checks: contract.acceptanceRules.map(rule => ({
-      id: rule.id,
-      category: 'contract',
-      description: rule.rule,
-      blockingLevel: rule.severity
-    })),
-    blockers: contract.acceptanceRules.filter(rule => ['P0', 'P1', 'P2'].includes(rule.severity)).map(rule => rule.id),
+    checks: [
+      ...contract.acceptanceRules.map(rule => ({
+        id: rule.id,
+        category: 'contract',
+        description: rule.rule,
+        blockingLevel: rule.severity
+      })),
+      ...designSystemChecks,
+      ...selfReviewChecks
+    ],
+    blockers: [
+      ...contract.acceptanceRules.filter(rule => ['P0', 'P1', 'P2'].includes(rule.severity)).map(rule => rule.id),
+      ...designSystemChecks.map(check => check.id),
+      ...selfReviewChecks.filter(check => ['P1', 'P2'].includes(check.blockingLevel)).map(check => check.id)
+    ],
     impeccable: {
       detect: { enabled: false, targets: [], notes: 'Enable when a concrete implementation target exists.' },
       critique: { enabled: false, notes: 'Optional after implementation screenshot capture.' }
@@ -1127,24 +1212,25 @@ function cardForResult(result) {
     card.references = ['surface-change-framing.md'];
   } else if (phase === 'NEEDS_DIRECTIONS') {
     card.required = missing.includes('evidence/brainstorm-dialogue.json')
-      ? ['专业设计问答', '至少两个专业维度', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
-      : ['A/B/C 三个方向规格', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
+      ? ['专业设计问答', '至少两个专业维度', '每轮设计系统影响和实现影响', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
+      : ['A/B/C 三个可实现方向规格', 'DESIGN.md 规则引用', '代码复用假设', '允许变更边界', '实现风险', '自审检查点', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
     card.guidance = [
       '先读 design-brainstorm.md；每轮成组询问 2-3 个高价值设计问题。',
-      '问题必须覆盖专业设计判断，不重复询问原型里已经可见的布局事实。',
+      '问题必须覆盖专业设计判断，并说明答案如何影响 DESIGN.md 规则、现有组件复用和后续自审。',
+      '不重复询问原型里已经可见的布局事实；上下文明确时用“我判断为 X，确认吗？”。',
       `brainstorm dimension enum: ${formatEnum(BRAINSTORM_DIMENSION_VALUES)}`,
       '不脑暴产品/API/数据库/权限。',
       `differenceDimension enum: ${formatEnum(DIFFERENCE_DIMENSION_VALUES)}`
     ];
     card.forbidden = ['生成评审工作台', '临时扩大产品范围'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
-      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field dimension="state-edge-cases" --field question="..." --field answer="..." --field designImplication="..."`
-      : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
+      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..." --field dimension="state-edge-cases" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
+      : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field designSystemRule="..." --field codeReuseHypothesis="..." --field allowedChangeBoundary="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field implementationRisk="medium" --field selfReviewCheck="..." --field selfReviewCheck="..." --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
     card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {
     card.required = ['workbench.html', 'workbench.css', 'option-a.html', 'option-b.html', 'option-c.html', '无 BFDS_PLACEHOLDER'];
-    card.guidance = ['方案必须忠于 directions.json。', '方案自带目标产品 UI 样式，不依赖 workbench.css。', '不用假资产、emoji、文本符号或 CSS art 冒充真实资产。', '文本不溢出，移动和桌面模拟器不互相挤压。', '逐个方案或逐个文件生成；预计超过 60 秒时先向用户说明当前进度。'];
-    card.forbidden = ['临时改方向', '用占位文件推进到用户选择'];
+    card.guidance = ['方案必须忠于 directions.json。', '生成方案卡、局部示意和实现约束摘要；不要默认生成三套完整页面。', '每个方案展示 DESIGN.md 规则、实现边界、实现风险和自审检查点。', '局部改造时未改区域只能作为基底、上下文或锁定说明，不要重画整页。', '不用假资产、emoji、文本符号或 CSS art 冒充真实资产。', '文本不溢出，移动和桌面模拟器不能互相挤压。', '逐个方案或逐个文件生成；预计超过 60 秒时先向用户说明当前进度。'];
+    card.forbidden = ['临时改方向', '用占位文件推进到用户选择', '把局部方案预览包装成最终完整高保真设计稿'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs workbench ${result.slug} --scaffold`;
     card.references = ['workbench-authoring.md'];
   } else if (phase === 'NEEDS_SELECTION') {
@@ -1153,15 +1239,15 @@ function cardForResult(result) {
     card.forbidden = ['由 agent 代替用户选择', '生成设计交付包'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs select ${result.slug} --field selectionQuote="..." --field selectedOption="B" --field confirmationQuote="..."`;
   } else if (phase === 'NEEDS_CONTRACT') {
-    card.required = ['contract 判断字段', 'contract 回显确认', 'design-contract.json', 'implementation-handoff.md', 'qa-plan.json'];
-    card.guidance = ['runtime 预填机械字段；大模型只提交 screens/states/interactions/acceptanceRules 等判断字段。'];
+    card.required = ['contract 判断字段', '实现约束汇总', 'contract 回显确认', 'design-contract.json', 'implementation-handoff.md', 'qa-plan.json'];
+    card.guidance = ['runtime 从 directions.json 汇总 DESIGN.md 规则、代码复用假设、允许变更边界、实现风险和自审检查。', '大模型只提交 screens/states/interactions/acceptanceRules 等判断字段，不让用户手写结构化 JSON。', '生成前确认用户选择原话和选中方案摘要。'];
     card.forbidden = ['凭聊天记忆补字段', '缺用户选择时生成交付包'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs pack ${result.slug} --add screen --field id="..." --field description="..." --field composition="..." --field hierarchy="..."`;
     card.references = ['contract-pack.md'];
   } else if (phase === 'CONTRACT_READY' || phase === 'IMPLEMENT_READY') {
     card.required = ['等待实现、验收或局部实时微调请求'];
-    card.guidance = ['实现必须读取 design-contract.json、implementation-handoff.md、qa-plan.json。'];
-    card.forbidden = ['凭聊天记忆改写设计契约'];
+    card.guidance = ['实现必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。', '实现后按 implementationConstraints.selfReviewChecks 做代码层设计自审，再进入运行态验收或 live 微调。'];
+    card.forbidden = ['凭聊天记忆改写设计契约', '绕过 DESIGN.md 发明新视觉系统'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs mark ${result.slug} --state implementing`;
   } else if (phase === 'INCONSISTENT') {
     card.required = ['修正或删除错误产物', '重新运行 next 确认阶段回到可继续状态'];

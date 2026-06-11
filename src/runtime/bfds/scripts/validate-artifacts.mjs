@@ -87,6 +87,7 @@ function validateArtifactDir(dir) {
     validateSchema(schema, data, artifactFile, errors);
   }
 
+  const directions = readJson(path.join(dir, 'evidence', 'directions.json'));
   const contract = readJson(path.join(dir, 'design-contract.json'));
   const qaPlan = readJson(path.join(dir, 'qa-plan.json'));
   const status = readJson(path.join(dir, 'status.json'));
@@ -108,6 +109,18 @@ function validateArtifactDir(dir) {
 
   if (qaPlan.impeccable?.critique?.target && /[<>]/.test(qaPlan.impeccable.critique.target)) {
     errors.push(`qa-plan.json.impeccable.critique.target must be concrete when present, got placeholder-like value ${JSON.stringify(qaPlan.impeccable.critique.target)}`);
+  }
+
+  const workbench = fs.readFileSync(path.join(dir, 'workbench.html'), 'utf8');
+  for (const [optionId, file] of Object.entries({ A: 'option-a.html', B: 'option-b.html', C: 'option-c.html' })) {
+    const name = directions.options?.[optionId]?.name;
+    if (!name) {
+      errors.push(`evidence/directions.json missing option ${optionId} name`);
+      continue;
+    }
+    if (!workbench.includes(name)) errors.push(`workbench.html must include directions option ${optionId} name: ${name}`);
+    const optionText = fs.readFileSync(path.join(dir, file), 'utf8');
+    if (!optionText.includes(name)) errors.push(`${file} must include directions option ${optionId} name: ${name}`);
   }
 
   for (const file of [
@@ -493,13 +506,17 @@ function baseBrainstormDialogue(slug) {
         dimension: 'primary-action',
         question: '这个目标界面最先要被用户看见的信息是什么？',
         answerQuote: '提示词输入本身必须最先被看见，其他说明都要弱一点。',
-        designImplication: '层级以输入区为主，说明和导航降低视觉存在感。'
+        designImplication: '层级以输入区为主，说明和导航降低视觉存在感。',
+        designSystemImplication: '沿用 DESIGN.md 的产品 UI 密度、输入控件和状态 token。',
+        implementationImplication: '优先复用现有输入组件，只调整输入区层级和帮助信息位置。'
       },
       {
         dimension: 'state-edge-cases',
         question: '错误、保存和加载状态需要做到什么精度？',
         answerQuote: '错误和保存要清楚，加载不要占满屏幕，保持局部反馈。',
-        designImplication: '方案必须覆盖 default/error/success/loading 的局部状态表达。'
+        designImplication: '方案必须覆盖 default/error/success/loading 的局部状态表达。',
+        designSystemImplication: '状态表达映射到 DESIGN.md 的语义色、焦点和状态文案规则。',
+        implementationImplication: '实现后自审覆盖 default/error/success/loading，确认反馈不锁住整页。'
       }
     ],
     approachesPresented: [
@@ -517,6 +534,9 @@ function baseDirections(slug) {
     name: `方案 ${id}`,
     designThesis: `方案 ${id} 的设计主张。`,
     sourceConstraints: ['PRODUCT.md', 'DESIGN.md'],
+    designSystemRules: [`方案 ${id} 沿用 DESIGN.md 的产品 UI 规则。`],
+    codeReuseHypothesis: [`方案 ${id} 优先复用现有设置页组件。`],
+    allowedChangeBoundary: `方案 ${id} 只改目标输入区域和局部状态反馈。`,
     hierarchy: `方案 ${id} 的层级。`,
     density: 'snug',
     motion: '低存在感反馈。',
@@ -525,6 +545,8 @@ function baseDirections(slug) {
     interactionModel: `方案 ${id} 的交互模型。`,
     visualSignature: `方案 ${id} 的视觉签名。`,
     differenceDimensions: dimensions,
+    implementationRisk: 'medium',
+    selfReviewChecks: [`方案 ${id} 未新增 DESIGN.md 外视觉规则。`, `方案 ${id} 未改变 keep 区域。`],
     keep: ['Existing route'],
     change: ['Prompt editor hierarchy'],
     avoid: ['No backend scope'],
@@ -589,6 +611,7 @@ function baseContract(slug) {
       },
       productContext: 'PRODUCT.md',
       designContext: 'DESIGN.md',
+      directionsEvidence: `docs/design/${slug}/evidence/directions.json`,
       surfaceEvidence: [`docs/design/${slug}/evidence/surface.json`]
     },
     surface: {
@@ -612,6 +635,14 @@ function baseContract(slug) {
     states: [{ name: 'default', expectation: 'Ready state', priority: 'P1' }],
     interactions: [{ trigger: 'Save', result: 'Saved state appears', accessibility: 'Button is reachable' }],
     tokens: { source: 'DESIGN.md', rules: ['Use existing tokens'] },
+    implementationConstraints: {
+      sourceOptions: ['A', 'B'],
+      designSystemRules: ['Use DESIGN.md product UI rules'],
+      codeReuseHypothesis: ['Reuse existing prompt editor components'],
+      allowedChangeBoundary: ['Only change prompt editor hierarchy and local state feedback'],
+      implementationRisk: 'medium',
+      selfReviewChecks: ['No visual rule outside DESIGN.md', 'Keep existing route unchanged']
+    },
     responsive: [{ viewport: 'mobile', rule: 'Single column' }],
     motion: [{ name: 'state-feedback', rule: 'Low presence', reducedMotion: 'No animation required' }],
     assets: [{ name: 'icons', source: 'Existing icon set', rule: 'Consistent style' }],
@@ -758,6 +789,12 @@ function validateGateTests() {
       '--field',
       'designThesis=强调输入区。',
       '--field',
+      'designSystemRule=沿用 DESIGN.md 的输入和状态规则。',
+      '--field',
+      'codeReuseHypothesis=复用现有设置页输入组件。',
+      '--field',
+      'allowedChangeBoundary=只改提示词输入区域。',
+      '--field',
       'hierarchy=输入区优先。',
       '--field',
       'density=snug',
@@ -773,6 +810,12 @@ function validateGateTests() {
       'visualSignature=稳定基线和细分隔。',
       '--field',
       'differenceDimension=hierarchy',
+      '--field',
+      'implementationRisk=medium',
+      '--field',
+      'selfReviewCheck=未新增 DESIGN.md 外颜色。',
+      '--field',
+      'selfReviewCheck=未改变导航区域。',
       '--field',
       'keep=Existing navigation',
       '--field',
@@ -851,7 +894,11 @@ function validateGateTests() {
         '--field',
         `answer=${answer}`,
         '--field',
-        `designImplication=${implication}`
+        `designImplication=${implication}`,
+        '--field',
+        'designSystemImplication=沿用 DESIGN.md 的输入、按钮和状态规则。',
+        '--field',
+        'implementationImplication=复用现有组件并把结果纳入自审检查。'
       ]);
       if (writeResult.status !== 0) errors.push(`expected brainstorm append to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
     }
@@ -888,6 +935,12 @@ function validateGateTests() {
         '--field',
         `designThesis=方案 ${optionId} 的主张。`,
         '--field',
+        `designSystemRule=方案 ${optionId} 沿用 DESIGN.md 的产品 UI 规则。`,
+        '--field',
+        `codeReuseHypothesis=方案 ${optionId} 复用现有设置页组件。`,
+        '--field',
+        `allowedChangeBoundary=方案 ${optionId} 只改目标输入区域。`,
+        '--field',
         `hierarchy=方案 ${optionId} 的层级。`,
         '--field',
         'density=snug',
@@ -905,6 +958,12 @@ function validateGateTests() {
         `differenceDimension=${dimensions[0]}`,
         '--field',
         `differenceDimension=${dimensions[1]}`,
+        '--field',
+        'implementationRisk=medium',
+        '--field',
+        `selfReviewCheck=方案 ${optionId} 未新增 DESIGN.md 外视觉规则。`,
+        '--field',
+        `selfReviewCheck=方案 ${optionId} 未改变 keep 区域。`,
         '--field',
         'keep=Existing navigation',
         '--field',
