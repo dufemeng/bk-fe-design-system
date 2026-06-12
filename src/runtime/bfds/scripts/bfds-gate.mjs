@@ -15,6 +15,7 @@ const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
 const TRUSTED_CONTEXT_DIRS = ['.', '.agents/context', 'docs'];
 const INIT_INTERVIEW_FILE = 'evidence/init-interview.json';
 const BRAINSTORM_DIALOGUE_FILE = 'evidence/brainstorm-dialogue.json';
+const IMPLEMENTATION_SELF_REVIEW_FILE = 'evidence/implementation-self-review.json';
 const CHANGE_TYPES_REQUIRING_CURRENT_SURFACE = new Set(['modify', 'remove', 'replace', 'restyle']);
 const IMPLEMENTABLE_STATUS = new Set(['contract-ready', 'implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
 const MARKABLE_STATUS = new Set(['implementing', 'implemented', 'qa-failed', 'qa-passed', 'live-iterating', 'done']);
@@ -348,12 +349,12 @@ function phaseRules(phase) {
     CONTRACT_READY: [
       '设计交付包完整；等待用户发起实现或验收。',
       '实现阶段必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。',
-      '实现后必须按 implementationConstraints.selfReviewChecks 做代码层设计自审。'
+      '实现后必须按 implementationConstraints.selfReviewChecks 做代码层设计自审；标记 implemented 前必须写 evidence/implementation-self-review.json。'
     ],
     IMPLEMENT_READY: [
       '可以按 BFDS 设计契约实现或验收。',
       '不得凭聊天记忆改写设计契约；不得绕过 DESIGN.md 发明新视觉系统。',
-      '实现偏差、自审结果和无法验证项写入 qa-report.md。'
+      '实现偏差、自审结果和无法验证项写入 implementation-self-review.json 或 qa-report.md。'
     ],
     INCONSISTENT: [
       '停止：发现下游产物存在但上游证据缺失或证据无效。',
@@ -389,6 +390,7 @@ function collectArtifacts(dir) {
     brainstormDialogueEvidence: artifact(BRAINSTORM_DIALOGUE_FILE),
     directionsEvidence: artifact('evidence/directions.json'),
     selectionEvidence: artifact('evidence/selection.json'),
+    implementationSelfReview: artifact(IMPLEMENTATION_SELF_REVIEW_FILE),
     gateLog: evidenceDirExists ? toProjectPath(path.join(dir, 'evidence', 'gate-log.ndjson')) : null,
     workbench: artifact('workbench.html'),
     optionA: artifact('option-a.html'),
@@ -725,6 +727,9 @@ if (markArg) {
   if (!['CONTRACT_READY', 'IMPLEMENT_READY'].includes(result.phase)) {
     result.phase = 'INCONSISTENT';
     result.errors.push(`cannot mark ${markArg} before contract is ready`);
+  } else if (markArg === 'implemented' && !fileExists(dir, IMPLEMENTATION_SELF_REVIEW_FILE)) {
+    result.phase = 'INCONSISTENT';
+    result.errors.push(`cannot mark implemented before ${IMPLEMENTATION_SELF_REVIEW_FILE} exists`);
   } else if (['qa-failed', 'qa-passed', 'done'].includes(markArg) && !fileExists(dir, 'qa-report.md')) {
     result.phase = 'INCONSISTENT';
     result.errors.push(`cannot mark ${markArg} before qa-report.md exists`);

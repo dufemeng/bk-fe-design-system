@@ -56,6 +56,7 @@
         "brainstormDialogueEvidence": { "type": ["string", "null"] },
         "directionsEvidence": { "type": ["string", "null"] },
         "selectionEvidence": { "type": ["string", "null"] },
+        "implementationSelfReview": { "type": ["string", "null"] },
         "gateLog": { "type": ["string", "null"] },
         "workbench": { "type": ["string", "null"], "minLength": 1 },
         "optionA": { "type": ["string", "null"], "minLength": 1 },

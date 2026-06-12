@@ -35,6 +35,6 @@
 - 检查是否复用现有组件、tokens、icon set 和数据流，没有重复造组件或引入新视觉系统。
 - 检查 default、loading、error、success、empty、long text、disabled、focus-visible 和 responsive 是否按合同覆盖。
 
-P0/P1/P2 偏差必须修正后再标记实现完成；无法验证的项写入 `qa-report.md`，不能写成通过。
+P0/P1/P2 偏差必须修正后再标记实现完成；无法验证的项写入 `qa-report.md`，不能写成通过。标记实现完成时必须写 `selfReviewNote`，一句话概括 `implementationConstraints.selfReviewChecks` 的逐项结论和剩余风险；runtime 会写入 `evidence/implementation-self-review.json`。
 
-开始实现前用 gate `--mark implementing`，基础实现和代码层设计自审完成后用 `--mark implemented`。
+开始实现前用 gate `--mark implementing`，基础实现和代码层设计自审完成后用 `--mark implemented --field selfReviewNote="..."`。

@@ -1259,6 +1259,28 @@ function validateGateTests() {
     result = runGate(projectRoot, slug);
     if (result.phase !== 'CONTRACT_READY') errors.push(`expected CONTRACT_READY, got ${result.phase}`);
 
+    const implementedWithoutReview = runGateFailure(projectRoot, slug, ['--mark', 'implemented']);
+    if (!implementedWithoutReview.failed || implementedWithoutReview.result.phase !== 'INCONSISTENT') {
+      errors.push(`expected implemented without self-review evidence to be INCONSISTENT, got ${implementedWithoutReview.result.phase}`);
+    }
+
+    const implemented = runBfds(projectRoot, [
+      'mark',
+      slug,
+      '--state',
+      'implemented',
+      '--field',
+      'selfReviewNote=已逐项检查 implementationConstraints.selfReviewChecks：保存主动作、设置面板边界、输入控件小屏状态和可访问状态均通过；无剩余 P0/P1/P2 偏差。'
+    ]);
+    if (implemented.status !== 0) errors.push(`expected mark implemented with selfReviewNote to pass, got ${implemented.status}: ${implemented.stderr || implemented.stdout}`);
+    const selfReviewFile = path.join(evidenceDir, 'implementation-self-review.json');
+    if (!fs.existsSync(selfReviewFile)) errors.push('expected implementation-self-review.json after mark implemented');
+    const implementedStatus = readJson(path.join(designDir, 'status.json'));
+    if (implementedStatus.state !== 'implemented') errors.push(`expected status.state implemented, got ${implementedStatus.state}`);
+    if (!implementedStatus.artifacts?.implementationSelfReview?.endsWith('evidence/implementation-self-review.json')) {
+      errors.push('expected status artifacts to include implementationSelfReview');
+    }
+
     const qaWithoutReport = runGateFailure(projectRoot, slug, ['--mark', 'qa-passed']);
     if (!qaWithoutReport.failed || qaWithoutReport.result.phase !== 'INCONSISTENT') errors.push(`expected qa-passed without report to be INCONSISTENT, got ${qaWithoutReport.result.phase}`);
 

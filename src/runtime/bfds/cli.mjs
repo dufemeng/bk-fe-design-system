@@ -1151,8 +1151,31 @@ function commandMark(rest, global) {
   const state = parsed.options.get('state');
   if (!state) throw new Error('mark requires --state');
   if (state === 'qa-passed') throw new Error('qa-passed must be set through qa --pass');
+  if (state === 'implemented') writeImplementationSelfReview(parsed, global);
   const result = runGate(parsed.target, ['--mark', state], global.root);
   return renderNextCard(result, global.json);
+}
+
+function writeImplementationSelfReview(parsed, global) {
+  const check = runGate(parsed.target, ['--check-only'], global.root);
+  if (!['CONTRACT_READY', 'IMPLEMENT_READY'].includes(check.phase)) {
+    throwInvalid('mark implemented requires a contract-ready or implement-ready design task', parsed.target, global);
+  }
+  const note = fieldOne(parsed, 'selfReviewNote').trim();
+  if (!note || note === '...' || note.includes(PLACEHOLDER)) {
+    throwInvalid('mark implemented requires --field selfReviewNote="..." after checking implementationConstraints.selfReviewChecks', parsed.target, global);
+  }
+  const dir = resolveDesignDir(parsed.target, global.root);
+  const slug = path.basename(dir);
+  const contract = readJson(path.join(dir, 'design-contract.json'), {});
+  const selfReviewChecks = contract.implementationConstraints?.selfReviewChecks ?? [];
+  writeJson(path.join(dir, 'evidence', 'implementation-self-review.json'), {
+    slug,
+    createdAt: new Date().toISOString(),
+    contract: rel(path.join(dir, 'design-contract.json')),
+    selfReviewChecks,
+    selfReviewNote: note
+  });
 }
 
 function commandQa(rest, global) {
@@ -1286,7 +1309,7 @@ function cardForResult(result) {
     card.references = ['contract-pack.md'];
   } else if (phase === 'CONTRACT_READY' || phase === 'IMPLEMENT_READY') {
     card.required = ['等待实现、验收或局部实时微调请求'];
-    card.guidance = ['实现必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。', '实现后按 implementationConstraints.selfReviewChecks 做代码层设计自审，再进入运行态验收或 live 微调。'];
+    card.guidance = ['实现必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。', '实现后按 implementationConstraints.selfReviewChecks 做代码层设计自审；标记 implemented 时必须提交 selfReviewNote，再进入运行态验收或 live 微调。'];
     card.forbidden = ['凭聊天记忆改写设计契约', '绕过 DESIGN.md 发明新视觉系统'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs mark ${result.slug} --state implementing`;
   } else if (phase === 'INCONSISTENT') {

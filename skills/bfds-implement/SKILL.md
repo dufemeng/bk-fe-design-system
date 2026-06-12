@@ -24,11 +24,11 @@ node <bfds-implement-skill-dir>/scripts/bfds.mjs next <slug>
 
 ```bash
 node <bfds-implement-skill-dir>/scripts/bfds.mjs mark <slug> --state implementing
-node <bfds-implement-skill-dir>/scripts/bfds.mjs mark <slug> --state implemented
+node <bfds-implement-skill-dir>/scripts/bfds.mjs mark <slug> --state implemented --field selfReviewNote="..."
 node <bfds-implement-skill-dir>/scripts/bfds.mjs qa <slug> --pass
 ```
 
-`qa-failed` 和 `done` 需要 `qa-report.md` 已存在；`qa-passed` 只能通过 `qa --pass` 进入，并要求 `qa-report.md` 覆盖 `qa-plan.json` 的每个 check ID。
+`implemented` 需要先对 `implementationConstraints.selfReviewChecks` 做代码层设计自审，并用 `selfReviewNote` 写入结论；`qa-failed` 和 `done` 需要 `qa-report.md` 已存在；`qa-passed` 只能通过 `qa --pass` 进入，并要求 `qa-report.md` 覆盖 `qa-plan.json` 的每个 check ID。
 
 ## 阶段入口
 
