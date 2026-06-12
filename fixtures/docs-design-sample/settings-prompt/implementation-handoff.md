@@ -52,7 +52,7 @@
 
 - `DESIGN.md` 是唯一设计规范事实源，不得引入合同外的新颜色、字体、圆角、阴影、动效或组件语气。
 - 设计系统规则：`DESIGN.md` 的 `colors.primary` 仅用于保存主动作；`spacing.sm/md`、`rounded.sm`、Components、Elevation 和 Accessibility 规则约束输入区、预览面板、状态反馈和恢复动作。
-- 代码复用假设：复用 `src/pages/settings/SettingsPromptPanel.tsx`、`src/components/forms/PromptTextarea.tsx`、`src/components/InlineStatus.tsx`、`src/components/forms/PromptValidationMessage.tsx` 和 `src/components/forms/PromptActions.tsx`。
+- 代码复用假设：暂无可验证源码复用证据；样例 fixture 不包含目标项目源码，实现前必须先在目标仓库定位设置面板、输入控件、局部状态反馈、错误说明和操作动作组件。
 - 允许变更边界：只改提示词输入区、模板/预览相对位置、局部保存反馈、错误说明和恢复动作；不改导航、数据流、权限或新增配置项。
 - 实现风险：`medium`
 - 不编数据。有真实来源才写；没有就用明确标注的占位符。
@@ -67,8 +67,8 @@
 自审检查：
 
 - 保存主动作仍是唯一使用 `colors.primary` 的控件，错误/成功状态不硬编码新颜色。
-- diff 不触及 `SettingsPromptPanel.tsx` 的 route、保存数据流和公开组件 API。
-- 小屏折叠后 `PromptTextarea.tsx` 仍是第一优先且无文字溢出。
+- diff 不触及已确认设置面板的 route、保存数据流和公开组件 API。
+- 小屏折叠后输入控件仍是第一优先且无文字溢出。
 - error、success、loading 状态均有可访问文本、focus-visible 和 reduced-motion 兜底。
 
 ## 8. 数据与文案来源

@@ -676,12 +676,18 @@ function validateGateTests() {
   const errors = validateSlimRuntimeLayout();
   const slug = 'settings-prompt';
   const projectRoots = [];
+  const writeSourceGroundingFiles = projectRoot => {
+    writeText(path.join(projectRoot, 'src', 'pages', 'settings', 'SettingsPromptPanel.tsx'), 'export function SettingsPromptPanel() { return null; }\n');
+    writeText(path.join(projectRoot, 'src', 'components', 'forms', 'PromptTextarea.tsx'), 'export function PromptTextarea() { return null; }\n');
+    writeText(path.join(projectRoot, 'src', 'components', 'InlineStatus.tsx'), 'export function InlineStatus() { return null; }\n');
+  };
   const makeProject = (withContext = true) => {
     const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bfds-gate-'));
     projectRoots.push(projectRoot);
     if (withContext) {
       writeText(path.join(projectRoot, 'PRODUCT.md'), validProductMd());
       writeText(path.join(projectRoot, 'DESIGN.md'), validDesignMd());
+      writeSourceGroundingFiles(projectRoot);
       writeJson(path.join(projectRoot, 'docs', 'design', slug, 'evidence', 'init-interview.json'), baseInitInterview(slug));
     }
     return projectRoot;
@@ -874,6 +880,67 @@ function validateGateTests() {
       errors.push('expected invalid direction card to print differenceDimension enum');
     }
 
+    const missingReusePathRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(missingReusePathRoot), 'surface.json'), baseSurface(slug));
+    writeJson(path.join(evidenceDirFor(missingReusePathRoot), 'brainstorm-dialogue.json'), baseBrainstormDialogue(slug));
+    const missingReusePathDirection = runBfds(missingReusePathRoot, [
+      'directions',
+      slug,
+      '--option',
+      'A',
+      '--field',
+      'name=方案 A',
+      '--field',
+      'designThesis=强调输入区。',
+      '--field',
+      'designSystemRule=DESIGN.md: spacing.sm/md、rounded.sm 和 components.button-primary 约束输入与保存动作。',
+      '--field',
+      'codeReuseHypothesis=src/missing/FakePromptPanel.tsx 是复用锚点。',
+      '--field',
+      'allowedChangeBoundary=只改提示词输入区域。',
+      '--field',
+      'hierarchy=输入区优先。',
+      '--field',
+      'density=snug',
+      '--field',
+      'motion=低存在感反馈。',
+      '--field',
+      'stateTreatment=覆盖 default/error/success。',
+      '--field',
+      'layoutStrategy=保留周边布局。',
+      '--field',
+      'interactionModel=保存和错误反馈局部完成。',
+      '--field',
+      'visualSignature=稳定基线和细分隔。',
+      '--field',
+      'differenceDimension=hierarchy',
+      '--field',
+      'differenceDimension=density',
+      '--field',
+      'implementationRisk=medium',
+      '--field',
+      'selfReviewCheck=保存主动作之外不硬编码新的 colors.primary 强调色。',
+      '--field',
+      'selfReviewCheck=未改变导航区域。',
+      '--field',
+      'keep=Existing navigation',
+      '--field',
+      'change=Prompt input layout',
+      '--field',
+      'avoid=Backend scope',
+      '--field',
+      'risks=路径不存在',
+      '--field',
+      'bestFor=高频设置'
+    ]);
+    if (missingReusePathDirection.status === 0) errors.push('expected nonexistent codeReuseHypothesis path to fail before write');
+    if (fs.existsSync(path.join(evidenceDirFor(missingReusePathRoot), 'directions.draft.json'))) {
+      errors.push('invalid codeReuseHypothesis path must not write evidence/directions.draft.json');
+    }
+    if (!missingReusePathDirection.stdout.includes('missing source path')) {
+      errors.push('expected nonexistent codeReuseHypothesis path error to mention missing source path');
+    }
+
     const draftCleanupRoot = makeProject(false);
     let writeResult = runBfds(draftCleanupRoot, [
       'answer',
@@ -915,6 +982,7 @@ function validateGateTests() {
 
     writeText(path.join(draftCleanupRoot, 'PRODUCT.md'), validProductMd());
     writeText(path.join(draftCleanupRoot, 'DESIGN.md'), validDesignMd());
+    writeSourceGroundingFiles(draftCleanupRoot);
     writeJson(path.join(evidenceDirFor(draftCleanupRoot), 'surface.json'), baseSurface(slug));
     for (const [dimension, question, answer, implication] of [
       ['primary-action', '最先看什么？', '先看输入区。', '输入区层级最高。'],

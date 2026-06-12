@@ -14,8 +14,7 @@
         "DESIGN.md: spacing.sm/md 和 rounded.sm 约束输入区、帮助信息和按钮间距。"
       ],
       "codeReuseHypothesis": [
-        "src/pages/settings/SettingsPromptPanel.tsx: 保留 route shell、保存数据流和设置导航。",
-        "src/components/forms/PromptTextarea.tsx + src/components/InlineStatus.tsx: 复用输入、校验和保存反馈。"
+        "暂无可验证源码复用证据：样例 fixture 不包含目标项目源码；实现前需在目标仓库定位设置面板、输入控件和局部状态反馈组件。"
       ],
       "allowedChangeBoundary": "只改输入区层级、帮助信息位置和局部保存反馈，不改设置导航和提交逻辑。",
       "hierarchy": "输入区第一优先，导航和说明降低存在感。",
@@ -29,8 +28,8 @@
       "implementationRisk": "low",
       "selfReviewChecks": [
         "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
-        "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
-        "PromptTextarea.tsx 在 default、loading、error、success 状态不挤压说明文案。"
+        "diff 不触及已确认设置面板的 route、保存数据流和公开组件 API。",
+        "输入控件在 default、loading、error、success 状态不挤压说明文案。"
       ],
       "keep": ["Existing settings navigation", "Existing submit logic"],
       "change": ["Input hierarchy", "Helper placement"],
@@ -48,8 +47,7 @@
         "DESIGN.md: Elevation 章节规定 shadows reserved for overlays；方案 B 的工作台面板使用 tonal separation，不新增阴影层级。"
       ],
       "codeReuseHypothesis": [
-        "src/pages/settings/SettingsPromptPanel.tsx: 复用 route 和组件 API。",
-        "src/components/settings/PromptTemplateRail.tsx + src/components/settings/PromptPreviewPanel.tsx: 组合模板、预览和状态区域。"
+        "暂无可验证源码复用证据：样例 fixture 不包含目标项目源码；实现前需定位设置路由、模板轨道、预览面板和局部状态组件。"
       ],
       "allowedChangeBoundary": "允许调整输入、模板、预览和状态的相对位置，不改路由、数据流或权限范围。",
       "hierarchy": "输入区和状态预览并列，模板作为辅助轨道。",
@@ -62,9 +60,9 @@
       "differenceDimensions": ["interaction-model", "density"],
       "implementationRisk": "medium",
       "selfReviewChecks": [
-        "PromptTemplateRail.tsx 只展示已确认占位模板，不新增模板市场或真实业务数据。",
-        "小屏折叠后 PromptTextarea.tsx 仍是第一优先且无文字溢出。",
-        "PromptPreviewPanel.tsx 使用 DESIGN.md 的 tonal separation 和现有语义状态，不新增阴影层级。"
+        "模板轨道只展示已确认占位模板，不新增模板市场或真实业务数据。",
+        "小屏折叠后输入控件仍是第一优先且无文字溢出。",
+        "预览面板使用 DESIGN.md 的 tonal separation 和现有语义状态，不新增阴影层级。"
       ],
       "keep": ["Existing settings route", "Existing component API"],
       "change": ["Template proximity", "Preview/status placement"],
@@ -82,8 +80,7 @@
         "DESIGN.md: Components 和 Accessibility 规则要求 focus-visible、可读对比度和 reduced motion；恢复动作必须保留这些约束。"
       ],
       "codeReuseHypothesis": [
-        "src/components/forms/PromptValidationMessage.tsx: 复用错误说明和可访问状态文本入口。",
-        "src/components/forms/PromptActions.tsx: 复用保存、重置和恢复动作，只增强状态文案。"
+        "暂无可验证源码复用证据：样例 fixture 不包含目标项目源码；实现前需定位错误说明、可访问状态文本、保存/重置/恢复动作组件。"
       ],
       "allowedChangeBoundary": "允许增强输入区错误说明、恢复动作和保存反馈，不改数据流、导航或新增配置项。",
       "hierarchy": "错误解释和恢复动作靠近输入区，说明内容延后。",
@@ -96,8 +93,8 @@
       "differenceDimensions": ["state-treatment", "motion-role"],
       "implementationRisk": "medium",
       "selfReviewChecks": [
-        "PromptValidationMessage.tsx 的错误态强度不覆盖 PromptTextarea.tsx 的主编辑层级。",
-        "PromptActions.tsx 的恢复动作不新增后端、权限或未确认配置能力。",
+        "错误态强度不覆盖输入控件的主编辑层级。",
+        "恢复动作不新增后端、权限或未确认配置能力。",
         "error、success、loading 状态均有可访问文本、focus-visible 和 reduced-motion 兜底。"
       ],
       "keep": ["Existing data flow", "Existing tokens"],

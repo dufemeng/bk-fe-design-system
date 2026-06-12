@@ -134,7 +134,7 @@
     {
       "id": "self-review-2",
       "category": "contract",
-      "description": "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
+      "description": "diff 不触及已确认设置面板的 route、保存数据流和公开组件 API。",
       "blockingLevel": "P2"
     },
     {

@@ -114,9 +114,7 @@
       "DESIGN.md: Colors / Components / Accessibility 规则要求语义状态、focus-visible、可读对比度和 reduced motion。"
     ],
     "codeReuseHypothesis": [
-      "src/pages/settings/SettingsPromptPanel.tsx: 保留 route shell、保存数据流、设置导航和组件 API。",
-      "src/components/forms/PromptTextarea.tsx + src/components/InlineStatus.tsx: 复用输入、校验和保存反馈。",
-      "src/components/forms/PromptValidationMessage.tsx + src/components/forms/PromptActions.tsx: 复用错误说明、可访问状态文本和恢复动作。"
+      "暂无可验证源码复用证据：样例 fixture 不包含目标项目源码；实现前需在目标仓库定位设置面板、输入控件、局部状态反馈、错误说明和操作动作组件。"
     ],
     "allowedChangeBoundary": [
       "只改输入区层级、帮助信息位置和局部保存反馈，不改设置导航和提交逻辑。",
@@ -126,8 +124,8 @@
     "implementationRisk": "medium",
     "selfReviewChecks": [
       "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
-      "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
-      "小屏折叠后 PromptTextarea.tsx 仍是第一优先且无文字溢出。",
+      "diff 不触及已确认设置面板的 route、保存数据流和公开组件 API。",
+      "小屏折叠后输入控件仍是第一优先且无文字溢出。",
       "error、success、loading 状态均有可访问文本、focus-visible 和 reduced-motion 兜底。"
     ]
   },

@@ -333,6 +333,41 @@ function assertSchemaFile(schemaName, value, label, target, global) {
 function assertDirectionOption(option, target, global) {
   const schema = readSchema('directions-evidence.schema.json');
   assertSchemaValue(schema.$defs.option, option, `directions.options.${option.optionId}`, target, global, schema);
+  assertCodeReuseGrounding(option, target, global);
+}
+
+function assertCodeReuseGrounding(option, target, global) {
+  const noSourceEvidence = /(暂无|无)可验证源码复用证据|no verifiable source reuse evidence|no source reuse evidence/i;
+  const missing = [];
+  const ungrounded = [];
+  for (const hypothesis of option.codeReuseHypothesis ?? []) {
+    const paths = extractRepoRelativePaths(hypothesis);
+    if (paths.length === 0) {
+      if (!noSourceEvidence.test(hypothesis)) ungrounded.push(hypothesis);
+      continue;
+    }
+    for (const sourcePath of paths) {
+      if (!fs.existsSync(path.resolve(cwd, sourcePath))) missing.push(sourcePath);
+    }
+  }
+  if (missing.length > 0 || ungrounded.length > 0) {
+    const details = [];
+    if (missing.length > 0) details.push(`missing source path(s): ${Array.from(new Set(missing)).join(', ')}`);
+    if (ungrounded.length > 0) details.push('entries without source path must explicitly say "暂无可验证源码复用证据"');
+    throwInvalid(`directions.options.${option.optionId}.codeReuseHypothesis must cite existing repo-relative source paths or declare no verifiable source reuse evidence; ${details.join('; ')}`, target, global);
+  }
+}
+
+function extractRepoRelativePaths(text) {
+  const matches = [];
+  const pattern = /(?:^|[\s`"'(（])((?:\.\/)?(?:src|app|pages|components|packages|lib|ui|frontend|client|web|features|views|modules|styles|shared|apps)\/[A-Za-z0-9_./@-]+)/g;
+  for (const match of text.matchAll(pattern)) {
+    const candidate = match[1]
+      .replace(/^[.]\//, '')
+      .replace(/[.,;:，。；：、)）\]]+$/g, '');
+    if (candidate && !candidate.includes('..')) matches.push(candidate);
+  }
+  return Array.from(new Set(matches));
 }
 
 function nextCardForTarget(target, global) {
@@ -1216,10 +1251,10 @@ function cardForResult(result) {
   } else if (phase === 'NEEDS_DIRECTIONS') {
     card.required = missing.includes('evidence/brainstorm-dialogue.json')
       ? ['目标界面证据、DESIGN.md 具体规则和源码/组件 grounding', '至少 2 轮用户参与的判断校准', '每轮 1 个关键设计不确定性', '至少两个专业维度', '每轮设计系统影响和实现影响', '2-3 个方向取舍确认', '未消除关键不确定性时继续追问']
-      : ['A/B/C 三个可实现方向规格', 'DESIGN.md 具体 token/组件规则/小节引用', '带源码路径或组件名的代码复用假设', '允许变更边界', '实现风险', '自审检查点', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
+      : ['A/B/C 三个可实现方向规格', 'DESIGN.md 具体 token/组件规则/小节引用', '带真实存在源码路径的代码复用假设，或明确“暂无可验证源码复用证据”', '允许变更边界', '实现风险', '自审检查点', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
     card.guidance = [
       '先读 design-brainstorm.md；每轮只校准一个最高价值设计不确定性。',
-      '先定位目标界面证据、DESIGN.md token/组件规则/小节、可复用源码文件或组件名；找不到源码证据要明说，不写空泛复用假设。',
+      '先定位目标界面证据、DESIGN.md token/组件规则/小节、可复用源码文件；codeReuseHypothesis 里的路径必须真实存在，找不到源码证据要明说“暂无可验证源码复用证据”。',
       '提问前说明它会影响哪个设计表达维度、哪些 DESIGN.md 规则、哪些现有组件/源码复用和后续自审。',
       '若内容范围、关键状态、DESIGN.md 偏离边界、代码复用边界或方向分叉仍不清楚，继续追问。',
       '不重复询问原型里已经可见的布局事实；上下文明确时用“我判断为 X，确认吗？”。',
