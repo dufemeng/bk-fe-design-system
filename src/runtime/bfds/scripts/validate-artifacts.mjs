@@ -504,18 +504,18 @@ function baseBrainstormDialogue(slug) {
     mode: 'socratic',
     turns: [
       {
-        dimension: 'primary-action',
-        question: '这个目标界面最先要被用户看见的信息是什么？',
-        answerQuote: '提示词输入本身必须最先被看见，其他说明都要弱一点。',
-        designImplication: '层级以输入区为主，说明和导航降低视觉存在感。',
+        dimension: 'content-data-range',
+        question: '真实内容范围和最长文案是什么？',
+        answerQuote: '提示词可能很长，说明文案要弱一点，不能压过编辑区域。',
+        designImplication: '输入区承载长文本编辑，说明和导航降低视觉存在感。',
         designSystemImplication: '映射到 DESIGN.md 的 spacing.sm/md、rounded.sm 和 components.button-primary。',
         implementationImplication: '复用 src/pages/settings/SettingsPromptPanel.tsx 和 src/components/forms/PromptTextarea.tsx，只调整输入区层级和帮助信息位置。'
       },
       {
-        dimension: 'state-edge-cases',
-        question: '错误、保存和加载状态需要做到什么精度？',
-        answerQuote: '错误和保存要清楚，加载不要占满屏幕，保持局部反馈。',
-        designImplication: '方案必须覆盖 default/error/success/loading 的局部状态表达。',
+        dimension: 'constraints-accessibility',
+        question: '小屏、键盘和可访问状态有什么硬约束？',
+        answerQuote: '错误和保存要清楚，加载不要占满屏幕，键盘和可访问文本要保留。',
+        designImplication: '方案必须覆盖 default/error/success/loading、focus-visible 和小屏布局。',
         designSystemImplication: '状态表达映射到 DESIGN.md 的语义色、焦点和状态文案规则。',
         implementationImplication: '实现后自审覆盖 default/error/success/loading，确认反馈不锁住整页。'
       }
@@ -985,8 +985,8 @@ function validateGateTests() {
     writeSourceGroundingFiles(draftCleanupRoot);
     writeJson(path.join(evidenceDirFor(draftCleanupRoot), 'surface.json'), baseSurface(slug));
     for (const [dimension, question, answer, implication] of [
-      ['primary-action', '最先看什么？', '先看输入区。', '输入区层级最高。'],
-      ['state-edge-cases', '状态要多强？', '错误和保存要清楚。', '覆盖局部状态。']
+      ['content-data-range', '真实内容最长多长？', '提示词可能很长。', '输入区要承载长文本。'],
+      ['local-preservation', '哪些周边必须保留？', '设置导航和保存数据流都要保留。', '只改输入区局部。']
     ]) {
       writeResult = runBfds(draftCleanupRoot, [
         'answer',

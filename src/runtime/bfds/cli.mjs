@@ -1322,7 +1322,7 @@ function cardForResult(result) {
     ];
     card.forbidden = ['生成评审工作台', '临时扩大产品范围', '代写、润色或补全用户回答原话'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
-      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
+      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="<choose-highest-uncertainty-dimension>" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
       : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field designSystemRule="..." --field codeReuseHypothesis="..." --field allowedChangeBoundary="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field implementationRisk="medium" --field selfReviewCheck="..." --field selfReviewCheck="..." --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
     card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {
