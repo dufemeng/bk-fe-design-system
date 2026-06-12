@@ -348,7 +348,8 @@ function phaseRules(phase) {
     ],
     CONTRACT_READY: [
       '设计交付包完整；等待用户发起实现或验收。',
-      '实现阶段必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。',
+      '设计会话到这里停止交付；实现必须切换到 bfds-implement。',
+      'bfds-implement 必须先读取 implementation-protocol.md、DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。',
       '实现后必须按 implementationConstraints.selfReviewChecks 做代码层设计自审；标记 implemented 前必须写 evidence/implementation-self-review.json。'
     ],
     IMPLEMENT_READY: [

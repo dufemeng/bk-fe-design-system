@@ -1344,9 +1344,9 @@ function cardForResult(result) {
     card.references = ['contract-pack.md'];
   } else if (phase === 'CONTRACT_READY' || phase === 'IMPLEMENT_READY') {
     card.required = ['等待实现、验收或局部实时微调请求'];
-    card.guidance = ['实现必须读取 DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json。', '实现后按 implementationConstraints.selfReviewChecks 做代码层设计自审；标记 implemented 时必须提交 selfReviewNote，再进入运行态验收或 live 微调。'];
-    card.forbidden = ['凭聊天记忆改写设计契约', '绕过 DESIGN.md 发明新视觉系统'];
-    card.nextCommand = `node <skill-dir>/scripts/bfds.mjs mark ${result.slug} --state implementing`;
+    card.guidance = ['设计 skill 到这里停止交付；实现必须切换到 bfds-implement。', 'bfds-implement 必须先读 implementation-protocol.md、DESIGN.md、design-contract.json、implementation-handoff.md、qa-plan.json，再标记 implementing。', '实现后按 implementationConstraints.selfReviewChecks 做代码层设计自审；标记 implemented 时必须提交 selfReviewNote，再进入运行态验收或 live 微调。'];
+    card.forbidden = ['设计会话直接开始改代码', '凭聊天记忆改写设计契约', '绕过 DESIGN.md 发明新视觉系统'];
+    card.nextCommand = `node <bfds-implement-skill-dir>/scripts/bfds.mjs mark ${result.slug} --state implementing`;
   } else if (phase === 'INCONSISTENT') {
     card.required = ['修正或删除错误产物', '重新运行 next 确认阶段回到可继续状态'];
     card.guidance = ['优先处理“错误”和“缺失”中点名的文件；越序写入时删除已写的下游 evidence/artifacts 后重走当前阶段。', '不要补猜缺失证据。'];
