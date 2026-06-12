@@ -24,32 +24,77 @@ runId: `fixture-not-run`
 - success
 - long-text
 
-## 已运行检查
+## Check QA-001
 
-- Impeccable 反模式扫描: not run for fixture
-- 设计契约一致性: not run for fixture
-- 字体与排版: not run for fixture
-- 间距与布局节奏: not run for fixture
-- 颜色与 token 映射: not run for fixture
-- 图像与资产质量: not run for fixture
-- 文案与内容纪律: not run for fixture
-- 图标: not run for fixture
-- 状态与交互: not run for fixture
-- 可访问性: not run for fixture
-- 响应式: not run for fixture
-- AI 捷径痕迹: not run for fixture
-- QA-001: not run for fixture
-- QA-002: not run for fixture
-- QA-003: not run for fixture
-- QA-004: not run for fixture
-- QA-005: not run for fixture
-- QA-006: not run for fixture
-- QA-007: not run for fixture
-- design-system-1: not run for fixture
-- self-review-1: not run for fixture
-- self-review-2: not run for fixture
-- self-review-3: not run for fixture
-- self-review-4: not run for fixture
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-002
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-003
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-004
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-005
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-006
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check QA-007
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check design-system-1
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check self-review-1
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check self-review-2
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check self-review-3
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
+
+## Check self-review-4
+
+Result: not-run
+Evidence: 未运行：fixture 只验证设计产物结构，不包含可运行实现或截图证据。
+Notes: 真实执行时替换为运行截图、命令输出或未运行原因。
 
 ## 按严重程度记录问题
 

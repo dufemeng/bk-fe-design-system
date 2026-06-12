@@ -1187,12 +1187,14 @@ function commandQa(rest, global) {
     writeText(reportFile, `# BFDS QA Report\n\n设计任务标识：\`${slug}\`\n\n`);
   } else if (parsed.options.has('check')) {
     const checkId = parsed.options.get('check');
+    const resultValue = requiredEvidenceField(parsed, 'result', parsed.target, global);
+    const evidenceValue = requiredEvidenceField(parsed, 'evidence', parsed.target, global);
     const text = [
       readText(reportFile, `# BFDS QA Report\n\n设计任务标识：\`${slug}\`\n\n`),
       `## Check ${checkId}`,
       '',
-      `Result: ${fieldRequired(parsed, 'result')}`,
-      `Evidence: ${fieldRequired(parsed, 'evidence')}`,
+      `Result: ${resultValue}`,
+      `Evidence: ${evidenceValue}`,
       `Notes: ${fieldOne(parsed, 'notes', '')}`,
       ''
     ].join('\n');
@@ -1208,11 +1210,44 @@ function commandQa(rest, global) {
   return renderNextCard(result, global.json);
 }
 
+function requiredEvidenceField(parsed, key, target, global) {
+  const value = fieldRequired(parsed, key).trim();
+  if (!value || value === '...' || value.includes(PLACEHOLDER)) {
+    throwInvalid(`qa --check requires non-placeholder ${key}`, target, global);
+  }
+  return value;
+}
+
 function assertQaReportCoversPlan(dir) {
   const report = readText(path.join(dir, 'qa-report.md'));
   const plan = readJson(path.join(dir, 'qa-plan.json'));
-  const missing = (plan.checks ?? []).map(check => check.id).filter(id => !report.includes(id));
-  if (missing.length > 0) throw new Error(`qa-report.md does not cover qa-plan checks: ${missing.join(', ')}`);
+  const missing = [];
+  for (const check of plan.checks ?? []) {
+    const section = qaReportCheckSection(report, check.id);
+    if (!section) {
+      missing.push(`${check.id} (missing section)`);
+      continue;
+    }
+    if (!/^Result:\s*\S.*$/m.test(section)) missing.push(`${check.id} (missing Result)`);
+    if (!/^Evidence:\s*\S.*$/m.test(section)) missing.push(`${check.id} (missing Evidence)`);
+  }
+  if (missing.length > 0) {
+    throw new Error(`qa-report.md must include one "## Check <id>" section with non-empty Result and Evidence for every qa-plan check: ${missing.join(', ')}`);
+  }
+}
+
+function qaReportCheckSection(report, id) {
+  const heading = new RegExp(`^##\\s+Check\\s+${escapeRegExp(id)}\\s*$`, 'm');
+  const match = heading.exec(report);
+  if (!match) return null;
+  const start = match.index;
+  const rest = report.slice(start);
+  const next = rest.slice(match[0].length).search(/^##\s+Check\s+/m);
+  return next === -1 ? rest : rest.slice(0, match[0].length + next);
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function commandLive(rest, global) {

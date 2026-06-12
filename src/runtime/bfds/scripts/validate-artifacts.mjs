@@ -1284,9 +1284,32 @@ function validateGateTests() {
     const qaWithoutReport = runGateFailure(projectRoot, slug, ['--mark', 'qa-passed']);
     if (!qaWithoutReport.failed || qaWithoutReport.result.phase !== 'INCONSISTENT') errors.push(`expected qa-passed without report to be INCONSISTENT, got ${qaWithoutReport.result.phase}`);
 
-    writeText(path.join(designDir, 'qa-report.md'), '# QA Report\n');
-    result = runGateWithArgs(projectRoot, slug, ['--mark', 'qa-passed']);
-    if (result.status?.state !== 'qa-passed') errors.push(`expected status.state qa-passed, got ${result.status?.state}`);
+    writeText(path.join(designDir, 'qa-report.md'), '# QA Report\n\nQA-001\n');
+    const shallowQaPass = runBfds(projectRoot, ['qa', slug, '--pass']);
+    if (shallowQaPass.status === 0) errors.push('expected qa --pass with shallow check-id-only report to fail');
+    if (!`${shallowQaPass.stderr}\n${shallowQaPass.stdout}`.includes('non-empty Result and Evidence')) {
+      errors.push('expected shallow qa --pass failure to require Result and Evidence');
+    }
+
+    writeResult = runBfds(projectRoot, ['qa', slug, '--start']);
+    if (writeResult.status !== 0) errors.push(`expected qa --start to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    writeResult = runBfds(projectRoot, [
+      'qa',
+      slug,
+      '--check',
+      'QA-001',
+      '--field',
+      'result=not-run',
+      '--field',
+      'evidence=未运行：gate fixture 不包含可运行实现；这是结构化证据占位。',
+      '--field',
+      'notes=真实执行时替换为截图路径、命令输出、diff 范围或未运行原因。'
+    ]);
+    if (writeResult.status !== 0) errors.push(`expected qa --check to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    writeResult = runBfds(projectRoot, ['qa', slug, '--pass']);
+    if (writeResult.status !== 0) errors.push(`expected qa --pass with structured evidence to pass, got ${writeResult.status}: ${writeResult.stderr || writeResult.stdout}`);
+    const qaPassedStatus = readJson(path.join(designDir, 'status.json'));
+    if (qaPassedStatus.state !== 'qa-passed') errors.push(`expected status.state qa-passed, got ${qaPassedStatus.state}`);
 
     const nextCard = runBfds(projectRoot, ['next', slug]);
     if (nextCard.status !== 0) errors.push(`expected bfds next to exit 0, got ${nextCard.status}`);
