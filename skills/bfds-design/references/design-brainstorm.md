@@ -21,6 +21,8 @@
 - `DESIGN.md` 中哪些 token、组件规则、状态语义或禁用项。
 - 哪些现有组件/源码复用、允许变更边界或后续自审检查。
 
+开始提问前先定位 grounding 证据：目标界面证据、`DESIGN.md` 具体 token/组件规则/小节、可复用源码文件或组件名。找不到源码证据时要明说“暂无可验证源码复用证据”，不能把“复用现有组件”写成无来源假设。
+
 不要问 API、数据模型、权限、商业模式、后端架构，也不要在本阶段重新确认目标界面。不要把原型里已经能看见的布局事实再问一遍，例如“按钮放左边还是右边”这类肉眼可见问题。
 
 上下文清楚时也不能静默跳过脑暴。第一轮可以压缩为判断式确认，例如：“我判断本次应采用低干扰状态提示，沿用 `DESIGN.md` 的 Tag/Badge 规则并只改列表行内标签区域。确认吗？”但仍必须完成第二轮判断校准或方向分叉确认，并写入 `brainstorm-dialogue.json`。
@@ -50,7 +52,7 @@
 
 示例问法：
 
-- “这个目标区域看起来是高频设置流，我判断用户更需要快速复核而不是探索。确认吗？这会让实现优先复用现有表单密度，而不是新增展示型卡片。”
+- “这个目标区域看起来是高频设置流，我判断用户更需要快速复核而不是探索。确认吗？这会让实现优先保留 `SettingsPromptPanel.tsx` 的表单节奏，并按 `DESIGN.md` 的 `spacing.sm/md` 调整输入区，而不是新增展示型卡片。”
 - “真实内容范围我还缺一项：典型情况下有多少条、最长文案多长、空状态是否常见？这会决定密度、溢出处理和自审时必须覆盖的长文案检查。”
 - “从 `DESIGN.md` 看默认应保持 restrained 产品 UI；这次是否允许单个状态使用更强提示色，还是必须完全沿用现有 token？”
 - “请给 1-2 个具名参考或反参考，并说明具体借鉴点，例如状态反馈、表单密度、列表节奏，而不是只说现代或清爽。”
@@ -77,9 +79,15 @@
   "optionId": "A",
   "name": "Quiet Precision",
   "designThesis": "用更安静的层级和明确状态减少输入焦虑。",
-  "sourceConstraints": ["PRODUCT.md", "DESIGN.md"],
-  "designSystemRules": ["沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件和状态 token。"],
-  "codeReuseHypothesis": ["优先复用现有设置页输入组件、按钮组件和状态提示组件。"],
+  "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: colors.primary / spacing.sm / components.button-primary"],
+  "designSystemRules": [
+    "DESIGN.md: colors.primary 只用于 durable actions 和 selected states；本方案只把保存主动作映射到该 token。",
+    "DESIGN.md: spacing.sm/md 与 rounded.sm 控制输入区、帮助信息和按钮间距；不新增展示型卡片阴影。"
+  ],
+  "codeReuseHypothesis": [
+    "src/pages/settings/SettingsPromptPanel.tsx: 保留 route shell、保存数据流和组件 API。",
+    "src/components/forms/PromptTextarea.tsx + src/components/InlineStatus.tsx: 复用输入、校验和保存反馈。"
+  ],
   "allowedChangeBoundary": "只改提示词输入区、帮助信息和局部状态反馈，不改页面导航和保存数据流。",
   "hierarchy": "主输入区第一优先。",
   "density": "snug",
@@ -91,9 +99,9 @@
   "differenceDimensions": ["hierarchy", "density"],
   "implementationRisk": "low",
   "selfReviewChecks": [
-    "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
-    "未改变页面导航、保存逻辑和组件 API。",
-    "长文本、错误、加载和成功状态不破坏输入区层级。"
+    "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
+    "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
+    "PromptTextarea.tsx 在 long text、error、loading、success 下不破坏输入区层级。"
   ],
   "keep": ["页面导航"],
   "change": ["输入区层级"],
@@ -116,5 +124,6 @@
 - 每轮问答都写清 `designSystemImplication` 和 `implementationImplication`。
 - 没有新增未确认产品能力。
 - A/B/C 都包含 keep/change/avoid。
-- A/B/C 都包含 `DESIGN.md` 规则引用、代码复用假设、允许变更边界、实现风险和自审检查点。
+- A/B/C 都包含具体 `DESIGN.md` token/组件规则/小节引用、带源码路径或组件名的代码复用假设、允许变更边界、实现风险和自审检查点。
 - 至少一个方案覆盖关键状态或关键交互。
+- 没有“沿用 DESIGN.md 规则”“复用现有组件”“现代、清爽、高级”这类无法落地的空泛句。

@@ -9,16 +9,16 @@
       "question": "这个设置页提示词输入组件最先要被用户看见的信息是什么？",
       "answerQuote": "输入框和保存状态最重要，说明文字可以弱一点，不要压过编辑。",
       "designImplication": "层级要把输入区和保存反馈放到第一优先，说明内容降低视觉权重。",
-      "designSystemImplication": "沿用 DESIGN.md 的产品 UI 密度、输入控件和状态 token，不引入新的展示型视觉系统。",
-      "implementationImplication": "优先复用现有设置页输入组件和保存反馈组件，只调整输入区层级和帮助信息位置。"
+      "designSystemImplication": "映射到 DESIGN.md 的 spacing.sm/md、rounded.sm 和 components.button-primary；保存主动作可用 colors.primary，其余说明保持低强调。",
+      "implementationImplication": "优先复用 src/pages/settings/SettingsPromptPanel.tsx、src/components/forms/PromptTextarea.tsx 和 src/components/InlineStatus.tsx，只调整输入区层级和帮助信息位置。"
     },
     {
       "dimension": "state-edge-cases",
       "question": "错误、保存、加载这些状态需要做到什么精度？",
       "answerQuote": "错误要很清楚，保存成功也要明确，但 loading 不要把整个页面锁住。",
       "designImplication": "方案必须覆盖局部 loading、错误原因、保存成功和恢复动作。",
-      "designSystemImplication": "错误、成功和加载状态必须映射到 DESIGN.md 已有语义色、文案节奏和焦点样式。",
-      "implementationImplication": "实现后自审必须覆盖 default、loading、error、success 四个状态，并确认不会锁住整页交互。"
+      "designSystemImplication": "错误、成功和加载状态必须映射到 DESIGN.md 的 Colors、Components 和 Accessibility 规则，不硬编码新状态色。",
+      "implementationImplication": "实现后自审覆盖 PromptValidationMessage.tsx 和 PromptActions.tsx 的 default、loading、error、success 状态，并确认不会锁住整页交互。"
     }
   ],
   "approachesPresented": [

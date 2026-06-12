@@ -8,9 +8,15 @@
       "optionId": "A",
       "name": "Quiet Navigation",
       "designThesis": "保留安静导航和低干扰节奏，让提示词输入成为稳定主区域。",
-      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
-      "designSystemRules": ["沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件、按钮和语义状态 token。"],
-      "codeReuseHypothesis": ["复用现有设置页表单布局、输入组件、按钮组件和保存反馈逻辑。"],
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: colors.primary / spacing.sm / components.button-primary"],
+      "designSystemRules": [
+        "DESIGN.md: colors.primary 只用于 durable actions 和 selected states；方案 A 只把保存主动作映射到该 token。",
+        "DESIGN.md: spacing.sm/md 和 rounded.sm 约束输入区、帮助信息和按钮间距。"
+      ],
+      "codeReuseHypothesis": [
+        "src/pages/settings/SettingsPromptPanel.tsx: 保留 route shell、保存数据流和设置导航。",
+        "src/components/forms/PromptTextarea.tsx + src/components/InlineStatus.tsx: 复用输入、校验和保存反馈。"
+      ],
       "allowedChangeBoundary": "只改输入区层级、帮助信息位置和局部保存反馈，不改设置导航和提交逻辑。",
       "hierarchy": "输入区第一优先，导航和说明降低存在感。",
       "density": "snug",
@@ -22,9 +28,9 @@
       "differenceDimensions": ["hierarchy", "local-preservation"],
       "implementationRisk": "low",
       "selfReviewChecks": [
-        "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
-        "未改变设置导航、提交逻辑和组件 API。",
-        "输入区 default、loading、error、success 状态不挤压说明文案。"
+        "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
+        "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
+        "PromptTextarea.tsx 在 default、loading、error、success 状态不挤压说明文案。"
       ],
       "keep": ["Existing settings navigation", "Existing submit logic"],
       "change": ["Input hierarchy", "Helper placement"],
@@ -36,9 +42,15 @@
       "optionId": "B",
       "name": "Operational Workbench",
       "designThesis": "把输入、模板、预览和操作状态组织成更高效的工作台。",
-      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
-      "designSystemRules": ["沿用 DESIGN.md 的面板、分隔、按钮和状态表达规则，保持产品 UI 的紧凑节奏。"],
-      "codeReuseHypothesis": ["复用现有设置页 route 和组件 API，新增预览/状态区域时优先组合现有面板和状态组件。"],
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: Components / Elevation / spacing.sm/md"],
+      "designSystemRules": [
+        "DESIGN.md: Components 章节的 cards、inputs、buttons 使用稳定间距和 modest radius；方案 B 的预览面板只组合这些现有规则。",
+        "DESIGN.md: Elevation 章节规定 shadows reserved for overlays；方案 B 的工作台面板使用 tonal separation，不新增阴影层级。"
+      ],
+      "codeReuseHypothesis": [
+        "src/pages/settings/SettingsPromptPanel.tsx: 复用 route 和组件 API。",
+        "src/components/settings/PromptTemplateRail.tsx + src/components/settings/PromptPreviewPanel.tsx: 组合模板、预览和状态区域。"
+      ],
       "allowedChangeBoundary": "允许调整输入、模板、预览和状态的相对位置，不改路由、数据流或权限范围。",
       "hierarchy": "输入区和状态预览并列，模板作为辅助轨道。",
       "density": "compact",
@@ -50,9 +62,9 @@
       "differenceDimensions": ["interaction-model", "density"],
       "implementationRisk": "medium",
       "selfReviewChecks": [
-        "模板和预览不引入未确认产品能力或假数据。",
-        "小屏折叠后输入区仍是第一优先且无文字溢出。",
-        "状态预览使用 DESIGN.md 允许的分隔、面板和语义色。"
+        "PromptTemplateRail.tsx 只展示已确认占位模板，不新增模板市场或真实业务数据。",
+        "小屏折叠后 PromptTextarea.tsx 仍是第一优先且无文字溢出。",
+        "PromptPreviewPanel.tsx 使用 DESIGN.md 的 tonal separation 和现有语义状态，不新增阴影层级。"
       ],
       "keep": ["Existing settings route", "Existing component API"],
       "change": ["Template proximity", "Preview/status placement"],
@@ -64,9 +76,15 @@
       "optionId": "C",
       "name": "Explicit Recovery",
       "designThesis": "突出错误恢复和保存反馈，降低配置失败时的操作成本。",
-      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: 保留现有 token"],
-      "designSystemRules": ["错误、成功、加载和恢复动作全部使用 DESIGN.md 的语义状态、焦点和可访问性规则。"],
-      "codeReuseHypothesis": ["复用现有错误提示、按钮和表单验证入口，只增强恢复路径和状态文案。"],
+      "sourceConstraints": ["PRODUCT.md: 高频设置场景", "DESIGN.md: Colors / Components / Accessibility"],
+      "designSystemRules": [
+        "DESIGN.md: Colors 章节要求语义状态映射到现有 token；方案 C 不硬编码 error/success/loading 色值。",
+        "DESIGN.md: Components 和 Accessibility 规则要求 focus-visible、可读对比度和 reduced motion；恢复动作必须保留这些约束。"
+      ],
+      "codeReuseHypothesis": [
+        "src/components/forms/PromptValidationMessage.tsx: 复用错误说明和可访问状态文本入口。",
+        "src/components/forms/PromptActions.tsx: 复用保存、重置和恢复动作，只增强状态文案。"
+      ],
       "allowedChangeBoundary": "允许增强输入区错误说明、恢复动作和保存反馈，不改数据流、导航或新增配置项。",
       "hierarchy": "错误解释和恢复动作靠近输入区，说明内容延后。",
       "density": "comfortable",
@@ -78,9 +96,9 @@
       "differenceDimensions": ["state-treatment", "motion-role"],
       "implementationRisk": "medium",
       "selfReviewChecks": [
-        "错误态强度不覆盖正常编辑状态的主层级。",
-        "恢复动作不新增后端、权限或未确认配置能力。",
-        "错误、成功、加载状态均有可访问文本和焦点反馈。"
+        "PromptValidationMessage.tsx 的错误态强度不覆盖 PromptTextarea.tsx 的主编辑层级。",
+        "PromptActions.tsx 的恢复动作不新增后端、权限或未确认配置能力。",
+        "error、success、loading 状态均有可访问文本、focus-visible 和 reduced-motion 兜底。"
       ],
       "keep": ["Existing data flow", "Existing tokens"],
       "change": ["Error visibility", "Recovery guidance"],

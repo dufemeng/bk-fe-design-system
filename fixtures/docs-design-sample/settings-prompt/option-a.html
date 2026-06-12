@@ -98,8 +98,8 @@
           <section>
             <h2>DESIGN.md 规则</h2>
             <ul>
-              <li>沿用 restrained 产品 UI、现有输入控件、按钮和语义状态 token。</li>
-              <li>低存在感 focus 和保存反馈，不新增视觉系统。</li>
+              <li>DESIGN.md: colors.primary 只用于保存主动作，说明和辅助状态保持低强调。</li>
+              <li>DESIGN.md: spacing.sm/md、rounded.sm 约束输入、帮助信息和按钮间距。</li>
             </ul>
           </section>
           <section>
@@ -112,8 +112,8 @@
           <section>
             <h2>自审检查</h2>
             <ul>
-              <li>未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。</li>
-              <li>default、loading、error、success 状态不挤压说明文案。</li>
+              <li>保存主动作仍是唯一使用 colors.primary 的控件。</li>
+              <li>PromptTextarea.tsx 的 default、loading、error、success 状态不挤压说明文案。</li>
             </ul>
           </section>
         </section>

@@ -122,19 +122,19 @@
     {
       "id": "design-system-1",
       "category": "contract",
-      "description": "实现沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件、按钮、面板、分隔、语义状态 token、焦点和可访问性规则。",
+      "description": "实现遵守 DESIGN.md 的 colors.primary、spacing.sm/md、rounded.sm、Components、Elevation 和 Accessibility 规则，不硬编码新状态色或新增阴影层级。",
       "blockingLevel": "P1"
     },
     {
       "id": "self-review-1",
       "category": "contract",
-      "description": "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
+      "description": "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
       "blockingLevel": "P2"
     },
     {
       "id": "self-review-2",
       "category": "contract",
-      "description": "未改变设置导航、提交逻辑和组件 API。",
+      "description": "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
       "blockingLevel": "P2"
     },
     {

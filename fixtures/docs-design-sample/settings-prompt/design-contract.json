@@ -109,14 +109,14 @@
   "implementationConstraints": {
     "sourceOptions": ["A", "B", "C"],
     "designSystemRules": [
-      "沿用 DESIGN.md 的 restrained 产品 UI、现有输入控件、按钮和语义状态 token。",
-      "沿用 DESIGN.md 的面板、分隔、按钮和状态表达规则，保持产品 UI 的紧凑节奏。",
-      "错误、成功、加载和恢复动作全部使用 DESIGN.md 的语义状态、焦点和可访问性规则。"
+      "DESIGN.md: colors.primary 只用于 durable actions 和 selected states；保存主动作是唯一映射到该 token 的控件。",
+      "DESIGN.md: Components 章节的 cards、inputs、buttons 使用 stable spacing 和 modest radius；预览面板只组合现有规则。",
+      "DESIGN.md: Colors / Components / Accessibility 规则要求语义状态、focus-visible、可读对比度和 reduced motion。"
     ],
     "codeReuseHypothesis": [
-      "复用现有设置页表单布局、输入组件、按钮组件和保存反馈逻辑。",
-      "复用现有设置页 route 和组件 API，新增预览/状态区域时优先组合现有面板和状态组件。",
-      "复用现有错误提示、按钮和表单验证入口，只增强恢复路径和状态文案。"
+      "src/pages/settings/SettingsPromptPanel.tsx: 保留 route shell、保存数据流、设置导航和组件 API。",
+      "src/components/forms/PromptTextarea.tsx + src/components/InlineStatus.tsx: 复用输入、校验和保存反馈。",
+      "src/components/forms/PromptValidationMessage.tsx + src/components/forms/PromptActions.tsx: 复用错误说明、可访问状态文本和恢复动作。"
     ],
     "allowedChangeBoundary": [
       "只改输入区层级、帮助信息位置和局部保存反馈，不改设置导航和提交逻辑。",
@@ -125,10 +125,10 @@
     ],
     "implementationRisk": "medium",
     "selfReviewChecks": [
-      "未新增 DESIGN.md 之外的颜色、圆角、阴影或字体。",
-      "未改变设置导航、提交逻辑和组件 API。",
-      "小屏折叠后输入区仍是第一优先且无文字溢出。",
-      "错误、成功、加载状态均有可访问文本和焦点反馈。"
+      "保存主动作仍是唯一使用 colors.primary 的控件，错误/成功状态不硬编码新颜色。",
+      "diff 不触及 SettingsPromptPanel.tsx 的 route、保存数据流和公开组件 API。",
+      "小屏折叠后 PromptTextarea.tsx 仍是第一优先且无文字溢出。",
+      "error、success、loading 状态均有可访问文本、focus-visible 和 reduced-motion 兜底。"
     ]
   },
   "responsive": [
