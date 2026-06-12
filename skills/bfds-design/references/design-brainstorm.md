@@ -13,11 +13,19 @@
 
 本阶段复用 Impeccable `shape` 的设计发现纪律，但流程留在 BFDS：只做任务级设计方向探索，不写代码，不跳过 `brainstorm-dialogue.json` 和 `directions.json`。
 
-每轮成组问 2-3 个高价值设计问题，并等待用户回答。优先用已有 `PRODUCT.md`、`DESIGN.md`、PRD 和 `surface.json` 做假设，再让用户确认或覆盖；答案明显时用“我判断为 X，确认吗？”而不是把所有菜单摊给用户。
+至少完成 2 轮用户参与的判断校准，不固定上限。每轮只校准一个关键设计不确定性，并等待用户回答或确认。优先用已有 `PRODUCT.md`、`DESIGN.md`、PRD、`surface.json` 和目标源码/视觉证据做假设，再让用户确认或覆盖；答案明显时用“我判断为 X，确认吗？”而不是把所有菜单摊给用户。
+
+每轮提问前先说明为什么问这一项，以及它会影响：
+
+- 信息层级、密度、状态、动效、交互节奏或局部结构中的哪一项。
+- `DESIGN.md` 中哪些 token、组件规则、状态语义或禁用项。
+- 哪些现有组件/源码复用、允许变更边界或后续自审检查。
 
 不要问 API、数据模型、权限、商业模式、后端架构，也不要在本阶段重新确认目标界面。不要把原型里已经能看见的布局事实再问一遍，例如“按钮放左边还是右边”这类肉眼可见问题。
 
-上下文清楚时也不能静默跳过脑暴。可以压缩为判断式确认，例如：“我判断本次应采用低干扰状态提示，沿用 `DESIGN.md` 的 Tag/Badge 规则并只改列表行内标签区域。确认吗？”确认后仍要写入 `brainstorm-dialogue.json`。
+上下文清楚时也不能静默跳过脑暴。第一轮可以压缩为判断式确认，例如：“我判断本次应采用低干扰状态提示，沿用 `DESIGN.md` 的 Tag/Badge 规则并只改列表行内标签区域。确认吗？”但仍必须完成第二轮判断校准或方向分叉确认，并写入 `brainstorm-dialogue.json`。
+
+如果内容范围、关键状态、`DESIGN.md` 偏离边界、代码复用边界或 A/B/C 方向分叉仍不清楚，必须继续追问；不能为了满足 2 轮下限直接进入 `directions.json`。
 
 ## 专业维度
 
@@ -47,7 +55,7 @@
 - “从 `DESIGN.md` 看默认应保持 restrained 产品 UI；这次是否允许单个状态使用更强提示色，还是必须完全沿用现有 token？”
 - “请给 1-2 个具名参考或反参考，并说明具体借鉴点，例如状态反馈、表单密度、列表节奏，而不是只说现代或清爽。”
 
-至少完成两轮有效设计问答后，提出 2-3 个方向及取舍；Claude Code 用 `AskUserQuestion` 让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
+至少完成两轮有效判断校准后，提出 2-3 个方向及取舍，并说明每个方向会在哪些设计维度上分叉；可以给出推荐和理由，但不能替用户选择。Claude Code 用 `AskUserQuestion` 让用户确认、合并或调整。用户确认后，写 `brainstorm-dialogue.json`。
 
 如果用户明确拒绝继续追问，仍要做一轮压缩设计判断确认：记录用户拒绝追问的原话、当前判断的 `designImplication`、`designSystemImplication` 和 `implementationImplication`。随后 `brainstorm-dialogue.json` 使用 `mode: "user-skipped"`，记录 `skipReasonQuote`，并先提出 2-3 个方向取舍取得用户确认。
 

@@ -485,6 +485,9 @@ function writeBrainstorm(dir, parsed, global) {
     if (answers.length !== count || implications.length !== count || designSystemImplications.length !== count || implementationImplications.length !== count || dimensions.length !== count) {
       throwInvalid(`brainstorm append-round requires paired fields; got ${dimensions.length} dimension, ${questions.length} question, ${answers.length} answer, ${implications.length} designImplication, ${designSystemImplications.length} designSystemImplication, ${implementationImplications.length} implementationImplication`, parsed.target, global);
     }
+    if (count !== 1) {
+      throwInvalid('brainstorm append-round records one user-participation judgment round at a time; ask one key design uncertainty, wait for the user, then append the next round', parsed.target, global);
+    }
     for (let index = 0; index < count; index += 1) {
       if (!BRAINSTORM_DIMENSION_VALUES.includes(dimensions[index])) {
         throwInvalid(`Invalid brainstorm dimension: ${dimensions[index]}. Expected one of ${formatEnum(BRAINSTORM_DIMENSION_VALUES)}`, parsed.target, global);
@@ -1212,11 +1215,12 @@ function cardForResult(result) {
     card.references = ['surface-change-framing.md'];
   } else if (phase === 'NEEDS_DIRECTIONS') {
     card.required = missing.includes('evidence/brainstorm-dialogue.json')
-      ? ['专业设计问答', '至少两个专业维度', '每轮设计系统影响和实现影响', '至少两轮有效问答或用户明确跳过记录', '2-3 个方向取舍确认']
+      ? ['至少 2 轮用户参与的判断校准', '每轮 1 个关键设计不确定性', '至少两个专业维度', '每轮设计系统影响和实现影响', '2-3 个方向取舍确认', '未消除关键不确定性时继续追问']
       : ['A/B/C 三个可实现方向规格', 'DESIGN.md 规则引用', '代码复用假设', '允许变更边界', '实现风险', '自审检查点', '至少两个实质差异维度', 'keep/change/avoid', '关键状态或交互覆盖'];
     card.guidance = [
-      '先读 design-brainstorm.md；每轮成组询问 2-3 个高价值设计问题。',
-      '问题必须覆盖专业设计判断，并说明答案如何影响 DESIGN.md 规则、现有组件复用和后续自审。',
+      '先读 design-brainstorm.md；每轮只校准一个最高价值设计不确定性。',
+      '提问前说明它会影响哪个设计表达维度、哪些 DESIGN.md 规则、哪些现有组件/源码复用和后续自审。',
+      '若内容范围、关键状态、DESIGN.md 偏离边界、代码复用边界或方向分叉仍不清楚，继续追问。',
       '不重复询问原型里已经可见的布局事实；上下文明确时用“我判断为 X，确认吗？”。',
       `brainstorm dimension enum: ${formatEnum(BRAINSTORM_DIMENSION_VALUES)}`,
       '不脑暴产品/API/数据库/权限。',
@@ -1224,7 +1228,7 @@ function cardForResult(result) {
     ];
     card.forbidden = ['生成评审工作台', '临时扩大产品范围'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
-      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..." --field dimension="state-edge-cases" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
+      ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
       : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field designSystemRule="..." --field codeReuseHypothesis="..." --field allowedChangeBoundary="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field implementationRisk="medium" --field selfReviewCheck="..." --field selfReviewCheck="..." --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
     card.references = ['design-brainstorm.md'];
   } else if (phase === 'NEEDS_WORKBENCH') {

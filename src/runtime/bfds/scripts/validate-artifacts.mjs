@@ -776,6 +776,44 @@ function validateGateTests() {
       errors.push('zero-round brainstorm must not write evidence/brainstorm-dialogue.json');
     }
 
+    const groupedBrainstormRoot = makeProject();
+    writeJson(path.join(evidenceDirFor(groupedBrainstormRoot), 'surface.json'), baseSurface(slug));
+    const groupedBrainstorm = runBfds(groupedBrainstormRoot, [
+      'answer',
+      slug,
+      '--stage',
+      'brainstorm',
+      '--append-round',
+      '--field',
+      'dimension=primary-action',
+      '--field',
+      'question=最先看什么？',
+      '--field',
+      'answer=先看输入区。',
+      '--field',
+      'designImplication=输入区层级最高。',
+      '--field',
+      'designSystemImplication=沿用 DESIGN.md 的输入规则。',
+      '--field',
+      'implementationImplication=复用现有输入组件。',
+      '--field',
+      'dimension=state-edge-cases',
+      '--field',
+      'question=状态要多强？',
+      '--field',
+      'answer=错误和保存要清楚。',
+      '--field',
+      'designImplication=覆盖局部状态。',
+      '--field',
+      'designSystemImplication=沿用 DESIGN.md 的状态规则。',
+      '--field',
+      'implementationImplication=把状态纳入自审。'
+    ]);
+    if (groupedBrainstorm.status === 0) errors.push('expected grouped brainstorm append to fail before write');
+    if (fs.existsSync(path.join(evidenceDirFor(groupedBrainstormRoot), 'brainstorm-dialogue.draft.json'))) {
+      errors.push('grouped brainstorm append must not write evidence/brainstorm-dialogue.draft.json');
+    }
+
     const preflightDirectionsRoot = makeProject();
     writeJson(path.join(evidenceDirFor(preflightDirectionsRoot), 'surface.json'), baseSurface(slug));
     writeJson(path.join(evidenceDirFor(preflightDirectionsRoot), 'brainstorm-dialogue.json'), baseBrainstormDialogue(slug));
