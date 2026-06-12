@@ -9,7 +9,7 @@ BFDS 是一个面向前端代码生成的设计规范执行层（Design System E
 - 设计方向探索：先做苏格拉底式设计问答和方向取舍确认，再产出 A/B/C 可实现方向规格；不脑暴产品能力。
 - 轻量方案评审工作台：生成 `docs/design/<slug>/workbench.html`，用 Kami 风格外壳承载方案卡、局部示意和实现约束摘要。
 - 设计交付包：用户选择方向后，生成 `design-contract.json`、`implementation-handoff.md`、`qa-plan.json`、`status.json`。
-- 规范驱动实现与自审：由 `bfds-implement` 消费设计交付包和 `DESIGN.md`，实现代码并进行代码层设计自审。
+- 规范驱动实现与自审：由 `bfds-implement` 消费设计交付包和 `DESIGN.md`，实现代码并进行代码层设计自审；标记 `implemented` 时必须写入 `evidence/implementation-self-review.json`。
 - 运行态检查与局部实时微调：复用 Impeccable `detect`、`critique`、`live` 做还原检查和局部调整。
 
 设计稿是中间校准物，用来让用户理解后续生码方向；最终高保真以真实代码、运行页面、自审和局部微调闭环为准。MVP 采用静态 HTML 工作台，用户在 Codex / Claude Code 对话里确认选择；事件记录 server 放到后续版本。
@@ -21,7 +21,7 @@ BFDS 是一个面向前端代码生成的设计规范执行层（Design System E
 BFDS MVP 由两个 skill 组成：
 
 - `skills/bfds-design/SKILL.md`：当用户明确要求从 PRD、原型、截图、Figma、URL、现有页面或组件开始前端设计时使用。它负责需求意图识别、设计规范建模、目标界面与变更边界确认、设计方向探索、轻量方案评审工作台和设计交付包。
-- `skills/bfds-implement/SKILL.md`：当用户要求实现已经确认的 BFDS 设计方案时使用。它从 `docs/design/<slug>/status.json` 恢复，读取 `DESIGN.md`、`design-contract.json`、`implementation-handoff.md`、`qa-plan.json`，按设计规范和实现约束生码、自审并运行验收。
+- `skills/bfds-implement/SKILL.md`：当用户要求实现已经确认的 BFDS 设计方案时使用。它从 `docs/design/<slug>/status.json` 恢复，读取 `DESIGN.md`、`design-contract.json`、`implementation-handoff.md`、`qa-plan.json`，按设计规范和实现约束生码、自审并运行验收。`mark --state implemented` 必须带 `--field selfReviewNote="..."`。
 
 不触发 BFDS 的请求包括：API 实现、数据库 migration、后端权限、普通 bug 修复、纯代码重构、算法实现，以及没有 BFDS 设计交付包的“凭记忆实现”。
 
@@ -122,6 +122,7 @@ docs/design/<slug>/
     brainstorm-dialogue.json
     directions.json
     selection.json
+    implementation-self-review.json
     gate-log.ndjson
   workbench.html
   workbench.css
@@ -133,6 +134,12 @@ docs/design/<slug>/
   qa-plan.json
   status.json
 ```
+
+关键约束：
+
+- `directions.json.options[].codeReuseHypothesis` 中出现源码路径时，路径必须是当前目标仓库真实存在的 repo-relative path；找不到源码证据时写“暂无可验证源码复用证据”，不要编造路径或组件名。
+- `implementation-self-review.json` 由 `bfds.mjs mark <slug> --state implemented --field selfReviewNote="..."` 写入，用于记录实现完成前对 `implementationConstraints.selfReviewChecks` 的代码层设计自审结论。
+- `qa-report.md` 必须为 `qa-plan.json.checks[].id` 的每个 check 提供独立 `## Check <id>` 区块，并包含非空 `Result:` 和 `Evidence:`；未运行写 `Result: not-run` 和未运行原因，不能只粘贴 check ID。
 
 MVP runtime、模板和 schema 位于：
 
