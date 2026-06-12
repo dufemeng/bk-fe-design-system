@@ -43,6 +43,7 @@ const pressureFiles = [
   'tests/pressure/bfds-design-context-trap.md',
   'tests/pressure/bfds-design-init-request-quarantine.md',
   'tests/pressure/bfds-design-skip-question-not-brainstorm.md',
+  'tests/pressure/bfds-design-partial-answer-quote-drift.md',
   'tests/pressure/bfds-design-workbench-gate.md',
   'tests/pressure/bfds-design-contract-gate.md',
   'tests/pressure/bfds-implement-detect-target-gate.md',

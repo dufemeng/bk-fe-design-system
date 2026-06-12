@@ -1199,7 +1199,7 @@ function cardForResult(result) {
   if (phase === 'CONTEXT_BLOCKED') {
     card.required = ['项目级 PRODUCT.md / DESIGN.md', 'init 多轮用户问答', '用户确认原话'];
     card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', 'PRODUCT.md / DESIGN.md 由父会话分段写；不要默认交给静默 subagent。', '预计超过 60 秒时，先告诉用户正在生成哪个文件。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
-    card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文'];
+    card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文', '代写、润色或补全用户回答原话'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..." --field question="..." --field answerQuote="..."`;
     card.references = ['impeccable-integration.md'];
   } else if (phase === 'NEEDS_SURFACE') {
@@ -1210,7 +1210,7 @@ function cardForResult(result) {
       `currentSource enum: ${formatEnum(CURRENT_SOURCE_VALUES)}`,
       `changeType enum: ${formatEnum(CHANGE_TYPE_VALUES)}`
     ];
-    card.forbidden = ['生成三方案', '生成评审工作台', '生成设计交付包'];
+    card.forbidden = ['生成三方案', '生成评审工作台', '生成设计交付包', '代写、润色或补全用户确认原话'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage surface --field surface="..." --field currentSource="user-description" --field changeType="modify" --field keep="..." --field change="..." --field avoid="..." --field confirmationQuote="..."`;
     card.references = ['surface-change-framing.md'];
   } else if (phase === 'NEEDS_DIRECTIONS') {
@@ -1227,7 +1227,7 @@ function cardForResult(result) {
       '不脑暴产品/API/数据库/权限。',
       `differenceDimension enum: ${formatEnum(DIFFERENCE_DIMENSION_VALUES)}`
     ];
-    card.forbidden = ['生成评审工作台', '临时扩大产品范围'];
+    card.forbidden = ['生成评审工作台', '临时扩大产品范围', '代写、润色或补全用户回答原话'];
     card.nextCommand = missing.includes('evidence/brainstorm-dialogue.json')
       ? `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage brainstorm --append-round --field dimension="primary-action" --field question="..." --field answer="..." --field designImplication="..." --field designSystemImplication="..." --field implementationImplication="..."`
       : `node <skill-dir>/scripts/bfds.mjs directions ${result.slug} --option A --field name="..." --field designThesis="..." --field designSystemRule="..." --field codeReuseHypothesis="..." --field allowedChangeBoundary="..." --field hierarchy="..." --field density="..." --field motion="..." --field stateTreatment="..." --field layoutStrategy="..." --field interactionModel="..." --field visualSignature="..." --field differenceDimension="hierarchy" --field differenceDimension="density" --field implementationRisk="medium" --field selfReviewCheck="..." --field selfReviewCheck="..." --field keep="..." --field change="..." --field avoid="..." --field risks="..." --field bestFor="..."`;
@@ -1241,12 +1241,12 @@ function cardForResult(result) {
   } else if (phase === 'NEEDS_SELECTION') {
     card.required = ['用户明确选择 A/B/C 或合并方案', '用户选择原话'];
     card.guidance = ['必须用问答 UI 让用户确认；推荐不算选择。'];
-    card.forbidden = ['由 agent 代替用户选择', '生成设计交付包'];
+    card.forbidden = ['由 agent 代替用户选择', '生成设计交付包', '润色、摘要改写或补全用户选择原话'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs select ${result.slug} --field selectionQuote="..." --field selectedOption="B" --field confirmationQuote="..."`;
   } else if (phase === 'NEEDS_CONTRACT') {
     card.required = ['contract 判断字段', '实现约束汇总', 'contract 回显确认', 'design-contract.json', 'implementation-handoff.md', 'qa-plan.json'];
     card.guidance = ['runtime 从 directions.json 汇总 DESIGN.md 规则、代码复用假设、允许变更边界、实现风险和自审检查。', '大模型只提交 screens/states/interactions/acceptanceRules 等判断字段，不让用户手写结构化 JSON。', '生成前确认用户选择原话和选中方案摘要。'];
-    card.forbidden = ['凭聊天记忆补字段', '缺用户选择时生成交付包'];
+    card.forbidden = ['凭聊天记忆补字段', '缺用户选择时生成交付包', '代写或润色用户回显确认原话'];
     card.nextCommand = `node <skill-dir>/scripts/bfds.mjs pack ${result.slug} --add screen --field id="..." --field description="..." --field composition="..." --field hierarchy="..."`;
     card.references = ['contract-pack.md'];
   } else if (phase === 'CONTRACT_READY' || phase === 'IMPLEMENT_READY') {
