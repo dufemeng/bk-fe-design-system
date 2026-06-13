@@ -4,7 +4,9 @@ BFDS 只在上下文缺失或局部微调时复用 Impeccable，不把 Impeccabl
 
 ## 上下文缺失
 
-next-card 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续目标界面确认、设计方向、评审工作台或设计交付包。
+`PRODUCT.md` / `DESIGN.md` 是项目级（仓库级）事实源，不是需求级产物。项目里已存在且通过 BFDS 形状校验时，next-card 会静默跳过设计上下文梳理直接进入目标界面确认：不重复访谈、不要求需求级 `init-interview.json`、也不重写这两个文件。
+
+只有上下文缺失或不符合 BFDS 形状时，next-card 才输出 `CONTEXT_BLOCKED`。此时只补项目级上下文，不要继续目标界面确认、设计方向、评审工作台或设计交付包。
 
 ## 分车道
 
@@ -42,7 +44,7 @@ next-card 输出 `CONTEXT_BLOCKED` 时，只补项目级上下文。不要继续
 - Codex / agents：`.agents/skills/impeccable/`
 - Claude Code：`.claude/skills/impeccable/`
 
-如果宿主 bundle 不存在，但可信 `PRODUCT.md` / `DESIGN.md` 已存在，仍必须让用户确认并写 `init-interview.json` 后才能继续 BFDS；否则停止并要求安装或提供可信上下文。
+可信 `PRODUCT.md` / `DESIGN.md` 已存在并通过校验时，直接复用、跳过 init，不重复访谈也不写 `init-interview.json`。只有上下文缺失或不合法才进入 init：此时即使宿主 bundle 不存在，也要先建立可信上下文（用户确认后写 `init-interview.json` 并由父会话分段写 `PRODUCT.md` / `DESIGN.md`）；否则停止并要求安装或提供可信上下文。
 
 ## Claude Code hook
 

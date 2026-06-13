@@ -3,8 +3,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const cwd = process.cwd();
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const DESIGN_ROOT = path.join(cwd, 'docs', 'design');
 const PROTECTED_CONTEXT_NAMES = new Set(['PRODUCT.md', 'Product.md', 'product.md', 'DESIGN.md', 'Design.md', 'design.md']);
 const DESIGN_ARCHITECTURE_HEADINGS = [
@@ -62,7 +64,9 @@ function findGateScript() {
   const candidates = [
     path.join(cwd, '.claude', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs'),
     path.join(cwd, '.agents', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs'),
-    path.join(process.env.HOME ?? '', '.codex', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs')
+    path.join(process.env.HOME ?? '', '.codex', 'skills', 'bfds-design', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs'),
+    // 仓库内开发/测试布局：hook 位于 scripts/，gate 源码在 src/runtime/bfds/scripts/。
+    path.join(scriptDir, '..', 'src', 'runtime', 'bfds', 'scripts', 'bfds-gate.mjs')
   ];
   return candidates.find(candidate => candidate && fs.existsSync(candidate)) ?? null;
 }
@@ -98,7 +102,18 @@ function newestInitInterview() {
   return files.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] ?? null;
 }
 
+function projectContextReady() {
+  // 探针 slug：gate 的 resolveContext 是项目级、与 slug 无关，--check-only 不写盘。
+  const probe = runGate('__bfds-context-probe__');
+  return Boolean(probe && probe.context && probe.context.ready);
+}
+
 function assertContextWriteAllowed(file, content) {
+  // PRODUCT.md / DESIGN.md 是项目级设计规范，只在 init（上下文缺失或不合法）时由父会话写入。
+  // 项目上下文已就绪且文件已存在时拒绝重写，防止跟随每个需求又重新生成这两个文件。
+  if (fs.existsSync(file) && projectContextReady()) {
+    deny(`${projectPath(file)} 已存在且项目级上下文已就绪：PRODUCT.md / DESIGN.md 是项目级设计规范，只在 init 缺上下文时建立，不随需求重写。如需更新项目级规范请单独处理，不要在 BFDS 需求流程里重写。`);
+  }
   if (!newestInitInterview()) {
     deny(`writing ${projectPath(file)} requires docs/design/<slug>/evidence/init-interview.json with user-confirmed Impeccable init answers first`);
   }

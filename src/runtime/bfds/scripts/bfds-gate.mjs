@@ -526,7 +526,10 @@ function evaluate(dir) {
   const contextErrors = [];
   if (!context.productPath) contextMissing.push('trusted PRODUCT.md');
   if (!context.designPath) contextMissing.push('trusted DESIGN.md');
-  if (!initInterviewResult.exists) contextMissing.push(INIT_INTERVIEW_FILE);
+  // PRODUCT.md / DESIGN.md 是项目级事实源。项目上下文已就绪（两文件都存在且通过 BFDS 形状校验）时，
+  // 不再要求需求级 init-interview.json，静默跳过设计上下文梳理，直接进入目标界面确认；
+  // 也不再让 next-card 指示重写这两个文件。只有上下文缺失或不合法时才需要 init 访谈证据。
+  if (!context.ready && !initInterviewResult.exists) contextMissing.push(INIT_INTERVIEW_FILE);
   if (context.problems.length > 0) contextErrors.push(...context.problems);
   if (initInterviewResult.exists && !initInterviewResult.ok) contextErrors.push(...initInterviewResult.errors);
   if (initInterviewResult.ok) {

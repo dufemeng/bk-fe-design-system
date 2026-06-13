@@ -19,7 +19,6 @@ function schemaPath(file) {
 }
 
 const schemaFiles = {
-  'evidence/init-interview.json': schemaPath('init-interview.schema.json'),
   'evidence/surface.json': schemaPath('surface-evidence.schema.json'),
   'evidence/brainstorm-dialogue.json': schemaPath('brainstorm-dialogue.schema.json'),
   'evidence/directions.json': schemaPath('directions-evidence.schema.json'),
@@ -27,6 +26,12 @@ const schemaFiles = {
   'design-contract.json': schemaPath('design-contract.schema.json'),
   'qa-plan.json': schemaPath('qa-plan.schema.json'),
   'status.json': schemaPath('status.schema.json')
+};
+
+// init-interview.json 只在 init 建立项目级上下文时产生；项目已有合法 PRODUCT.md / DESIGN.md
+// 时设计任务会静默跳过 init，因此整包校验把它当可选证据：存在才校验 schema。
+const optionalSchemaFiles = {
+  'evidence/init-interview.json': schemaPath('init-interview.schema.json')
 };
 
 const forwardFiles = [
@@ -86,6 +91,16 @@ function validateArtifactDir(dir) {
     schema.$root = schema;
     const data = readJson(path.join(dir, artifactFile));
     validateSchema(schema, data, artifactFile, errors);
+  }
+
+  for (const [artifactFile, schemaFile] of Object.entries(optionalSchemaFiles)) {
+    const fullPath = path.join(dir, artifactFile);
+    if (!fs.existsSync(fullPath)) continue;
+    assertFile(schemaFile, errors);
+    if (!fs.existsSync(schemaFile)) continue;
+    const schema = readJson(schemaFile);
+    schema.$root = schema;
+    validateSchema(schema, readJson(fullPath), artifactFile, errors);
   }
 
   const directions = readJson(path.join(dir, 'evidence', 'directions.json'));
@@ -1103,11 +1118,21 @@ function validateGateTests() {
     }
     assertGateLogIncludes(noContextRoot, slug, 'CONTEXT_BLOCKED', errors, 'context blocked');
 
-    const noInterviewRoot = makeProject(false);
-    writeText(path.join(noInterviewRoot, 'PRODUCT.md'), validProductMd());
-    writeText(path.join(noInterviewRoot, 'DESIGN.md'), validDesignMd());
-    const noInterview = runGateFailure(noInterviewRoot, slug);
-    if (!noInterview.failed || noInterview.result.phase !== 'CONTEXT_BLOCKED') errors.push(`expected missing init interview to be CONTEXT_BLOCKED, got ${noInterview.result.phase}`);
+    // 项目级 PRODUCT.md / DESIGN.md 已存在且通过校验时，静默跳过设计上下文梳理，直接进入目标界面确认；
+    // 不要求需求级 init-interview.json，也不重写这两个文件。
+    const skipInitRoot = makeProject(false);
+    writeText(path.join(skipInitRoot, 'PRODUCT.md'), validProductMd());
+    writeText(path.join(skipInitRoot, 'DESIGN.md'), validDesignMd());
+    const skipInit = runGate(skipInitRoot, slug);
+    if (skipInit.phase !== 'NEEDS_SURFACE') errors.push(`expected valid project context without init-interview to skip init and reach NEEDS_SURFACE, got ${skipInit.phase}`);
+    if (fs.existsSync(path.join(evidenceDirFor(skipInitRoot), 'init-interview.json'))) {
+      errors.push('skipping init must not write a requirement-level init-interview.json');
+    }
+    const regenGuard = runHook(skipInitRoot, {
+      tool_name: 'Write',
+      tool_input: { file_path: 'DESIGN.md', content: validDesignMd() }
+    });
+    if (regenGuard.status === 0) errors.push('expected hook to block regenerating existing DESIGN.md when project context is ready');
 
     const architectureRoot = makeProject(false);
     writeText(path.join(architectureRoot, 'PRODUCT.md'), validProductMd());
