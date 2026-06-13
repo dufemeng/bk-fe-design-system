@@ -4,9 +4,7 @@ BFDS 只在上下文缺失或局部微调时复用 Impeccable，不把 Impeccabl
 
 ## 上下文缺失
 
-`PRODUCT.md` / `DESIGN.md` 是项目级（仓库级）事实源，不是需求级产物。项目里已存在且通过 BFDS 形状校验时，next-card 会静默跳过设计上下文梳理直接进入目标界面确认：不重复访谈、不要求需求级 `init-interview.json`、也不重写这两个文件。
-
-只有上下文缺失或不符合 BFDS 形状时，next-card 才输出 `CONTEXT_BLOCKED`。此时只补项目级上下文，不要继续目标界面确认、设计方向、评审工作台或设计交付包。
+`PRODUCT.md` / `DESIGN.md` 是项目级事实源：已存在且通过校验时 next-card 静默跳过、不重复访谈也不重写；缺失或不合法时才输出 `CONTEXT_BLOCKED`，此时只补项目级上下文，不要继续目标界面确认、设计方向、评审工作台或设计交付包。
 
 ## 分车道
 

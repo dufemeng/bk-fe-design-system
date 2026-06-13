@@ -1290,11 +1290,22 @@ function cardForResult(result) {
     errors: result.errors ?? []
   };
   if (phase === 'CONTEXT_BLOCKED') {
-    card.required = ['项目级 PRODUCT.md / DESIGN.md', 'init 多轮用户问答', '用户确认原话'];
-    card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', 'PRODUCT.md / DESIGN.md 由父会话分段写；不要默认交给静默 subagent。', '预计超过 60 秒时，先告诉用户正在生成哪个文件。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
-    card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文', '代写、润色或补全用户回答原话'];
-    card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..." --field question="..." --field answerQuote="..."`;
-    card.references = ['impeccable-integration.md'];
+    const initInterviewMissing = missing.includes('evidence/init-interview.json');
+    const contextFilesPresent = Boolean(result.context && result.context.productPath && result.context.designPath);
+    if (contextFilesPresent && !initInterviewMissing) {
+      // 项目级文件已存在、仅形状不达标：就地修复报错的那一个文件，不重走访谈、不重写已合法文件。
+      card.required = ['就地修正“错误”里点名的项目级文件形状（PRODUCT.md 或 DESIGN.md）'];
+      card.guidance = ['只修报错的那一个文件，保留另一个已合法文件；不重走完整 init 访谈，也不重写已合法文件。', '预计超过 60 秒时，先告诉用户正在修正哪个文件。', ...(result.contextTask ?? [])];
+      card.forbidden = ['重写已合法的 PRODUCT.md 或 DESIGN.md', '重走完整 init 访谈', '进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文'];
+      card.nextCommand = `node <skill-dir>/scripts/bfds.mjs next ${result.slug}`;
+      card.references = ['impeccable-integration.md'];
+    } else {
+      card.required = ['项目级 PRODUCT.md / DESIGN.md', 'init 多轮用户问答', '用户确认原话'];
+      card.guidance = ['只补项目级上下文；先扫描可推断信息，再每轮成组询问 2-3 个项目级问题。', '把推断作为选项或假设呈现给用户确认，不缩减 Impeccable init 的问题覆盖面。', 'PRODUCT.md / DESIGN.md 由父会话分段写；不要默认交给静默 subagent。', '预计超过 60 秒时，先告诉用户正在生成哪个文件。', '选择/确认类优先使用问答 UI。', ...(result.contextTask ?? [])];
+      card.forbidden = ['进入目标界面确认', '生成三方案', '把当前任务需求写成项目级上下文', '代写、润色或补全用户回答原话'];
+      card.nextCommand = `node <skill-dir>/scripts/bfds.mjs answer ${result.slug} --stage init --append-round --field question="..." --field answerQuote="..." --field question="..." --field answerQuote="..."`;
+      card.references = ['impeccable-integration.md'];
+    }
   } else if (phase === 'NEEDS_SURFACE') {
     card.required = ['目标界面', '现状来源', '改动类型', '必须保留', '允许改变', '必须避免', '用户确认原话'];
     card.guidance = [

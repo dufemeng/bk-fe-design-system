@@ -448,18 +448,11 @@ function writePendingRequest(dir, slug, request) {
 }
 
 function contextBlockedTask(missing, errors) {
-  if (missing.includes(INIT_INTERVIEW_FILE)) {
-    return [
-      'Claude Code 用 AskUserQuestion 单选 register: product / brand；不要问 register 名称、品牌 ID 或产品 ID。',
-      '先扫描可推断信息，再每轮成组询问 2-3 个项目级上下文问题：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
-      '把扫描推断作为选项或假设让用户确认，不缩减 Impeccable init 的问题覆盖面。',
-      `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
-      '用户确认后，由父会话分段写 PRODUCT.md / DESIGN.md；不要默认交给静默 subagent。'
-    ];
-  }
+  // 优先就地修复已存在但形状不达标的项目级文件，避免逼用户重走完整访谈或重写已合法的另一个文件。
   if (errors.some(error => error.includes('DESIGN.md'))) {
     return [
       '修正 DESIGN.md：必须是 Stitch 视觉系统文档，包含 token frontmatter 和 Overview/Colors/Typography/Elevation/Components/Do\'s and Don\'ts。',
+      '只就地修正 DESIGN.md，不重走完整 init 访谈，也不重写已合法的 PRODUCT.md。',
       '不要写技术栈、项目结构、目录结构、包管理或前端架构文档。',
       '写完后运行 bfds.mjs next。'
     ];
@@ -468,7 +461,17 @@ function contextBlockedTask(missing, errors) {
     return [
       '修正 PRODUCT.md：必须包含 ## Register，值只能是 brand 或 product。',
       '补齐用户、产品目的、品牌人格、反参考、设计原则、可访问性等项目级战略上下文。',
+      '只就地修正 PRODUCT.md，不重走完整 init 访谈，也不重写已合法的 DESIGN.md。',
       '写完后运行 bfds.mjs next。'
+    ];
+  }
+  if (missing.includes(INIT_INTERVIEW_FILE)) {
+    return [
+      'Claude Code 用 AskUserQuestion 单选 register: product / brand；不要问 register 名称、品牌 ID 或产品 ID。',
+      '先扫描可推断信息，再每轮成组询问 2-3 个项目级上下文问题：用户与目的、品牌人格/反参考、可访问性、视觉系统来源。',
+      '把扫描推断作为选项或假设让用户确认，不缩减 Impeccable init 的问题覆盖面。',
+      `把用户回答和确认原话写入 ${INIT_INTERVIEW_FILE}，不要写 PRODUCT.md / DESIGN.md。`,
+      '用户确认后，由父会话分段写 PRODUCT.md / DESIGN.md；不要默认交给静默 subagent。'
     ];
   }
   return [
@@ -526,10 +529,11 @@ function evaluate(dir) {
   const contextErrors = [];
   if (!context.productPath) contextMissing.push('trusted PRODUCT.md');
   if (!context.designPath) contextMissing.push('trusted DESIGN.md');
-  // PRODUCT.md / DESIGN.md 是项目级事实源。项目上下文已就绪（两文件都存在且通过 BFDS 形状校验）时，
-  // 不再要求需求级 init-interview.json，静默跳过设计上下文梳理，直接进入目标界面确认；
-  // 也不再让 next-card 指示重写这两个文件。只有上下文缺失或不合法时才需要 init 访谈证据。
-  if (!context.ready && !initInterviewResult.exists) contextMissing.push(INIT_INTERVIEW_FILE);
+  // PRODUCT.md / DESIGN.md 是项目级事实源。两文件都已存在时（即使形状不达标）按“就地修复对应文件”处理：
+  // 不要求需求级 init-interview.json、不重走完整访谈、也不重写已合法的另一个文件。
+  // 只有项目级文件确实缺失、需要新建时才要求 init 访谈证据；两文件都存在且通过校验时静默跳过 init。
+  const contextFilesPresent = Boolean(context.productPath && context.designPath);
+  if (!contextFilesPresent && !initInterviewResult.exists) contextMissing.push(INIT_INTERVIEW_FILE);
   if (context.problems.length > 0) contextErrors.push(...context.problems);
   if (initInterviewResult.exists && !initInterviewResult.ok) contextErrors.push(...initInterviewResult.errors);
   if (initInterviewResult.ok) {

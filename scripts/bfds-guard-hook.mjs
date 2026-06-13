@@ -102,19 +102,30 @@ function newestInitInterview() {
   return files.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs)[0] ?? null;
 }
 
-function projectContextReady() {
+function contextFileAlreadyValid(file) {
   // 探针 slug：gate 的 resolveContext 是项目级、与 slug 无关，--check-only 不写盘。
   const probe = runGate('__bfds-context-probe__');
-  return Boolean(probe && probe.context && probe.context.ready);
+  const ctx = probe && probe.context;
+  if (!ctx) return false;
+  const target = path.resolve(cwd, file);
+  const base = path.basename(file).toLowerCase();
+  if (base === 'product.md') {
+    return Boolean(ctx.productOk && ctx.productPath && path.resolve(cwd, ctx.productPath) === target);
+  }
+  if (base === 'design.md') {
+    return Boolean(ctx.designOk && ctx.designPath && path.resolve(cwd, ctx.designPath) === target);
+  }
+  return false;
 }
 
 function assertContextWriteAllowed(file, content) {
-  // PRODUCT.md / DESIGN.md 是项目级设计规范，只在 init（上下文缺失或不合法）时由父会话写入。
-  // 项目上下文已就绪且文件已存在时拒绝重写，防止跟随每个需求又重新生成这两个文件。
-  if (fs.existsSync(file) && projectContextReady()) {
-    deny(`${projectPath(file)} 已存在且项目级上下文已就绪：PRODUCT.md / DESIGN.md 是项目级设计规范，只在 init 缺上下文时建立，不随需求重写。如需更新项目级规范请单独处理，不要在 BFDS 需求流程里重写。`);
+  const exists = fs.existsSync(file);
+  // 已通过 BFDS 形状校验的项目级文件不随需求重写；形状不达标的文件仍允许就地修复。
+  if (exists && contextFileAlreadyValid(file)) {
+    deny(`${projectPath(file)} 已存在且已通过 BFDS 形状校验：PRODUCT.md / DESIGN.md 是项目级设计规范，只在缺失或形状不达标时建立或就地修复，不随需求重写已合法文件。如需更新项目级规范请单独处理。`);
   }
-  if (!newestInitInterview()) {
+  // 新建项目级文件必须先有用户确认的 init 访谈证据；就地修复已存在文件不需要。
+  if (!exists && !newestInitInterview()) {
     deny(`writing ${projectPath(file)} requires docs/design/<slug>/evidence/init-interview.json with user-confirmed Impeccable init answers first`);
   }
 

@@ -29,7 +29,7 @@ Claude Code 中，单选、多选和确认类用户输入必须用 `AskUserQuest
 
 ## 阶段入口
 
-- `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；`DESIGN.md` 是后续方案和实现的设计规范事实源。按 next-card 每轮成组询问 2-3 个项目级问题，用 `answer --stage init` 记录多轮访谈和用户确认。项目已有合法 `PRODUCT.md` / `DESIGN.md` 时不会进入此阶段，runtime 会静默跳过，直接到目标界面确认，不重复访谈也不重写这两个文件。
+- `CONTEXT_BLOCKED`：只补项目级 `PRODUCT.md` / `DESIGN.md`；`DESIGN.md` 是后续方案和实现的设计规范事实源。按 next-card 每轮成组询问 2-3 个项目级问题，用 `answer --stage init` 记录多轮访谈和用户确认。
 - `NEEDS_SURFACE`：确认目标界面与变更边界；按 next-card 用 `answer --stage surface` 提交扁平字段。
 - `NEEDS_DIRECTIONS`：先用 `answer --stage brainstorm` 做专业设计问答和方向取舍，再用 `directions` 提交 A/B/C 可实现方向规格；不能跳过脑暴直接出方向。
 - `NEEDS_WORKBENCH`：用 `workbench --scaffold` 生成脚手架；填入方案卡、局部示意和实现约束摘要后用 `workbench --validate`，含 `BFDS_PLACEHOLDER` 的文件不能进入选择。

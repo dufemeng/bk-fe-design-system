@@ -1134,6 +1134,39 @@ function validateGateTests() {
     });
     if (regenGuard.status === 0) errors.push('expected hook to block regenerating existing DESIGN.md when project context is ready');
 
+    // 已有两文件、但 DESIGN.md 形状不达标、无 init-interview：路由到“就地修复 DESIGN.md”，
+    // 不要求 init-interview、不重走访谈；hook 允许就地修复 DESIGN.md，但拒绝重写已合法的 PRODUCT.md。
+    const repairRoot = makeProject(false);
+    writeText(path.join(repairRoot, 'PRODUCT.md'), validProductMd());
+    writeText(path.join(repairRoot, 'DESIGN.md'), '# 设计说明\n\n蓝色主色，无衬线字体。\n');
+    const repair = runGateFailure(repairRoot, slug);
+    if (!repair.failed || repair.result.phase !== 'CONTEXT_BLOCKED') {
+      errors.push(`expected present-but-invalid DESIGN.md to be CONTEXT_BLOCKED, got ${repair.result.phase}`);
+    }
+    if (repair.result.missing?.includes('evidence/init-interview.json')) {
+      errors.push('present-but-invalid context files must not require a requirement-level init-interview.json');
+    }
+    if (!repair.result.contextTask?.some(task => task.includes('修正 DESIGN.md'))) {
+      errors.push('expected present-but-invalid DESIGN.md to route to a targeted DESIGN.md repair task');
+    }
+    if (repair.result.contextTask?.some(task => task.includes('每轮成组询问') || task.includes('register'))) {
+      errors.push('present-but-invalid DESIGN.md must not trigger a full init interview');
+    }
+    const repairCard = runBfds(repairRoot, ['next', slug]);
+    if (repairCard.stdout.includes('init 多轮用户问答')) {
+      errors.push('repair-mode CONTEXT_BLOCKED card must not require a full init interview');
+    }
+    const fixDesign = runHook(repairRoot, {
+      tool_name: 'Write',
+      tool_input: { file_path: 'DESIGN.md', content: validDesignMd() }
+    });
+    if (fixDesign.status !== 0) errors.push(`expected hook to allow repairing invalid DESIGN.md, got ${fixDesign.status}: ${fixDesign.stderr || fixDesign.stdout}`);
+    const guardValidProduct = runHook(repairRoot, {
+      tool_name: 'Write',
+      tool_input: { file_path: 'PRODUCT.md', content: validProductMd() }
+    });
+    if (guardValidProduct.status === 0) errors.push('expected hook to block overwriting already-valid PRODUCT.md during DESIGN.md repair');
+
     const architectureRoot = makeProject(false);
     writeText(path.join(architectureRoot, 'PRODUCT.md'), validProductMd());
     writeText(path.join(architectureRoot, 'DESIGN.md'), architectureDesignMd());
